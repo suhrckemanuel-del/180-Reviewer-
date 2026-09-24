@@ -1,0 +1,50 @@
+{
+  "pastes": {
+    "PASTE-1-system-prompt": {
+      "chars": 18806,
+      "tokens": 4065
+    },
+    "PASTE-2A-chat-path": {
+      "chars": 22358,
+      "tokens": 5162
+    },
+    "PASTE-2C-artifact-path": {
+      "chars": 19058,
+      "tokens": 5663
+    },
+    "PASTE-3-deck-A": {
+      "chars": 3149,
+      "tokens": 740
+    }
+  },
+  "arms": {
+    "full-prose": {
+      "chars": 44317,
+      "tokens": 9967
+    },
+    "full-html": {
+      "chars": 41017,
+      "tokens": 10468
+    },
+    "tail85-prose": {
+      "chars": 41413,
+      "tokens": 9193
+    },
+    "tail65-prose": {
+      "chars": 36931,
+      "tokens": 8161
+    },
+    "tail40-prose": {
+      "chars": 31159,
+      "tokens": 6869
+    },
+    "tail65-html": {
+      "chars": 34253,
+      "tokens": 8486
+    },
+    "headdrop-prose": {
+      "chars": 25509,
+      "tokens": 5902
+    }
+  }
+}

@@ -1,0 +1,104 @@
+REVIEW OF: final recommendation deck | MODE: deep
+
+BEFORE YOU USE THIS
+1. Check the quotes. Every finding carries a verbatim quote and a location. Find each one in the deliverable yourself. It takes seconds. A quote you cannot find means that finding is discarded, not softened. Nothing is checking this but you.
+2. There is no grade here, on purpose. This review does not say how ready the work is, because the same deliverable has been given two different answers on identical input. The findings below are the reliable part. Read them and make your own call.
+3. This deliverable does not go to the client on this review alone, ever. A named human signs off on client work. That rule does not move.
+
+Confidence in this review: High. Could change if: the cash position has been verified through separate due diligence or the financial model exists outside this deck.
+Weakest areas: Recommendation feasibility, Evidence quality, Risks and assumptions.
+Effort to close the findings below: 8 to 12 hours.
+
+WHAT WORKS
+The problem framing is clear and the constraint is stated explicitly. Slide 3 names the binding fact: "cannot take on new fixed costs without new income first." This is honest work. The market signal is also concrete: the client "turns away repair work it cannot staff," which is actual demand, not assumed. The team has correctly identified what matters.
+
+WHAT TO FIX, IN ORDER
+
+1. The recommendation contradicts the stated constraint on new hiring. [High impact]
+   Where: Slide 3 and Slide 6
+   Quote: Slide 3: "cannot take on new fixed costs without new income first." Slide 6: "hire three paid repair staff to meet demand. This will make Client D self-sustaining."
+   Why it costs the client: The client cannot execute this recommendation without resolving which statement is true. If hiring is a fixed cost they cannot take on without new income, then the proposal to hire before generating that income is infeasible as stated. If they can hire, then the constraint needs rework. The client reads both and gets two opposite directions for what to do first.
+   What to do: Show the sequencing. Either build a phased plan where revenue is generated first (through pricing, increased throughput, or another channel) and only then hiring is taken on, or show where the working capital for nine months of three new salaries comes from and demonstrate that source is secure. Make the constraint and the recommendation align.
+   Answer first: What is the funding source for payroll during months one through nine, while the shop reaches break-even?
+
+2. The core financial claim has no derivation and vague peer support. [High impact]
+   Where: Slide 7
+   Quote: "Revenue will double in year one. The shop pays for itself by month nine."
+   Why it costs the client: The decision rests on these numbers. Whether the client can sustain the plan depends on whether revenue actually doubles and the shop breaks even in nine months, not twelve or eighteen. The peer comparison on Slide 5 is unattributed and does not derive these specific numbers. A doubling could be pessimistic, realistic, or impossible given the starting margin. The client has no way to stress-test the forecast.
+   What to do: Build the model bottom-up. Show current revenue (from the 60% cost coverage baseline), assume a unit model (transactions per week, average sale size), lay out fixed costs (rent, new salaries, utilities), and derive the break-even point. If peer cases are evidence, name them specifically: what was their starting revenue, their margins, and their market? Show the comparison explicitly.
+   Answer first: What are the month-by-month volume and pricing assumptions that produce the doubling forecast?
+
+3. Implementation path is abstract and omits the enabling step. [Moderate]
+   Where: Slide 9
+   Quote: "Sign a lease. Recruit staff. Launch."
+   Why it costs the client: "Sign a lease" assumes three things are settled: funding is secured, the location is chosen, and the decision to proceed is made. None of these are addressed. The team has skipped the actual first step. Without knowing what step one is (is it a funding pitch to a bank or grant funder? A real-estate market search? A pilot test?), the client cannot answer whether this timeline is real or aspirational.
+   What to do: Name the true first step and the work it requires. If this is a funding-gated project, show the funding strategy and the decision gate. If location search comes first, show the criteria and timeline. Anchor the plan to a concrete milestone that triggers the next phase, not to an outcome.
+   Answer first: Before signing a lease, what must happen, and how long will it take?
+
+4. Risk framing misses the material constraint the client faces. [Moderate]
+   Where: Slide 8
+   Quote: "The plan is low-risk. Demand is proven and the model is tested by peers."
+   Why it costs the client: The deliverable itself established on Slide 3 that the client has no cash reserves. This is a liquidity risk that peer evidence does not eliminate. If demand is slower than assumed, or if the shop takes fourteen months instead of nine to break even, the client cannot make payroll and the business fails. "Proven demand" and "tested model" do not mitigate that the client cannot absorb delay or lower-than-forecast sales. The risk assessment skips the risk that actually matters.
+   What to do: Reframe honestly. This plan is high-impact if executed well, but high-liquidity-risk given the client's cash position. Name the actual decision gates: what happens if month nine arrives and the shop is still not profitable? What is the go-no-go trigger? Show the downside case alongside the base case.
+   Answer first: What specific circumstances would cause this plan to fail, and when would the client need to pivot?
+
+THE HABIT TO BUILD
+Teams often solve for the goal (self-sustaining, growth, scale) without fully resolving the constraints imposed by the current state. This team did it well on Slide 3: they named the constraint. Then they ignored it in the recommendation. The habit is constraint-forward planning: every recommendation step should be sequenced and funded given the binding constraint, not in spite of it. The best fix does not break the prior page's logic; it builds on it.
+
+WHAT THIS REVIEW COULD NOT JUDGE
+Whether Client D can actually secure retail space at the assumed cost and timeline. The actual demand elasticity (would customers really buy from a shop, or only from their current channels). Whether the peer cases cited are truly comparable, or what the funding outcomes were for those peers. The current grant income runway and total cash position. Domain expertise in bicycle retail unit economics.
+
+QUESTIONS WORTH ASKING THE TEAM
+1. You state on Slide 3 that the client cannot take fixed costs without new income. Where does the payroll funding for three staff for nine months come from?
+2. What is the real first step before "sign a lease," and how long is it?
+3. Are the peers who doubled revenue in a similar financial position at the start (low cash, grant-dependent)? If so, how did they fund the transition?
+4. If the shop takes fourteen months to break even instead of nine, what options does the client have?
+5. Could the team run a smaller test (pop-up, temporary location, or partial hiring) before committing to the full shop investment? What would that cost?
+
+HOW TO CHECK THIS FEEDBACK
+Every point above quotes your own deliverable and says where. If you cannot find one of these quotes in your own work, that point is wrong. Drop it and say so. This review advises. A human decides, and nothing here goes to your client on its own.
+
+
+=== PASTE-BACK RECORD ===
+
+{
+  "recordVersion": "override-log-2-chat",
+  "capturedAt": null,
+  "reviewer": {
+    "promptVersion": "frozen-2026-08-09",
+    "mode": "deep",
+    "executionMode": "chat",
+    "model": null
+  },
+  "deliverable": {
+    "ref": "case-04-contradiction-no-implementation",
+    "artifactType": "final recommendation deck",
+    "stage": "near final"
+  },
+  "lead": { "id": null, "secondsOnTask": null, "vsByHand": null },
+  "quoteCheck": { "status": "lead-eye-check", "quotesChecked": 4, "quotesMissing": null },
+  "ai": {
+    "findings": [
+      { "fid": "f1", "short": "Contradiction on hiring constraint", "severity": "critical",
+        "issueType": "thinking", "dimension": "Feasibility and implementation", "slides": [3, 6] },
+      { "fid": "f2", "short": "Unsourced financial projections", "severity": "critical",
+        "issueType": "evidence", "dimension": "Evidence quality", "slides": [7] },
+      { "fid": "f3", "short": "Vague implementation path", "severity": "major",
+        "issueType": "implementation", "dimension": "Recommendation specificity", "slides": [9] },
+      { "fid": "f4", "short": "Risk analysis incomplete", "severity": "major",
+        "issueType": "thinking", "dimension": "Risks, assumptions and uncertainty", "slides": [8] }
+    ]
+  },
+  "decisions": [
+    { "fid": "f1", "action": null, "cutReason": null, "note": "" },
+    { "fid": "f2", "action": null, "cutReason": null, "note": "" },
+    { "fid": "f3", "action": null, "cutReason": null, "note": "" },
+    { "fid": "f4", "action": null, "cutReason": null, "note": "" }
+  ],
+  "added": [],
+  "mustCatch": null,
+  "readinessCall": { "ai": null, "lead": null, "reason": "" },
+  "sent": false
+}
+
+=== END. ===

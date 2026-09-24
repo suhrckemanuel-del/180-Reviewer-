@@ -1,0 +1,133 @@
+{
+  "mode": "deep",
+  "artifactType": "final recommendation deck",
+  "clientQuestion": "How can Client D become financially self-sustaining within two years",
+  "confidence": "Low",
+  "confidenceReason": "EVIDENCE AND SOURCE NOTES, INTENDED AUDIENCE, PROJECT STAGE, KNOWN CONSTRAINTS and WHAT THE TEAM IS UNSURE ABOUT were not provided with this deliverable, so confidence is set to Low per the missing-context rule. The findings below rest only on text quoted directly from the nine slides.",
+  "readiness": {
+    "level": "Not ready for client review",
+    "mainReason": "Not ready for client review: the recommendation to open a shopfront and hire three paid staff within six months directly contradicts slide 3's statement that Client D has no cash reserves and cannot take on new fixed costs or hiring until revenue grows, and the deck gives the client no way to tell which of the two governs.",
+    "blockingIssues": [
+      {
+        "rule": "1. Contradiction the recommendation rests on",
+        "ceiling": "Not ready for client review",
+        "explanation": "The client cannot resolve from the deck itself whether the lease and the three hires happen before or after revenue grows. The two readings lead to different actions: approve the spend now on faith, or hold the plan until revenue exists. That is the specific difference the client would act on.",
+        "evidence": [
+          {
+            "quote": "Client D has no cash reserves and cannot take on new fixed costs without new income first. The board has been clear that hiring is not possible until revenue grows.",
+            "location": "Slide 3, Financial position"
+          },
+          {
+            "quote": "Open a retail shopfront within six months and hire three paid repair staff to meet demand.",
+            "location": "Slide 6, Our recommendation"
+          }
+        ]
+      },
+      {
+        "rule": "4. Ungrounded headline number the recommendation depends on",
+        "ceiling": "Needs targeted revision",
+        "explanation": "The doubling and payback figures drive the entire self-sustainability claim, and their only stated support is an unnamed, unsourced comparison to unspecified peers.",
+        "evidence": [
+          {
+            "quote": "Comparable social enterprises have doubled revenue after opening a shop.",
+            "location": "Slide 5, The opportunity"
+          },
+          {
+            "quote": "Revenue will double in year one. The shop pays for itself by month nine.",
+            "location": "Slide 7, Financial impact"
+          }
+        ]
+      }
+    ]
+  },
+  "scores": {
+    "1_clientDecisionUsefulness": {"score": 3.0, "result": "partial", "checksPassed": 2, "checksTotal": 4, "note": "A recommendation is stated, but the contradiction and the undetailed next steps leave the client unable to say what to actually approve."},
+    "2_problemFraming": {"score": 4.0, "result": "partial", "checksPassed": 3, "checksTotal": 4, "note": "The problem is specific and bounded to self-sustainability within two years, and the deck does not drift, but success criteria beyond the revenue figures are not stated."},
+    "3_storylineAndPyramidLogic": {"score": 2.0, "result": "fail", "checksPassed": 1, "checksTotal": 4, "note": "Slide order follows situation to recommendation, but no single sentence anywhere carries both the action and the reason together (see Finding 1), and titles such as \"Situation\" and \"The opportunity\" name topics rather than the argument."},
+    "4_evidenceQuality": {"score": 1.0, "result": "fail", "checksPassed": 0, "checksTotal": 4, "note": "The forward-looking figures the recommendation depends on carry no named source, no limitation is stated anywhere in the deck, and the claims on slide 8 overstate what the deck has shown."},
+    "5_analysisAndInsight": {"score": 3.0, "result": "partial", "checksPassed": 2, "checksTotal": 4, "note": "Grant decline is connected to the need for new revenue and to the shopfront idea, but the deck mostly describes the situation and market rather than interpreting what the financial constraint means for sequencing."},
+    "6_recommendationSpecificity": {"score": 2.0, "result": "fail", "checksPassed": 1, "checksTotal": 4, "note": "A first step exists (sign a lease) but no owner, no measure and only one of the two recommended actions carries a timeframe."},
+    "7_feasibilityAndImplementation": {"score": 1.0, "result": "fail", "checksPassed": 0, "checksTotal": 4, "note": "The plan is not shown to be feasible against the cash constraint the deck itself states, and the next steps carry no owner, timeline or contingency."},
+    "8_risksAssumptionsUncertainty": {"score": 1.0, "result": "fail", "checksPassed": 0, "checksTotal": 4, "note": "No risk, assumption or caveat is stated anywhere. Slide 8 asserts the opposite of uncertainty (\"low-risk\", \"proven\", \"tested\") without qualification."},
+    "9_slideLevelCommunication": {"score": 4.0, "result": "partial", "checksPassed": 3, "checksTotal": 4, "note": "Bullets are concise and numbers are stated plainly, but several slides only make sense read against other slides, which the reader test surfaces."},
+    "10_professionalismToneConfidentiality": {"score": 4.0, "result": "partial", "checksPassed": 3, "checksTotal": 4, "note": "No named individual is judged and no confidential data is exposed, but the certainty of the language on slides 7 and 8 is not matched by the evidence given."}
+  },
+  "diagnosticMean": 2.5,
+  "findings": [
+    {
+      "id": "F1",
+      "issueType": "thinking",
+      "severity": "critical",
+      "deliveryCritical": true,
+      "diagnosis": "The recommendation contradicts the deck's own stated constraint. Slide 3 says Client D has no cash reserves, cannot take on new fixed costs without new income first, and that the board has ruled out hiring until revenue grows. Slide 6 recommends opening a shopfront and hiring three paid staff within six months, both new fixed costs, before any new revenue exists. The deck never says how this is funded or which statement the client should believe.",
+      "why": "The client cannot tell whether to approve upfront spending on rent and wages or to wait for revenue first, and could approve a plan the deck's own numbers say Client D cannot afford.",
+      "fix": "Resolve the sequencing before this goes to the client: either show a funding source that lets Client D absorb the new fixed costs ahead of revenue, or restructure the plan so hiring and the lease follow revenue growth, and make slide 6 consistent with the constraint stated on slide 3.",
+      "reflectQuestion": "Before you read the fix: if a board member asked how the shop and the three hires get paid for before revenue has grown, what would you tell them using only what is written on slides 3 and 6?",
+      "evidence": [
+        {
+          "quote": "Client D has no cash reserves and cannot take on new fixed costs without new income first. The board has been clear that hiring is not possible until revenue grows.",
+          "location": "Slide 3, Financial position"
+        },
+        {
+          "quote": "Open a retail shopfront within six months and hire three paid repair staff to meet demand.",
+          "location": "Slide 6, Our recommendation"
+        }
+      ]
+    },
+    {
+      "id": "F2",
+      "issueType": "evidence",
+      "severity": "critical",
+      "deliveryCritical": true,
+      "diagnosis": "The deck states as certainty the two figures that carry its entire self-sustainability case: revenue doubling in year one and the shop paying for itself by month nine. The only support offered is an unnamed comparison to unspecified peers, with no names, no numbers and no source given. Slide 8 then calls the plan low-risk, proven and tested, a stronger claim than anything the deck has shown.",
+      "why": "The client could approve the shopfront and the hiring believing the payback is proven and the plan is low-risk, when the only support behind that belief is an unsourced comparison.",
+      "fix": "Name the comparable social enterprises, show their actual figures and how comparable their situation is to Client D's, and remove or qualify the low-risk and proven language until the deck can support it.",
+      "reflectQuestion": "Before you read the fix: what would need to be true about \"comparable social enterprises\" for their result to actually support a revenue-doubling forecast for Client D specifically?",
+      "evidence": [
+        {
+          "quote": "Comparable social enterprises have doubled revenue after opening a shop.",
+          "location": "Slide 5, The opportunity"
+        },
+        {
+          "quote": "Revenue will double in year one. The shop pays for itself by month nine.",
+          "location": "Slide 7, Financial impact"
+        },
+        {
+          "quote": "The plan is low-risk. Demand is proven and the model is tested by peers.",
+          "location": "Slide 8, Why this works"
+        }
+      ]
+    },
+    {
+      "id": "F3",
+      "issueType": "implementation",
+      "severity": "major",
+      "deliveryCritical": false,
+      "diagnosis": "The next steps are three verbs with no owner, no date beyond the six month figure on slide 6, and no measure of success. Signing the lease and recruiting staff are also the exact actions slide 3 says Client D cannot afford yet, so the plan has no step that is both concrete and feasible under the constraint the deck itself states.",
+      "why": "Without an owner, a date and a measure, the lead and the client have no way to hold the plan accountable or to tell whether it is on track.",
+      "fix": "Assign an owner and a date to each step, add a measure tied to the month nine and year one targets, and sequence the steps against the cash constraint on slide 3 rather than against the six month figure alone.",
+      "reflectQuestion": "Before you read the fix: who on the team owns \"sign a lease\", and what happens to that commitment if revenue has not grown by the time it falls due?",
+      "evidence": [
+        {
+          "quote": "Sign a lease. Recruit staff. Launch.",
+          "location": "Slide 9, Next steps"
+        }
+      ]
+    }
+  ],
+  "questionsForLead": [
+    "Where do the \"revenue will double\" and \"pays for itself by month nine\" figures come from, and can they be sourced?",
+    "How would the shopfront and the three hires actually be funded before revenue grows, given slide 3 states no cash reserves?",
+    "Which comparable social enterprises does slide 5 refer to, and how comparable is their starting position to Client D's?",
+    "Does the board's position that hiring is not possible until revenue grows still stand, or has it changed since this was recorded?",
+    "Who owns each step on slide 9, and by what date?"
+  ],
+  "notAssessed": [
+    "Sourcing of the 60 percent cost-coverage figure and the grant-decline expectation on slide 2: no EVIDENCE AND SOURCE NOTES were provided, so these are treated as the team's known internal data and not independently checked.",
+    "Whether the deck's tone and level of detail fit its actual audience: INTENDED AUDIENCE was not stated.",
+    "Any constraint beyond what slides 3 and 6 state directly: KNOWN CONSTRAINTS was not provided.",
+    "The team's own open questions on this draft: WHAT THE TEAM IS UNSURE ABOUT was not provided.",
+    "Visual layout, design and slide formatting: the input is extracted text with no visual layer, so the reader test above was run on titles, order and stated content only."
+  ],
+  "learningNote": "Habit: before a recommendation slide is finalized, re-read every constraint stated earlier in the same deck and check the recommendation against each one, line by line. A plan that contradicts a constraint the team itself documented is one of the fastest ways to lose credibility with a client, because the client will find the contradiction faster than the team wants. Exercise: for the next deck, keep a running one-line list of every hard constraint mentioned (cash, timeline, mandate, capacity) as it is written, and cross-check the final recommendation against that list before it goes out."
+}

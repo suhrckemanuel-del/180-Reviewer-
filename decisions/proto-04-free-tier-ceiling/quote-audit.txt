@@ -1,0 +1,19 @@
+Every string the reply offers as EVIDENCE, checked verbatim against deck A.
+Fields counted: "quote"/"text" (JSON), quotes:[..] (HTML object), Quote: (prose).
+'brief' = verbatim, but from the input brief rather than the deliverable text.
+
+run                        quotes  deck  brief  NEITHER
+-------------------------------------------------------
+claude--full-html               4     4      0        0
+claude--headdrop-prose          3     3      0        0
+claude--tail40-prose            4     3      1        0
+claude--tail65-prose            2     2      0        0
+codex--full-html                7     7      0        0
+codex--full-prose               4     4      0        0
+codex--headdrop-prose           6     6      0        0
+codex--tail40-prose             9     9      0        0
+codex--tail65-html              0     0      0        0
+codex--tail65-prose             9     9      0        0
+codex--tail85-prose             7     7      0        0
+-------------------------------------------------------
+TOTAL                          55    54      1        0

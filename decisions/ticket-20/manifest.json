@@ -1,0 +1,56 @@
+{
+  "keys": {
+    "part1": "0920-VERIFY7",
+    "part2": "KAPPA-4R"
+  },
+  "arms": {
+    "student-nothing": {
+      "chars": 52250,
+      "tokens": 11931,
+      "has_key1": true,
+      "has_key2": true,
+      "has_gate": true,
+      "has_demand": true
+    },
+    "student-attempt": {
+      "chars": 52531,
+      "tokens": 11986,
+      "has_key1": true,
+      "has_key2": true,
+      "has_gate": true,
+      "has_demand": true
+    },
+    "lead-nothing": {
+      "chars": 52250,
+      "tokens": 11931,
+      "has_key1": true,
+      "has_key2": true,
+      "has_gate": true,
+      "has_demand": true
+    },
+    "student-cut": {
+      "chars": 31191,
+      "tokens": 7278,
+      "has_key1": false,
+      "has_key2": true,
+      "has_gate": true,
+      "has_demand": true
+    },
+    "student-argue": {
+      "chars": 52562,
+      "tokens": 12004,
+      "has_key1": true,
+      "has_key2": true,
+      "has_gate": true,
+      "has_demand": true
+    },
+    "student-cut-attempt": {
+      "chars": 31472,
+      "tokens": 7333,
+      "has_key1": false,
+      "has_key2": true,
+      "has_gate": true,
+      "has_demand": true
+    }
+  }
+}

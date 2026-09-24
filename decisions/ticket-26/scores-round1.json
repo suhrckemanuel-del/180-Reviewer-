@@ -1,0 +1,543 @@
+[
+  {
+    "arm": "haiku--lead-nothing-r1",
+    "mode": "lead",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 2,
+    "dense_fields_present": [
+      "Quote:",
+      "What to do:",
+      "Where:",
+      "Why it costs the client:"
+    ],
+    "new_fields_bled_in": [],
+    "answer_first_present": true,
+    "why_words": [
+      47,
+      41
+    ],
+    "quotes_checked": 4,
+    "quotes_not_in_deck": [
+      "research shows this works",
+      " This weakens the recommendation's defensibility before the "
+    ],
+    "severities": [
+      "High impact",
+      "Minor"
+    ]
+  },
+  {
+    "arm": "haiku--lead-nothing-r2",
+    "mode": "lead",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 3,
+    "dense_fields_present": [
+      "Quote:",
+      "What to do:",
+      "Where:",
+      "Why it costs the client:"
+    ],
+    "new_fields_bled_in": [],
+    "answer_first_present": true,
+    "why_words": [
+      42,
+      35,
+      38
+    ],
+    "quotes_checked": 4,
+    "quotes_not_in_deck": [
+      "Similar organizations achieve X% conversion, so our 8% assum"
+    ],
+    "severities": [
+      "High impact",
+      "Moderate",
+      "Moderate"
+    ]
+  },
+  {
+    "arm": "haiku--student-attempt-r1",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 2,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "The 8% conversion assumption carries the financial case and is unsourced. [High impact]",
+        "title_words": 11,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 2,
+        "problem_words": 22,
+        "why_sentences": 3,
+        "why_words": 64,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "High impact"
+      },
+      {
+        "title": "The 32% attendance rate is used as evidence for the 8% conversion, but they measure different behaviors. [Moderate]",
+        "title_words": 17,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 2,
+        "problem_words": 20,
+        "why_sentences": 2,
+        "why_words": 32,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      }
+    ],
+    "severities": [
+      "High impact",
+      "Moderate"
+    ],
+    "quotes_checked": 6,
+    "quotes_not_in_deck": [
+      " but does not name what it is conservative against. No sourc",
+      " before they commit capital and staff time to a launch. With",
+      " claim and reframe this: ",
+      "\n   Aim for a line like: ",
+      "\n   Answer first: What membership conversion data can compar"
+    ]
+  },
+  {
+    "arm": "haiku--student-attempt-r2",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 5,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "The 8% conversion assumption drives the financial case but has no empirical basis [High impact]",
+        "title_words": 13,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 5,
+        "problem_words": 44,
+        "why_sentences": 3,
+        "why_words": 39,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "High impact"
+      },
+      {
+        "title": "The link between 32% attendance and 8% membership conversion is stated but not explained [Moderate]",
+        "title_words": 14,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 4,
+        "problem_words": 38,
+        "why_sentences": 2,
+        "why_words": 33,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "Two members-only events per year assumes coordinator capacity you have not tested [Moderate]",
+        "title_words": 12,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 4,
+        "problem_words": 52,
+        "why_sentences": 2,
+        "why_words": 24,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "\"Discount with local partners\" is committed without confirming partner agreement [Moderate]",
+        "title_words": 10,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 2,
+        "problem_words": 27,
+        "why_sentences": 2,
+        "why_words": 19,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The gate to scale from soft launch to full launch (5% conversion) has no explicit reasoning [Minor]",
+        "title_words": 16,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 3,
+        "problem_words": 29,
+        "why_sentences": 3,
+        "why_words": 31,
+        "why_names_a_reader": false,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Minor"
+      }
+    ],
+    "severities": [
+      "High impact",
+      "Moderate",
+      "Moderate",
+      "Moderate",
+      "Minor"
+    ],
+    "quotes_checked": 9,
+    "quotes_not_in_deck": [
+      "Comparable arts non-profits we studied converted 8-12% of ev",
+      "The 8% assumption is conservative against the 32% attendance",
+      "Two members-only events a year",
+      "we assume...that members-only events do not strain staff.",
+      " means in hours. If soft launch breaches that threshold, rev",
+      " is committed without confirming partner agreement [Moderate",
+      "\n   The problem: You list this as part of the membership off",
+      "\n   The problem: The plan assumes 8% year-one conversion but"
+    ]
+  },
+  {
+    "arm": "haiku--student-attempt-r3",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 3,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "The 8% conversion assumption is unsourced and its logic is missing [High impact]",
+        "title_words": 11,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 4,
+        "problem_words": 47,
+        "why_sentences": 4,
+        "why_words": 77,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "High impact"
+      },
+      {
+        "title": "The implementation is described in sequence but not in the detail needed to execute [Moderate]",
+        "title_words": 14,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 8,
+        "problem_words": 51,
+        "why_sentences": 5,
+        "why_words": 55,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The risk assumptions are named but not validated [Moderate]",
+        "title_words": 8,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 5,
+        "problem_words": 52,
+        "why_sentences": 4,
+        "why_words": 60,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      }
+    ],
+    "severities": [
+      "High impact",
+      "Moderate",
+      "Moderate"
+    ],
+    "quotes_checked": 6,
+    "quotes_not_in_deck": [
+      " is asserted but never explained. Why should a 32% event-att",
+      " which signals they know it is the crux.\n   Do this: Show th",
+      "Soft launch to 200 contacts",
+      " is not defined. Is the list 100 percent current, or 80 perc"
+    ]
+  },
+  {
+    "arm": "codex--lead-nothing-r1",
+    "mode": "lead",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 4,
+    "dense_fields_present": [
+      "Quote:",
+      "What to do:",
+      "Where:",
+      "Why it costs the client:"
+    ],
+    "new_fields_bled_in": [],
+    "answer_first_present": true,
+    "why_words": [
+      35,
+      37,
+      34,
+      37
+    ],
+    "quotes_checked": 7,
+    "quotes_not_in_deck": [],
+    "severities": [
+      "High impact",
+      "Moderate",
+      "Moderate",
+      "Moderate"
+    ]
+  },
+  {
+    "arm": "codex--lead-nothing-r2",
+    "mode": "lead",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 4,
+    "dense_fields_present": [
+      "Quote:",
+      "What to do:",
+      "Where:",
+      "Why it costs the client:"
+    ],
+    "new_fields_bled_in": [
+      "Aim for a line like:"
+    ],
+    "answer_first_present": true,
+    "why_words": [
+      48,
+      35,
+      33,
+      36
+    ],
+    "quotes_checked": 6,
+    "quotes_not_in_deck": [],
+    "severities": [
+      "High impact",
+      "Moderate",
+      "Moderate",
+      "Minor"
+    ]
+  },
+  {
+    "arm": "codex--student-attempt-r1",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 4,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "The deck gives the board two success thresholds without saying which one controls the launch. [Moderate]",
+        "title_words": 15,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 23,
+        "why_sentences": 2,
+        "why_words": 31,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The reason for the recommendation appears too late for a board reading once. [Moderate]",
+        "title_words": 13,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 17,
+        "why_sentences": 2,
+        "why_words": 33,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The 8% case does not show whether membership is realistic or financially meaningful. [Moderate]",
+        "title_words": 13,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 27,
+        "why_sentences": 2,
+        "why_words": 37,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": true,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The soft launch cannot by itself prove that the full offer fits existing staff capacity. [Moderate]",
+        "title_words": 15,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 26,
+        "why_sentences": 2,
+        "why_words": 33,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": true,
+        "wrote_none": false,
+        "severity": "Moderate"
+      }
+    ],
+    "severities": [
+      "Moderate",
+      "Moderate",
+      "Moderate",
+      "Moderate"
+    ],
+    "quotes_checked": 5,
+    "quotes_not_in_deck": []
+  },
+  {
+    "arm": "codex--student-attempt-r2",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 3,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "Nobody can tell why 5% is enough when the case is built on 8% [Moderate]",
+        "title_words": 14,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 27,
+        "why_sentences": 3,
+        "why_words": 53,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": true,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The soft launch is biased toward the people most likely to join [Moderate]",
+        "title_words": 12,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 26,
+        "why_sentences": 2,
+        "why_words": 46,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The capacity claim is an assumption, not a feasibility case [Moderate]",
+        "title_words": 10,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 25,
+        "why_sentences": 3,
+        "why_words": 41,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": true,
+        "wrote_none": false,
+        "severity": "Moderate"
+      }
+    ],
+    "severities": [
+      "Moderate",
+      "Moderate",
+      "Moderate"
+    ],
+    "quotes_checked": 5,
+    "quotes_not_in_deck": []
+  },
+  {
+    "arm": "codex--student-attempt-r3",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 3,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "The deck gives the board two different launch thresholds. [High impact]",
+        "title_words": 9,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 26,
+        "why_sentences": 3,
+        "why_words": 37,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "High impact"
+      },
+      {
+        "title": "The board cannot tell whether 8% or \u00a35,000 is enough. [Moderate]",
+        "title_words": 10,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 24,
+        "why_sentences": 2,
+        "why_words": 41,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": true,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The soft launch cannot test the two risks it claims to test. [Moderate]",
+        "title_words": 12,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 27,
+        "why_sentences": 2,
+        "why_words": 39,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": true,
+        "wrote_none": false,
+        "severity": "Moderate"
+      }
+    ],
+    "severities": [
+      "High impact",
+      "Moderate",
+      "Moderate"
+    ],
+    "quotes_checked": 5,
+    "quotes_not_in_deck": []
+  }
+]

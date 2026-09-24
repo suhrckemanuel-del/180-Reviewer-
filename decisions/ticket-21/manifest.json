@@ -1,0 +1,42 @@
+{
+  "nogate-full-no": {
+    "chars": 44747,
+    "tokens": 10064
+  },
+  "both-full-no": {
+    "chars": 46455,
+    "tokens": 10460
+  },
+  "both-full-yes": {
+    "chars": 46715,
+    "tokens": 10511
+  },
+  "both-tail65-no": {
+    "chars": 38710,
+    "tokens": 8585
+  },
+  "both-tail40-no": {
+    "chars": 32759,
+    "tokens": 7245
+  },
+  "both-headdrop-no": {
+    "chars": 26363,
+    "tokens": 6100
+  },
+  "both-headdrop-yes": {
+    "chars": 26623,
+    "tokens": 6151
+  },
+  "p1-headdrop-no": {
+    "chars": 25509,
+    "tokens": 5902
+  },
+  "p2-headdrop-no": {
+    "chars": 26363,
+    "tokens": 6100
+  },
+  "both-headdrop2-no": {
+    "chars": 18115,
+    "tokens": 4225
+  }
+}

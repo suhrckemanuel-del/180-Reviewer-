@@ -1,0 +1,146 @@
+REVIEW OF: final recommendation deck, 9 slides | MODE: deep
+
+BEFORE YOU USE THIS
+1. Check the quotes. Every finding carries a verbatim quote and a location. Find each one in
+   the deliverable yourself. It takes seconds. A quote you cannot find means that finding is
+   discarded, not softened. Nothing is checking this but you.
+2. There is no grade here, on purpose. This review does not say how ready the work is, because
+   the same deliverable has been given two different answers on identical input. The findings
+   below are the reliable part. Read them and make your own call.
+3. This deliverable does not go to the client on this review alone, ever. A named human signs
+   off on client work. That rule does not move.
+
+Confidence in this review: Medium. Could change if: the team shares the financial model behind
+the doubling claim and the board's current position on hiring.
+Weakest areas: risks and assumptions; evidence quality; feasibility and implementation.
+Effort to close the findings below: 6-10 hours.
+
+WHAT WORKS
+- The deck states its own binding constraint plainly instead of burying it. Slide 3: "Client D
+  has no cash reserves and cannot take on new fixed costs without new income first."
+- The baseline is specific and quantified early. Slide 2: "Client D covers 60% of its costs
+  from bicycle sales and relies on grants for the rest."
+- The demand evidence is concrete rather than asserted. Slide 4: "Client D turns away repair
+  work it cannot staff."
+
+WHAT TO FIX, IN ORDER
+
+1. The recommendation does the one thing the deck says the client cannot do, and never
+   reconciles the two. [High impact]
+   Where: slides 3 and 6
+   Quote: "The board has been clear that hiring is not possible until revenue grows."
+   Quote: "Open a retail shopfront within six months and hire three paid repair staff to meet demand."
+   Why it costs the client: the client cannot act on this deck. Either the board's condition
+   holds and the plan is impossible as written, or it has moved and the deck never says so.
+   Those are different decisions, and nothing here lets the client choose between them.
+   What to do: state which one is true and build the plan on it. If the condition holds, the
+   recommendation has to sequence revenue before fixed cost. A recommendation must survive the
+   constraints its own deck asserts.
+   Answer first: has the board's position changed, or does the plan assume it will change?
+
+2. The doubling claim carries the whole financial case and is never tested against what
+   self-sustainability actually costs. [Moderate]
+   Where: slides 5 and 7
+   Quote: "Comparable social enterprises have doubled revenue after opening a shop."
+   Quote: "Revenue will double in year one. The shop pays for itself by month nine."
+   Why it costs the client: doubling revenue only matters if it covers the 40% gap plus three
+   salaries plus a lease. The deck never puts those two numbers next to each other, so the
+   client cannot tell whether the plan reaches self-sustainability or falls short of it.
+   What to do: name what self-sustaining costs per year with the new fixed costs included, then
+   show the revenue path against that number. A figure with nothing to be measured against
+   describes rather than analyses.
+   Answer first: what does Client D need to earn to cover its costs once the shop and three
+   staff are in place?
+
+3. The deck calls the plan low-risk while its own pages describe the conditions that make it
+   risky. [Moderate]
+   Where: slide 8
+   Quote: "The plan is low-risk. Demand is proven and the model is tested by peers."
+   Why it costs the client: a client reading "low-risk" will not stress-test the downside. The
+   deck has already said there are no reserves and no room for fixed costs, which is the
+   definition of a plan with no margin for error.
+   What to do: replace the claim with the actual risk position and what would have to be true
+   for it to hold. Confidence should match the evidence behind it, not the strength of the
+   recommendation.
+   Answer first: what happens to Client D if revenue grows at half the assumed rate?
+
+4. The next steps name activities, not a plan anyone can be held to. [Moderate]
+   Where: slide 9
+   Quote: "Sign a lease. Recruit staff. Launch."
+   Why it costs the client: nobody owns anything, nothing has a date or a cost, and the lease
+   is unfunded on the deck's own account of the finances. A client cannot start on this, which
+   for a final deliverable is where the value was supposed to be.
+   What to do: give each step an owner, a date, a cost and the measure that says it worked, and
+   say how the lease is financed before revenue arrives. A recommendation without a first step
+   the client can take is an opinion.
+   Answer first: who signs the lease, with what money, and by when?
+
+THE HABIT TO BUILD
+Check your recommendation against the constraints your own deck asserts, before you write it up.
+This deck's situation section and its recommendation section were each written well and written
+separately, which is the habit worth breaking. Exercise: before finalising, list every constraint
+your own pages state, then write one line per constraint saying how the recommendation survives
+it. Anything you cannot answer is either a change to the recommendation or a question for the
+client.
+
+WHAT THIS REVIEW COULD NOT JUDGE
+- Whether the peer benchmark is real or comparable. No source is given in the deck.
+- The financial model behind the doubling claim. It is not in the deliverable.
+- Whether the board's hiring position has changed since it was stated.
+- Anything visual. This was reviewed as text, so layout, design and slide density are unassessed.
+
+QUESTIONS WORTH ASKING THE TEAM
+- What does self-sustaining cost per year, once the shopfront and three salaries are included?
+- Which comparable enterprises, at what starting revenue, and in what market?
+- Has the board's condition on hiring changed, or does the plan depend on it changing?
+- How is the lease financed before the new revenue arrives?
+
+HOW TO CHECK THIS FEEDBACK
+Every point above quotes your own deliverable and says where. If you cannot find one of these
+quotes in your own work, that point is wrong. Drop it and say so. This review advises. A human
+decides, and nothing here goes to your client on its own.
+
+
+=== PASTE-BACK RECORD ===
+
+{
+  "recordVersion": "override-log-2-chat",
+  "capturedAt": null,
+  "reviewer": {
+    "promptVersion": "frozen-2026-08-09",
+    "mode": "deep",
+    "executionMode": "chat",
+    "model": null
+  },
+  "deliverable": {
+    "ref": null,
+    "artifactType": "final recommendation deck",
+    "stage": "final"
+  },
+  "lead": { "id": null, "secondsOnTask": null, "vsByHand": null },
+  "quoteCheck": { "status": "lead-eye-check", "quotesChecked": 9, "quotesMissing": null },
+  "ai": {
+    "findings": [
+      { "fid": "f1", "short": "Contradicts stated constraint", "severity": "critical",
+        "issueType": "thinking", "dimension": "Client decision usefulness", "slides": [3, 6] },
+      { "fid": "f2", "short": "Doubling never benchmarked", "severity": "major",
+        "issueType": "evidence", "dimension": "Analysis and insight", "slides": [5, 7] },
+      { "fid": "f3", "short": "Low-risk overclaim", "severity": "major",
+        "issueType": "thinking", "dimension": "Risks, assumptions and uncertainty", "slides": [8] },
+      { "fid": "f4", "short": "Next steps unowned", "severity": "major",
+        "issueType": "implementation", "dimension": "Recommendation specificity", "slides": [9] }
+    ]
+  },
+  "decisions": [
+    { "fid": "f1", "action": null, "cutReason": null, "note": "" },
+    { "fid": "f2", "action": null, "cutReason": null, "note": "" },
+    { "fid": "f3", "action": null, "cutReason": null, "note": "" },
+    { "fid": "f4", "action": null, "cutReason": null, "note": "" }
+  ],
+  "added": [],
+  "mustCatch": null,
+  "readinessCall": { "ai": null, "lead": null, "reason": "" },
+  "sent": false
+}
+
+=== END. ===

@@ -1,0 +1,173 @@
+REVIEW OF: Final recommendation deck | MODE: deep
+
+BEFORE YOU USE THIS
+1. Check the quotes. Every finding carries a verbatim quote and a location. Find each one in
+the deliverable yourself. It takes seconds. A quote you cannot find means that finding is
+discarded, not softened. Nothing is checking this but you.
+2. There is no grade here, on purpose. This review does not say how ready the work is, because
+the same deliverable has been given two different answers on identical input. The findings
+below are the reliable part. Read them and make your own call.
+3. This deliverable does not go to the client on this review alone, ever. A named human signs
+off on client work. That rule does not move.
+
+Confidence in this review: Low. Could change if: evidence and source notes for the revenue
+doubling claim and the peer comparator were supplied, since neither was in the pasted input.
+Weakest areas: Risks, assumptions and uncertainty. Evidence quality. Feasibility and
+implementation.
+Effort to close the findings below: roughly 6 to 10 hours (a financing plan for the upfront
+costs, sourcing or dropping the peer comparator, an owner and budget for each next step, and
+one governing insight slide).
+
+WHAT WORKS
+1. "Client D covers 60% of its costs from bicycle sales and relies on grants for the rest."
+   (Slide 2). One sentence states the funding gap with a real number, not a general claim.
+2. "Demand for refurbished bikes is strong and growing in the city. Client D turns away repair
+   work it cannot staff." (Slide 4). This is a specific, checkable signal of unmet demand, not
+   a generic market statement.
+
+WHAT TO FIX, IN ORDER
+
+1. The recommendation asks Client D to do exactly what its own financial position rules out. [High impact]
+   Where: Slide 3, slide 6, slide 8
+   Quote (slide 3): "Client D has no cash reserves and cannot take on new fixed costs without
+   new income first."
+   Quote (slide 3): "The board has been clear that hiring is not possible until revenue grows."
+   Quote (slide 6): "Open a retail shopfront within six months and hire three paid repair staff
+   to meet demand."
+   Quote (slide 8): "The plan is low-risk."
+   Why it costs the client: Slide 3 says new fixed costs and hiring wait for revenue growth.
+   Slide 6 recommends both, up front, before revenue has moved. The deck never says where the
+   lease and salary money comes from, and slide 8 calls this "low-risk" without addressing the
+   conflict, so the client cannot tell which instruction the board should follow.
+   What to do: Before proposing the shop and the hires, show the financing that bridges "no
+   cash reserves" to a signed lease and three salaries. If none exists, sequence the plan so
+   revenue moves first, in line with the board's own condition, or name the bridge funding that
+   resolves the conflict.
+   Answer first: Where does the cash for the lease and the first months of three salaries come
+   from, given slide 3 states there are no reserves and the board has ruled out hiring and new
+   fixed costs until revenue grows.
+
+2. The revenue projection the whole plan rests on has no working shown. [High impact]
+   Where: Slide 5, slide 7
+   Quote (slide 5): "Comparable social enterprises have doubled revenue after opening a shop."
+   Quote (slide 7): "Revenue will double in year one. The shop pays for itself by month nine."
+   Why it costs the client: The client is asked to commit to a lease and three hires on a
+   doubling assumption sourced to unnamed "comparable" organisations, with no numbers, sector or
+   scale given, and the month nine payback claim has no arithmetic behind it at all.
+   What to do: Name the peer enterprises or the source behind "comparable," or show the
+   arithmetic (current revenue, projected shop revenue, cost base) behind the doubling and the
+   payback date. Until then, treat both figures as unverified projections rather than evidence.
+   Answer first: What are the actual figures, and whose, behind "comparable social enterprises
+   have doubled revenue," and what calculation produces "pays for itself by month nine."
+
+3. No single sentence states the recommendation and why it solves self-sustainability. [Moderate]
+   Where: Slide 6, slide 7 (the reasoning is assembled across both)
+   Quote (slide 6): "Open a retail shopfront within six months and hire three paid repair staff
+   to meet demand."
+   Quote (slide 6): "This will make Client D self-sustaining."
+   Quote (slide 7): "Revenue will double in year one."
+   Why it costs the client: Reading only the titles and opening lines, slide by slide, a reader
+   gets a sequence of separate facts: situation, constraint, market, opportunity, action, impact,
+   confidence, steps. No one sentence states what to do and why it closes the two-year
+   self-sustainability gap; the reader has to build that link themselves from three slides.
+   What to do: Write one slide, early, that states the recommendation and the reason it closes
+   the gap in a single sentence, then let the rest of the deck support that sentence instead of
+   building toward it.
+   Answer first: If a board member reads only the slide titles and first sentences, what one
+   sentence should they land on, and where does that sentence currently sit.
+
+4. Next steps gives three verbs and nothing to act on. [Moderate]
+   Where: Slide 9
+   Quote: "Sign a lease. Recruit staff. Launch."
+   Why it costs the client: A near-final deck should leave Client D able to start executing.
+   Three verbs carry no owner, no budget, no measure and no order tied to the cash constraint
+   named on slide 3, so the client is left to build the actual plan themselves.
+   What to do: Attach an owner, a cost and a timeframe to each step, and sequence them against
+   the financing question raised in finding 1 rather than listing the three eventual actions.
+   Answer first: Who signs the lease, what does it cost, and what has to be true first, given
+   Client D has no cash reserves today.
+
+THE HABIT TO BUILD
+The weak habit: writing the recommendation slide from the opportunity, without checking it
+against the constraints slide already in the same deck. Exercise: after drafting a
+recommendation, reread every constraint stated earlier in the document and write one sentence
+naming the resource the recommendation needs and where it comes from, before writing the next
+steps slide.
+
+WHAT THIS REVIEW COULD NOT JUDGE
+Evidence and source notes were not included in the input, so I cannot tell whether the 60%
+cost-coverage figure, the demand claims or the peer comparator have support that simply was not
+pasted in.
+Whether "comparable social enterprises" is a real, checked set of peers or an assertion is not
+verifiable from the deck text alone.
+Whether the board has reviewed and approved the specific sequencing in slide 6, given slide 3
+describes a different board position, cannot be settled from the deliverable.
+Full financial detail (lease cost, wage costs, cash position beyond "no reserves") was not in
+the pasted text, so the size of the funding gap cannot be independently checked.
+Known constraints, intended audience and the other input template fields were not provided, so
+scope and audience fit could not be fully assessed.
+
+QUESTIONS WORTH ASKING THE TEAM
+1. Where does the cash for the lease and the first months of three salaries come from, given
+slide 3 states no reserves and the board's condition that hiring wait for revenue growth.
+2. Who are the "comparable social enterprises" on slide 5, and what is the source for their
+revenue doubling.
+3. What is the arithmetic behind "revenue will double in year one" and "pays for itself by
+month nine."
+4. Has the board reviewed slide 6 against the constraint on slide 3, and do they agree the
+sequencing works.
+5. What evidence and source notes exist for these figures that were not included in this paste.
+
+HOW TO CHECK THIS FEEDBACK
+Every point above quotes your own deliverable and says where. If you cannot find one of these
+quotes in your own work, that point is wrong. Drop it and say so. This review advises. A human
+decides, and nothing here goes to your client on its own.
+
+
+=== PASTE-BACK RECORD ===
+
+{
+  "recordVersion": "override-log-2-chat",
+  "capturedAt": null,
+  "reviewer": {
+    "promptVersion": "frozen-2026-08-09",
+    "mode": "deep",
+    "executionMode": "chat",
+    "model": null
+  },
+  "deliverable": {
+    "ref": null,
+    "artifactType": "final recommendation deck",
+    "stage": "not stated in input"
+  },
+  "lead": { "id": null, "secondsOnTask": null, "vsByHand": null },
+  "quoteCheck": { "status": "lead-eye-check", "quotesChecked": 12, "quotesMissing": null },
+  "ai": {
+    "findings": [
+      { "fid": "f1", "short": "hiring contradicts cash constraint", "severity": "critical",
+        "issueType": "recommendation",
+        "dimension": "Feasibility and implementation", "slides": [3, 6, 8] },
+      { "fid": "f2", "short": "unsourced revenue doubling", "severity": "critical",
+        "issueType": "evidence",
+        "dimension": "Evidence quality", "slides": [5, 7] },
+      { "fid": "f3", "short": "no governing insight", "severity": "major",
+        "issueType": "communication",
+        "dimension": "Storyline and pyramid logic", "slides": [6, 7] },
+      { "fid": "f4", "short": "next steps too thin", "severity": "major",
+        "issueType": "implementation",
+        "dimension": "Feasibility and implementation", "slides": [9] }
+    ]
+  },
+  "decisions": [
+    { "fid": "f1", "action": null, "cutReason": null, "note": "" },
+    { "fid": "f2", "action": null, "cutReason": null, "note": "" },
+    { "fid": "f3", "action": null, "cutReason": null, "note": "" },
+    { "fid": "f4", "action": null, "cutReason": null, "note": "" }
+  ],
+  "added": [],
+  "mustCatch": null,
+  "readinessCall": { "ai": null, "lead": null, "reason": "" },
+  "sent": false
+}
+
+=== END. ===

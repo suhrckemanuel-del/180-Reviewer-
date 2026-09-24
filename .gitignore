@@ -1,0 +1,123 @@
+# Client-confidential material never goes in this repo.
+# Real deliverables, decks and extracted text live outside it. Anonymize before committing any example.
+_client-private/
+*client*.pdf
+*client*.pptx
+
+# Real-deck material stays local: raw intake machinery (extracted client text, real
+# filenames, drive inventory, sealed triage) AND the pseudonymised case files, which
+# carry the full text of real client deliverables. Only the labeling kit, seeded-variant
+# spec and READMEs are committed.
+tools/quality-reviewer/v2/eval-cases-real/intake-work/
+tools/quality-reviewer/v2/eval-cases-real/real-*.md
+tools/quality-reviewer/v2/eval-cases-real/real-*.gold.md
+
+# The gold labels and capture worksheets live in the labeling/ subdir and name findings
+# on real client deliverables — LOCAL ONLY, never pushed. The root rules above are anchored
+# to eval-cases-real/ and do NOT reach this subdir, so it is listed explicitly.
+# (Synthetic real-00.* fixtures are deliberately not matched and stay tracked.)
+tools/quality-reviewer/v2/eval-cases-real/labeling/real-*.gold.md
+tools/quality-reviewer/v2/eval-cases-real/labeling/real-*.worksheet.*
+# The session record names client findings in prose — local only.
+tools/quality-reviewer/v2/eval-cases-real/_LABELING-RECORD.md
+# Same rule: the inter-rater recovery quotes the paired human judgments on real decks.
+tools/quality-reviewer/v2/eval-cases-real/_INTER-RATER-RECOVERY.md
+# Secure-transfer zips of the eval set carry full client content — never commit them.
+tools/quality-reviewer/v2/eval-cases-real/*.zip
+# Baseline runs on the real cases: the reviewer output quotes client decks verbatim, the
+# input packs are the decks themselves, and the scorecard reproduces the human gold labels.
+# The whole tree is local only. The harness code (run-reviews.js, score-review.js,
+# scorecard.js) and the fabricated real-00 fixtures stay tracked.
+tools/quality-reviewer/v2/eval-runs/real-baseline/
+
+# ...and every OTHER run folder under eval-runs/, by default. Reviewer output quotes the
+# deliverable verbatim, so a run folder is guilty until proven synthetic. Naming folders
+# one at a time does not scale: the 2026-08-08 comparator-gate sprint wrote real-13
+# reviews to a new folder the real-baseline/ rule did not reach, and they were staged.
+# This fails closed. Add an exception only for a folder proven synthetic or prompt-only.
+tools/quality-reviewer/v2/eval-runs/*/
+!tools/quality-reviewer/v2/eval-runs/prompt-archive/
+!tools/quality-reviewer/v2/eval-runs/redesign-2026-07-23/
+!tools/quality-reviewer/v2/eval-runs/stability/
+# Synthetic-only: four blind runs on eval-cases/case-04, no real-case content.
+!tools/quality-reviewer/v2/eval-runs/chat-native-2026-08-09/
+
+# Real client deliverables extracted for local testing. The TEST-KIT itself is synthetic and
+# committed; this subfolder is where real decks land and it never is. Extracted text carries
+# client names verbatim, and a .md file would not be caught by the *.pptx rules above.
+tools/quality-reviewer/v2/TEST-KIT/local-decks/
+
+# Override records embed finding text and evidence quotes from real deliverables,
+# so they are client-confidential by construction (17-override-log.md section 6).
+# The whole directory is ignored before the first record is written.
+tools/quality-reviewer/v2/eval-runs/override-log/
+
+# The deployable copy of the renderer, rebuilt by build-site.js. Generated, not
+# authored: index.html is the source of truth. Ignored so a build that somehow
+# bundled real-case reviews could not be committed from here. build-site.js
+# refuses to write it at all if it carries real-case markers.
+tools/quality-reviewer/v2/site/
+
+# Heavy binaries (decks, image dumps) are kept out to keep the repo lean.
+*.pptx
+slides_out/
+*.tmp
+
+# Branch Awards working files carry internal branch data (budgets, metrics, client
+# names in aggregate) — local only, never pushed.
+branch-awards/
+
+# Website build secrets and reference material with unclear licensing
+website/.env
+website/moodboard/
+
+# Live reviewer-mockup builds render a REAL review over a REAL client deck: every quote in
+# them is verbatim client material. website/ is a deployed Cloudflare Pages tree, so a live
+# build committed here would publish that material to the open web. The whole directory is
+# ignored rather than a filename pattern, so the rule cannot be defeated by adding a new
+# file inside it. build-desk.js --live refuses to write unless its output path is ignored.
+# The fabricated build (website/reviewer-mockups/index.html) stays tracked and deployable.
+website/reviewer-mockups/live/
+
+# Browser-automation artifacts: accessibility snapshots and console logs capture whatever
+# was on the page. Now that a live reviewer build can render a real client deck, anything
+# dropped here can contain verbatim client text. Local only.
+.playwright-mcp/
+
+# Local tooling
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.venv/
+
+# Editor
+.vscode/
+.idea/
+
+# Note: small PDFs that are our own IP (evidence-base.pdf, methodology-evidence-base.pdf)
+# are intentionally tracked. Client PDFs are not.
+
+# Generated consolidated site tree (rebuilt by website/variants/tools/build-dist.mjs)
+website/variants/dist/
+
+# Cloudflare Wrangler build/deploy cache. Generated, machine-local.
+.wrangler/
+
+# Portfolio workbench: raw client material, rendered inspection images and
+# selection records all carry client names, visuals or unapproved claims.
+# Only the public-safe operating documents in portfolio-workbench/ are tracked.
+portfolio-workbench/private/
+portfolio-workbench/qa/
+portfolio-workbench/candidates/
+
+# The wayfinder map's working tree is committed: the tickets, the resolutions, the
+# measurements and the results records are the reasoning behind the prompt, and keeping
+# them on one laptop is the handover problem the chapter is recruiting to solve.
+# The RUN TREES are not. They are model replies and the bundles that produced them: tens
+# of megabytes, regenerable from the build scripts beside them, and the same class of
+# content as eval-runs/ above.
+.scratch/*/*/runs/
+.scratch/*/*/bundles/
+.scratch/*/*/render/

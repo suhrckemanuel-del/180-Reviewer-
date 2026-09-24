@@ -1,0 +1,117 @@
+{
+  "keys": {
+    "part1": "SIGMA-7K",
+    "part2": "DELTA-3Q"
+  },
+  "arms": {
+    "A-probe-full": {
+      "chars": 41887,
+      "tokens": 9386,
+      "has_key1": false,
+      "has_key2": false,
+      "has_demand": false
+    },
+    "A-probe-headdrop": {
+      "chars": 22649,
+      "tokens": 5224,
+      "has_key1": false,
+      "has_key2": false,
+      "has_demand": false
+    },
+    "B-full": {
+      "chars": 45481,
+      "tokens": 10266,
+      "has_key1": true,
+      "has_key2": true,
+      "has_demand": true
+    },
+    "B-headdrop": {
+      "chars": 26212,
+      "tokens": 6090,
+      "has_key1": false,
+      "has_key2": true,
+      "has_demand": true
+    },
+    "B-tail97": {
+      "chars": 44871,
+      "tokens": 10106,
+      "has_key1": true,
+      "has_key2": false,
+      "has_demand": true
+    },
+    "B-tail85": {
+      "chars": 42496,
+      "tokens": 9466,
+      "has_key1": true,
+      "has_key2": false,
+      "has_demand": true
+    },
+    "B-tail65": {
+      "chars": 37994,
+      "tokens": 8398,
+      "has_key1": true,
+      "has_key2": false,
+      "has_demand": false
+    },
+    "B2-full": {
+      "chars": 45935,
+      "tokens": 10377,
+      "has_key1": true,
+      "has_key2": true,
+      "has_demand": true,
+      "has_rule": true
+    },
+    "B2-tail97": {
+      "chars": 45327,
+      "tokens": 10218,
+      "has_key1": true,
+      "has_key2": false,
+      "has_demand": true,
+      "has_rule": true
+    },
+    "B2-tail92": {
+      "chars": 44288,
+      "tokens": 9952,
+      "has_key1": true,
+      "has_key2": false,
+      "has_demand": true,
+      "has_rule": true
+    },
+    "B2-headdrop": {
+      "chars": 26144,
+      "tokens": 6070,
+      "has_key1": false,
+      "has_key2": true,
+      "has_demand": true,
+      "has_rule": true
+    },
+    "B3-full": {
+      "chars": 45939,
+      "tokens": 10380,
+      "has_key1": true,
+      "has_key2": true,
+      "has_demand": true,
+      "has_rule": true
+    },
+    "B3-headdrop": {
+      "chars": 26144,
+      "tokens": 6070,
+      "has_key1": false,
+      "has_key2": true,
+      "has_demand": true,
+      "has_rule": true
+    },
+    "B3-tail92": {
+      "chars": 44292,
+      "tokens": 9955,
+      "has_key1": true,
+      "has_key2": false,
+      "has_demand": true,
+      "has_rule": true
+    }
+  },
+  "keys_b3": {
+    "part1": "0919-SIGMA7K",
+    "part2": "DELTA-3Q"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "keys": {
+    "part1": "0924-V1RECHECK",
+    "part2": "OMEGA-9V"
+  },
+  "template": "round-1",
+  "arms": {
+    "v1-student-attempt-r1": {
+      "chars": 55706,
+      "tokens": 12717
+    },
+    "v1-student-attempt-r2": {
+      "chars": 55706,
+      "tokens": 12717
+    },
+    "v1-student-attempt-r3": {
+      "chars": 55706,
+      "tokens": 12717
+    }
+  }
+}

@@ -1,0 +1,505 @@
+[
+  {
+    "arm": "haiku--lead-nothing-r1",
+    "mode": "lead",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 1,
+    "dense_fields_present": [
+      "Quote:",
+      "What to do:",
+      "Where:",
+      "Why it costs the client:"
+    ],
+    "new_fields_bled_in": [],
+    "answer_first_present": true,
+    "why_words": [
+      43
+    ],
+    "quotes_checked": 1,
+    "quotes_not_in_deck": [],
+    "severities": [
+      "Moderate"
+    ]
+  },
+  {
+    "arm": "haiku--student-attempt-r1",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 3,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "The implementation path is too abstract for the coordinator to act on immediately [Moderate]",
+        "title_words": 13,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 2,
+        "problem_words": 38,
+        "why_sentences": 3,
+        "why_words": 45,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The 8% conversion assumption is unsourced and it is what the board is uncertain about [Moderate]",
+        "title_words": 15,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 3,
+        "problem_words": 48,
+        "why_sentences": 4,
+        "why_words": 66,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The 45-pound price lacks specific justification [Minor]",
+        "title_words": 6,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 2,
+        "problem_words": 33,
+        "why_sentences": 2,
+        "why_words": 19,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Minor"
+      }
+    ],
+    "severities": [
+      "Moderate",
+      "Moderate",
+      "Minor"
+    ],
+    "quotes_checked": 3,
+    "quotes_not_in_deck": [
+      "Three comparable local arts non-profits run membership at 40"
+    ]
+  },
+  {
+    "arm": "haiku--student-attempt-r2",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 4,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "The 8% conversion assumption drives the financial outcome but carries no benchmark. [High impact]",
+        "title_words": 12,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 3,
+        "problem_words": 47,
+        "why_sentences": 3,
+        "why_words": 55,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": true,
+        "wrote_none": false,
+        "severity": "High impact"
+      },
+      {
+        "title": "The comparability of the three pricing benchmarks is not established. [Moderate]",
+        "title_words": 10,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 4,
+        "problem_words": 52,
+        "why_sentences": 2,
+        "why_words": 35,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": true,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The soft launch execution is missing the Monday morning action. [Moderate]",
+        "title_words": 10,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 5,
+        "problem_words": 57,
+        "why_sentences": 4,
+        "why_words": 52,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": true,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The 5,000 pound projection lacks context to Client E's overall budget. [Moderate]",
+        "title_words": 11,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 4,
+        "problem_words": 54,
+        "why_sentences": 3,
+        "why_words": 38,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": true,
+        "wrote_none": false,
+        "severity": "Moderate"
+      }
+    ],
+    "severities": [
+      "High impact",
+      "Moderate",
+      "Moderate",
+      "Moderate"
+    ],
+    "quotes_checked": 7,
+    "quotes_not_in_deck": [
+      " but provides no data from comparable organizations to suppo",
+      "\n   The problem: The deck cites three organizations' pricing",
+      "\n   The problem: The deliverable says the coordinator will ",
+      " but does not specify how. Are the 200 drawn from event atte",
+      " Every execution choice has different time costs and likely ",
+      " You find the actual approach, but it needs that level of sp"
+    ]
+  },
+  {
+    "arm": "haiku--student-attempt-r3",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 4,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "The soft launch is described in timeline, not mechanism. [High impact]",
+        "title_words": 9,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 6,
+        "problem_words": 55,
+        "why_sentences": 3,
+        "why_words": 39,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "High impact"
+      },
+      {
+        "title": "The drop from 32% attendance to 8% conversion is not explained. [Moderate]",
+        "title_words": 11,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 3,
+        "problem_words": 37,
+        "why_sentences": 2,
+        "why_words": 36,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The members-only benefits are too vague to execute. [Moderate]",
+        "title_words": 8,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 5,
+        "problem_words": 45,
+        "why_sentences": 3,
+        "why_words": 37,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The revenue adequacy is never stated. [Moderate]",
+        "title_words": 6,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 4,
+        "problem_words": 48,
+        "why_sentences": 3,
+        "why_words": 46,
+        "why_names_a_reader": true,
+        "has_example": true,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      }
+    ],
+    "severities": [
+      "High impact",
+      "Moderate",
+      "Moderate",
+      "Moderate"
+    ],
+    "quotes_checked": 13,
+    "quotes_not_in_deck": [
+      " without knowing the channel. The slide names the when (mont",
+      " means, the timeline slips. If the team was unclear about ef",
+      "\n   Answer first: Is the soft launch email, phone calls, in-",
+      "\n   The problem: The board sees 32% of 1,400 people already ",
+      "\n   Answer first: What is the typical conversion rate from f",
+      "\n   The problem: The coordinator will not know what ",
+      " means in operation. Is it a waitlist? A 48-hour head start?",
+      "\u2014which partners, and how much discount? The team describes w",
+      "\n   Do this: For each benefit, describe one concrete form of",
+      ").\n   Aim for a line like: For priority booking, ",
+      "\n   Answer first: Which specific local partners have agreed ",
+      " The slide then sets a go/no-go rule (soft launch clears 5% "
+    ]
+  },
+  {
+    "arm": "codex--lead-nothing-r1",
+    "mode": "lead",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 3,
+    "dense_fields_present": [
+      "Quote:",
+      "What to do:",
+      "Where:",
+      "Why it costs the client:"
+    ],
+    "new_fields_bled_in": [],
+    "answer_first_present": true,
+    "why_words": [
+      39,
+      43,
+      38
+    ],
+    "quotes_checked": 6,
+    "quotes_not_in_deck": [],
+    "severities": [
+      "Moderate",
+      "Moderate",
+      "Moderate"
+    ]
+  },
+  {
+    "arm": "codex--lead-nothing-r2",
+    "mode": "lead",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 3,
+    "dense_fields_present": [
+      "Quote:",
+      "What to do:",
+      "Where:",
+      "Why it costs the client:"
+    ],
+    "new_fields_bled_in": [],
+    "answer_first_present": true,
+    "why_words": [
+      36,
+      35,
+      34
+    ],
+    "quotes_checked": 7,
+    "quotes_not_in_deck": [],
+    "severities": [
+      "High impact",
+      "Moderate",
+      "Moderate"
+    ]
+  },
+  {
+    "arm": "codex--student-attempt-r1",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 3,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "The board never receives one early sentence that states both the launch decision and the evidence-based reason for it. [Moderate]",
+        "title_words": 19,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 18,
+        "why_sentences": 2,
+        "why_words": 41,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The \u00a35,000 case and rollout target rely on an 8% assumption that attendance does not validate as paid conversion. [Moderate]",
+        "title_words": 19,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 25,
+        "why_sentences": 2,
+        "why_words": 41,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The rollout leaves the board without a stated action for a pilot result between 5% and 8% conversion. [Moderate]",
+        "title_words": 18,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 21,
+        "why_sentences": 2,
+        "why_words": 39,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      }
+    ],
+    "severities": [
+      "Moderate",
+      "Moderate",
+      "Moderate"
+    ],
+    "quotes_checked": 0,
+    "quotes_not_in_deck": []
+  },
+  {
+    "arm": "codex--student-attempt-r2",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 3,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "The revenue case does not establish what conversion rate or revenue would make membership worthwhile, and it uses two unexplained thresholds. [Moderate]",
+        "title_words": 21,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 2,
+        "problem_words": 36,
+        "why_sentences": 2,
+        "why_words": 37,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The claim that membership can run on existing capacity is not supported by an operating workload. [Moderate]",
+        "title_words": 16,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 21,
+        "why_sentences": 2,
+        "why_words": 35,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The board does not receive one early sentence that connects the recommended launch to the reason it should choose it. [Minor]",
+        "title_words": 20,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 2,
+        "problem_words": 23,
+        "why_sentences": 1,
+        "why_words": 27,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Minor"
+      }
+    ],
+    "severities": [
+      "Moderate",
+      "Moderate",
+      "Minor"
+    ],
+    "quotes_checked": 5,
+    "quotes_not_in_deck": []
+  },
+  {
+    "arm": "codex--student-attempt-r3",
+    "mode": "student",
+    "produced_review": true,
+    "habit_section_present": false,
+    "n_findings": 3,
+    "old_fields_leaked": [],
+    "findings": [
+      {
+        "title": "The conversion target and expansion gate are not defensible because attendance is used as proof of membership conversion. [Moderate]",
+        "title_words": 18,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 19,
+        "why_sentences": 3,
+        "why_words": 43,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The capacity risk is named but is not tested before the full-launch decision. [Moderate]",
+        "title_words": 13,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 15,
+        "why_sentences": 2,
+        "why_words": 41,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      },
+      {
+        "title": "The reason for a single-tier test is buried after the board has already been asked to approve membership. [Moderate]",
+        "title_words": 18,
+        "has_all_fields": true,
+        "missing_fields": [],
+        "problem_sentences": 1,
+        "problem_words": 19,
+        "why_sentences": 3,
+        "why_words": 45,
+        "why_names_a_reader": true,
+        "has_example": false,
+        "example_disclaimer": false,
+        "wrote_none": false,
+        "severity": "Moderate"
+      }
+    ],
+    "severities": [
+      "Moderate",
+      "Moderate",
+      "Moderate"
+    ],
+    "quotes_checked": 0,
+    "quotes_not_in_deck": []
+  }
+]

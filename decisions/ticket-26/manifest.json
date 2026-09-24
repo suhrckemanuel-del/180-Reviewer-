@@ -1,0 +1,53 @@
+{
+  "keys": {
+    "part1": "0924-WITHDRAW",
+    "part2": "OMEGA-9X"
+  },
+  "arms": {
+    "student-attempt-r1": {
+      "chars": 54420,
+      "tokens": 12424,
+      "has_key1": true,
+      "has_key2": true,
+      "has_new_template": false,
+      "has_lead_template": true,
+      "habit_section_gone": true
+    },
+    "student-attempt-r2": {
+      "chars": 54420,
+      "tokens": 12424,
+      "has_key1": true,
+      "has_key2": true,
+      "has_new_template": false,
+      "has_lead_template": true,
+      "habit_section_gone": true
+    },
+    "student-attempt-r3": {
+      "chars": 54420,
+      "tokens": 12424,
+      "has_key1": true,
+      "has_key2": true,
+      "has_new_template": false,
+      "has_lead_template": true,
+      "habit_section_gone": true
+    },
+    "lead-nothing-r1": {
+      "chars": 54139,
+      "tokens": 12369,
+      "has_key1": true,
+      "has_key2": true,
+      "has_new_template": false,
+      "has_lead_template": true,
+      "habit_section_gone": true
+    },
+    "lead-nothing-r2": {
+      "chars": 54139,
+      "tokens": 12369,
+      "has_key1": true,
+      "has_key2": true,
+      "has_new_template": false,
+      "has_lead_template": true,
+      "habit_section_gone": true
+    }
+  }
+}
