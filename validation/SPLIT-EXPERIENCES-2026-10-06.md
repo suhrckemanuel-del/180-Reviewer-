@@ -44,6 +44,12 @@ Pre-existing detailed validation archives were preserved under ignored
 - Product ZIP: `180-Reviewer-supervised-1006-NCEECNQ.zip`, outside the repository in the
   deliverables workspace. It contains only the registered candidate's product files; private
   previews, sources, notes and screenshots are excluded. Recovered setup copies must match hashes.
+- [PR #6](https://github.com/suhrckemanuel-del/180-Reviewer-/pull/6) is open, attached to the chat
+  and unmerged. Issues #1–#5 received implementation/remaining-acceptance updates and remain open.
+  The ZIP's exact 14-file inventory and all 13 product-file hashes were verified. Five starting/guide
+  files recovered from the GitHub PR branch match the manifest hashes. This was verified using owner
+  credentials and does not establish intended consultant access. The committed publication audit
+  includes only 68 product/document files; detailed archives and private artifacts are excluded.
 
 ## Legacy hosted mismatch
 

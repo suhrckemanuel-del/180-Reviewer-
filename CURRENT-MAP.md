@@ -1,7 +1,9 @@
 # 180 Reviewer: current map
 
 Updated 2026-10-06. Current candidate: candidate-2026-10-05-split.
-Start with [START-HERE](tools/quality-reviewer/v2/TEST-KIT/START-HERE.md).
+Start with the [registered candidate guide](tools/quality-reviewer/v2/releases/1006-NCEECNQ/START-HERE.md).
+Published for owner review in [PR #6](https://github.com/suhrckemanuel-del/180-Reviewer-/pull/6),
+on branch `reviewer/student-lead-2026-10-05`. Issues #1–#5 have implementation updates and remain open.
 
 Student and lead have separate generated setup/input files, dedicated HTML templates and
 audience-specific notes. Shared methodology, evidence validation and privacy rules remain

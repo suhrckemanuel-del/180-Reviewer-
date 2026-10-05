@@ -37,7 +37,8 @@ use and is collected before feedback only when measuring learning. An optional H
 implemented locally under issue #3 as a faithful rendering of the same review; coaching continues in chat.
 The old hosted review desk is not the current release path.
 
-**Start supervised testing:** [Start here](tools/quality-reviewer/v2/TEST-KIT/START-HERE.md).
+**Start supervised testing:** [Start here](tools/quality-reviewer/v2/releases/1006-NCEECNQ/START-HERE.md).
+The [candidate PR](https://github.com/suhrckemanuel-del/180-Reviewer-/pull/6) is open for owner review.
 Choose STUDENT-SETUP.txt / STUDENT-INPUT-TEMPLATE.txt for complete feedback and optional
 same-chat reasoning, or LEAD-SETUP.txt / LEAD-INPUT-TEMPLATE.txt for concise evidence checks
 and human keep/ask/cut decisions. Optional HTML uses student-review.html or lead-review.html
