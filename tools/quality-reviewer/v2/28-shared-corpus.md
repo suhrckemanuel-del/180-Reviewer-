@@ -86,7 +86,7 @@ Three consequences for us, all testable:
 ### 1.3 The answer key, and measuring the gap
 
 Hancock, *Building expertise in the age of AI*, McKinsey Quarterly, July 2026
-([research/06](../../../research/06-mckinsey-ai-insight-base/reading-list.md)). The junior attempts
+(historical research/06 reading list, outside this repository). The junior attempts
 the work, AI grades it, the manager discusses the difference — our attempt gate, arrived at
 independently. The part we do not have is the measurement: **track the narrowing gap between the
 student's own attempt and the AI's output as the signal that judgment is forming.** That requires

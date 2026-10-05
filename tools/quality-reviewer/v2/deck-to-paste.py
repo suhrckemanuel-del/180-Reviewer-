@@ -5,37 +5,20 @@
 # Writes the DELIVERABLE TEXT block, slide-segmented, plus the extraction-notes block the
 # reviewer needs. Prints the result to stdout if no -o is given.
 #
-# WHY THE EXTRACTION NOTES MATTER, and why this is not a nicety.
-# The reviewer's comparator test asks, for every figure the recommendation leans on, "compared
-# to what". On damaged input it cannot always tell a missing comparator from one the extraction
-# destroyed, so it reads the extraction notes and applies one mechanical test to their wording:
-# did the note say TEXT was lost, or that the PLACE of text was lost? Only lost TEXT suspends
-# the comparator, and only on the slides that note names. So the vocabulary below is not
-# decoration. "not recoverable as text" and "flattened" route to opposite behaviours, and a
-# deck pasted with no notes at all gives the gate nothing to read.
-# See 04-prompt-templates.md section A, step 5, and 25-comparator-gate.md.
-#
-# WHAT THIS DOES BETTER THAN THE INTAKE SCRIPT (eval-cases-real/intake-work/extract-local.py):
-#   - tables keep their header row and bind each value to its column label, instead of being
-#     flattened to tab-joined rows. A table whose numbers lose their labels is the exact
-#     "disconnected from its label" damage the gate treats as lost PLACE.
-#   - charts are read. python-pptx exposes categories and series values, so figures that would
-#     otherwise be reported as "no extractable values" come through as real numbers. Chart
-#     values are the single most common known gap in this project's real cases, and they are
-#     the numbers the comparator test most wants.
-#   - the extraction-notes block is generated from what actually happened, in the gate's own
-#     vocabulary, rather than written by hand afterwards.
-#
-# No client text is stored anywhere. It reads one file and writes one file.
+# Local only. Text/JSON are working aids. Original pages remain authoritative.
+# Selection preserves original page/slide numbers. Damaged text OR lost relationships
+# require source-page inspection; the presence of words is not proof of faithful extraction.
+# All file outputs must stay in the repository's ignored _client-private area.
 
-import sys, os, re, argparse
+import sys, os, re, argparse, json, hashlib, html, subprocess
+from pathlib import Path
 
 def clean(s):
     return re.sub(r'[ \t]+', ' ', (s or '').replace('\r', '').strip())
 
 # ---------------------------------------------------------------- pptx
 
-def from_pptx(path):
+def from_pptx(path, include_notes=False):
     from pptx import Presentation
     from pptx.util import Emu
     prs = Presentation(path)
@@ -73,27 +56,10 @@ def from_pptx(path):
                     had_text = True
                     continue
                 tables += 1
-                # Row 0 is a header only if it plausibly is one: more than one row, and most
-                # of its cells filled. Single-row tables and tables whose top row is mostly
-                # blank have no header, and binding values to a header that is not there
-                # invents labels.
-                head = rows[0]
-                filled = sum(1 for v in head if v)
-                has_header = len(rows) > 1 and filled >= max(2, int(0.6 * len(head)))
-                if has_header:
-                    body.append('[Table] ' + ' | '.join(head))
-                    for r in rows[1:]:
-                        pairs = [f'{head[j]}: {v}' if j < len(head) and head[j] else v
-                                 for j, v in enumerate(r) if v]
-                        if pairs:
-                            body.append('  ' + '; '.join(pairs))
-                else:
-                    body.append('[Table, no header row]')
-                    for r in rows:
-                        vals = [v for v in r if v]
-                        if vals:
-                            body.append('  ' + ' | '.join(vals))
-                    unbound.append(i)
+                # Preserve all cells, including blanks. A populated row is not proof of a header.
+                body.append('[Table, row/column order preserved; header status not inferred]')
+                body.extend('  ' + ' | '.join(row) for row in rows)
+                unbound.append(i)
                 had_text = True
 
             # --- charts: recover categories and series values
@@ -109,7 +75,7 @@ def from_pptx(path):
                         pass
                     lines = []
                     for s in ch.series:
-                        vals = [v for v in s.values if v is not None]
+                        vals = list(s.values)
                         if not vals:
                             continue
                         # A chart can carry values with no category names at all: the labels
@@ -118,8 +84,7 @@ def from_pptx(path):
                         # recoverable" note, and that note suspends the comparator test on the
                         # one slide whose numbers the reader most needs interrogated.
                         if cats:
-                            body_vals = '; '.join(f'{cats[j]}: {v}' for j, v in enumerate(vals)
-                                                  if j < len(cats))
+                            body_vals = '; '.join(f'{cats[j] if j < len(cats) else "unlabelled value " + str(j+1)}: {v if v is not None else "not supplied"}' for j, v in enumerate(vals))
                         else:
                             body_vals = ('values in chart order, labels are elsewhere on the '
                                          'slide: ' + ', '.join(str(v) for v in vals))
@@ -137,13 +102,15 @@ def from_pptx(path):
                 pics += 1
 
         try:
-            n = slide.notes_slide.notes_text_frame.text if slide.has_notes_slide else ''
+            n = slide.notes_slide.notes_text_frame.text if include_notes and slide.has_notes_slide else ''
             if clean(n):
                 body.append('[Speaker notes] ' + clean(n))
         except Exception:
             pass
 
         slides.append((i, body))
+        if pics:
+            notes.append((i, 'images are not represented by text; inspect the original slide'))
         if not had_text:
             notes.append((i, 'image-only, no extractable text on this slide'))
     # A chart we could not read is lost TEXT: its values are not in the input at all, so the
@@ -152,11 +119,9 @@ def from_pptx(path):
     for i in sorted(set(chart_unreadable)):
         notes.append((i, 'chart present but its values are not recoverable as text, '
                          'no values at all were extracted'))
-    # A table with no header row loses which column each value came from. The values are all
-    # present, so this is lost PLACE, not lost TEXT: it must NOT suspend the comparator test.
+    # Plain text cannot establish visual grouping, merged headings or table meaning.
     for i in sorted(set(unbound)):
-        notes.append((i, 'a table here has no header row, so its values are kept as extracted '
-                         'and are disconnected from their labels'))
+        notes.append((i, 'table cells are preserved without inferring header roles; inspect merged cells, labels and visual grouping in the original'))
     return slides, sorted(notes), len(prs.slides), None
 
 # ---------------------------------------------------------------- pdf / docx
@@ -170,81 +135,110 @@ def from_pdf(path):
         slides.append((i, [t] if t else []))
         if not t:
             notes.append((i, 'no extractable text, image-only page'))
-    return slides, notes, len(doc), None
+        else:
+            notes.append((i, 'text extraction does not preserve colors, chart meaning or reliable table associations; inspect the original page'))
+    count = len(doc)
+    doc.close()
+    return slides, notes, count, None
 
 def from_docx(path):
     import docx
     d = docx.Document(path)
-    body = [clean(p.text) for p in d.paragraphs if clean(p.text)]
-    for tb in d.tables:
-        rows = [[clean(c.text) for c in r.cells] for r in tb.rows]
-        if rows:
-            head, rest = rows[0], rows[1:]
-            body.append('[Table] ' + ' | '.join(head))
-            for r in rest:
-                body.append('  ' + '; '.join(
-                    f'{head[j]}: {v}' if j < len(head) and head[j] else v
-                    for j, v in enumerate(r)))
-    return [(1, body)], [], 1, None
+    # Preserve paragraph/table order. DOCX has no stable PDF page numbers here.
+    from docx.table import Table
+    from docx.text.paragraph import Paragraph
+    body = []
+    for child in d.element.body.iterchildren():
+        if child.tag.endswith('}p'):
+            text = clean(Paragraph(child, d).text)
+            if text: body.append(text)
+        elif child.tag.endswith('}tbl'):
+            rows = [[clean(c.text) for c in row.cells] for row in Table(child, d).rows]
+            if rows:
+                body.append('[Table, row order preserved; header status not inferred]')
+                body.extend(' | '.join(row) for row in rows)
+    return [(1, body)], [(1, 'DOCX logical section, not a rendered page; images, pagination and layout are not assessed')], 1, None
 
 # ---------------------------------------------------------------- output
 
-def run(path, out):
-    ext = os.path.splitext(path)[1].lower()
+def selected_pages(spec, count):
+    if not spec or spec.lower() == 'all': return list(range(1, count + 1))
+    chosen = set()
+    for token in spec.split(','):
+        m = re.fullmatch(r"(\d+)(?:-(\d+))?", token.strip())
+        if not m: raise ValueError('Use page ranges such as 1-12,15,20-24')
+        first, last = int(m[1]), int(m[2] or m[1])
+        if first < 1 or last < first or last > count: raise ValueError('Selection is outside the source page range')
+        chosen.update(range(first, last + 1))
+    return sorted(chosen)
+
+
+def private_output(filename):
+    repo = Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], cwd=Path(__file__).resolve().parent, text=True).strip())
+    root = (repo / '_client-private').resolve()
+    target = Path(filename).resolve()
+    if not target.is_relative_to(root) or target == root:
+        raise ValueError('Output must be inside the repository ignored _client-private area')
+    subprocess.run(['git', '-c', 'safe.directory=' + repo.as_posix(), 'check-ignore', '--quiet', '--', str(target)], cwd=repo, check=True)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    return target
+
+
+def run(path, out, selection='all', include_notes=False, preview=None, evidence_json=None):
+    # Check every requested destination before writing any client content.
+    for destination in (out, preview, evidence_json):
+        if destination: private_output(destination)
+    ext = Path(path).suffix.lower()
     unit = 'Slide' if ext == '.pptx' else ('Page' if ext == '.pdf' else 'Section')
     fn = {'.pptx': from_pptx, '.pdf': from_pdf, '.docx': from_docx}.get(ext)
-    if not fn:
-        sys.exit(f'unsupported file type {ext}. Use .pptx, .pdf or .docx.')
-
-    slides, notes, count, _ = fn(path)
-
-    # chart-recovery notes, derived from what the body actually contains
-    charted = [i for i, b in slides if any(x.startswith('[Chart') for x in b)]
-    tabled  = [i for i, b in slides if any(x.startswith('[Table') for x in b)]
-
-    lines = [f'DELIVERABLE TEXT (one block per {unit.lower()}, with numbers):', '']
+    if not fn: raise ValueError('Use .pptx, .pdf or .docx')
+    slides, notes, count, _ = fn(path, include_notes) if ext == '.pptx' else fn(path)
+    chosen = selected_pages(selection, count)
+    slides = [(i, body) for i, body in slides if i in chosen]
+    notes = [(i, msg) for i, msg in notes if i in chosen]
+    excluded = [i for i in range(1, count + 1) if i not in chosen]
+    lines = [f'DELIVERABLE TEXT (original {unit.lower()} numbers preserved):', '']
     for i, body in slides:
-        lines.append(f'**{unit} {i}**')
-        lines.extend(body if body else ['(no extractable text)'])
-        lines.append('')
-
+        lines += [f'**{unit} {i}**', *(body or ['(no extractable text)']), '']
     lines += ['## Extraction notes (not part of the deliverable)', '',
-              f'- Source: {os.path.basename(path)}, {count} {unit.lower()}s, read with '
-              f'deck-to-paste.py.']
-    if tabled:
-        lines.append(f'- {plural(unit, tabled)} {fmt(tabled)}: tables kept as extracted, with '
-                     'each value bound to its column label.')
-    if charted:
-        lines.append(f'- {plural(unit, charted)} {fmt(charted)}: chart values were read from '
-                     'the chart data and are bound to their categories.')
-    for i, msg in notes:
-        lines.append(f'- {unit} {i}: {msg}.')
-    if not notes:
-        lines.append('- No slide lost text in extraction.')
-    lines += ['',
-              '<!-- The wording above is load-bearing. The reviewer reads these notes to tell a',
-              '     figure whose comparator is genuinely missing from one whose comparator the',
-              '     extraction destroyed. Only lost TEXT suspends its comparator test. Do not',
-              '     reword these lines. -->']
-
+        f'- Source: {Path(path).name}, {count} {unit.lower()}s.',
+        f'- Included: {fmt(chosen)}.', f'- Excluded: {fmt(excluded) or "none"}. Do not diagnose absent evidence from excluded material.',
+        '- Original files are authoritative. Text is a working aid; inspect original pages before findings.',
+        '- Speaker notes: ' + ('included when present.' if include_notes else 'excluded.')]
+    lines += [f'- {unit} {i}: {msg}.' for i, msg in notes]
     text = '\n'.join(lines) + '\n'
-    # This tool extracts. It does NOT anonymise, and the extraction carries client names,
-    # figures and quotes verbatim. 12-real-deck-intake.md section C is the policy.
-    warn = [
-        '',
-        '  NOT ANONYMISED. This output carries the client name and its numbers verbatim.',
-        '  Before pasting it into any AI service: replace the client name throughout, and',
-        '  turn off model training on that service. Most consumer free tiers train on what',
-        '  you paste unless you say otherwise, and the deliverable belongs to the client.',
-        '',
-    ]
-    print(chr(10).join(warn), file=sys.stderr)
+    print('Local extraction only. Not anonymized: inspect names, logos, personal data and unpublished figures before any authorized sharing.', file=sys.stderr)
     if out:
-        open(out, 'w', encoding='utf-8', newline='\n').write(text)
-        print(f'wrote {out}  ({count} {unit.lower()}s, {len(tabled)} with tables, '
-              f'{len(charted)} with charts, {len(notes)} flagged)')
-    else:
-        sys.stdout.write(text)
+        private_output(out).write_text(text, encoding='utf-8')
+        print(f'Wrote selected content: {len(chosen)} of {count} {unit.lower()}s.')
+    else: sys.stdout.write(text)
+    if evidence_json:
+        evidence = {'source': str(Path(path).resolve()), 'sha256': hashlib.sha256(Path(path).read_bytes()).hexdigest(),
+            'pageCount': count, 'unit': unit.lower(), 'included': chosen, 'excluded': excluded,
+            'pages': [{'pdf_page': i, 'text': '\n'.join(body)} for i, body in slides],
+            'notes': [{'page': i, 'message': msg} for i, msg in notes]}
+        private_output(evidence_json).write_text(json.dumps(evidence, ensure_ascii=False, indent=2), encoding='utf-8')
+    if preview:
+        target = private_output(preview)
+        images = {}
+        if ext == '.pdf':
+            import fitz
+            with fitz.open(path) as doc:
+                for n in chosen:
+                    filename = private_output(target.parent / (target.stem + '-pages') / f'page-{n:04}.png')
+                    page = doc[n-1]
+                    page.get_pixmap(matrix=fitz.Matrix(1.2, 1.2), alpha=False).save(filename)
+                    images[n] = filename.relative_to(target.parent).as_posix()
+        blocks = []
+        for i, body in slides:
+            image = f'<img src="{html.escape(images[i], quote=True)}" alt="Original PDF page {i}">' if i in images else '<p>Inspect the original document for images and layout.</p>'
+            blocks.append(f'<section><h2>{unit} {i}</h2>{image}<pre>{html.escape(chr(10).join(body))}</pre></section>')
+        content = '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Local intake preview</title><style>body{font:16px system-ui;max-width:1000px;margin:30px auto;padding:20px;color:#14180f}img{max-width:100%;border:1px solid #ddd}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f8ec;padding:20px}section{border-top:2px solid #78b038;margin-top:30px}p{line-height:1.6}</style><h1>Selected content preview</h1><p>Review the original page alongside the exact selected text. No uploads. Not anonymized.</p>'
+        content += '<p>Included: ' + fmt(chosen) + '. Excluded: ' + (fmt(excluded) or 'none') + '.</p>'
+        content += ''.join(blocks) + '<h2>Exact paste payload</h2><pre>' + html.escape(text) + '</pre></html>'
+        target.write_text(content, encoding='utf-8')
+        print('Wrote local preview with original PDF page images where applicable.')
+
 
 def fmt(xs):
     return ', '.join(str(x) for x in xs)
@@ -257,5 +251,12 @@ if __name__ == '__main__':
                                              'into the reviewer, with extraction notes.')
     ap.add_argument('deck')
     ap.add_argument('-o', '--out', default=None)
+    ap.add_argument('--pages', default='all', help='Original page/slide numbers: all or 1-12,15,20-24')
+    ap.add_argument('--include-speaker-notes', action='store_true')
+    ap.add_argument('--preview', help='Ignored local HTML preview path')
+    ap.add_argument('--evidence-json', help='Ignored page-marked evidence JSON path')
     a = ap.parse_args()
-    run(a.deck, a.out)
+    try:
+        run(a.deck, a.out, a.pages, a.include_speaker_notes, a.preview, a.evidence_json)
+    except (ValueError, subprocess.CalledProcessError) as error:
+        ap.error(str(error))

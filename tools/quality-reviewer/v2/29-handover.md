@@ -1,7 +1,7 @@
 # The AI Quality Reviewer — handover
 
 > **Landed in the product tree 2026-09-20 by
-> [ticket 20](../../../.scratch/deliverable-reviewer/issues/20-apply-the-accumulated-edit-lists-to-the-product.md).**
+> ticket 20 (historical external working record).**
 > Written as `ticket-09/HANDOVER.md` and moved here because it is a deliverable, not a working
 > note. Paths below are relative to the repository root unless they are links.
 

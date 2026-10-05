@@ -1,7 +1,7 @@
 # 31. The cycle census
 
-Written down 2026-09-20 by [ticket 20](../../../.scratch/deliverable-reviewer/issues/20-apply-the-accumulated-edit-lists-to-the-product.md),
-from [ticket 10](../../../.scratch/deliverable-reviewer/issues/10-design-the-consultant-feedback-loop.md)
+Written down 2026-09-20 by ticket 20 (historical external working record),
+from ticket 10 (historical external working record)
 sections 3 and 5. It sits alongside [17-override-log.md](17-override-log.md), which specifies the
 per-triage record. That document is the numerator. **This one is the denominator.**
 

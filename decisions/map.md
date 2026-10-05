@@ -1,5 +1,10 @@
 # Map: the deliverable reviewer as a real tool
 
+> **Historical / superseded:** this 2026-09-18 map is retained as decision history. The
+> 2026-09-30 [project plan](../PROJECT-PLAN-2026-09-30.md) is the current source of truth.
+> For the current build, owner design approval and remaining release work, read
+> [CURRENT-MAP.md](../CURRENT-MAP.md), updated 2026-10-05 against GitHub issues #1–#5.
+
 Label: `wayfinder:map`
 Charted: 2026-09-18
 

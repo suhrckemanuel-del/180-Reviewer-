@@ -1,0 +1,146 @@
+{
+  "keys": {
+    "part1": "1006-NCEECNQ",
+    "part2": "43YVN-ZL"
+  },
+  "generatedAt": "2026-10-05T22:05:00.691Z",
+  "promptVersion": "candidate-2026-10-05-split",
+  "attemptGateAudience": "none",
+  "audiences": [
+    "student",
+    "lead"
+  ],
+  "audienceFiles": {
+    "student": [
+      "STUDENT-SETUP.txt",
+      "STUDENT-INPUT-TEMPLATE.txt",
+      "student-review.template.html"
+    ],
+    "lead": [
+      "LEAD-SETUP.txt",
+      "LEAD-INPUT-TEMPLATE.txt",
+      "lead-review.template.html"
+    ]
+  },
+  "sources": {
+    "04-prompt-templates.md": {
+      "bytes": 27260,
+      "sha256": "12192adada50a9fa58c9b4c1b366d5d0254824a993366527d26258ad7f695786"
+    },
+    "CHAT-CONTEXT.md": {
+      "bytes": 29193,
+      "sha256": "ecb41da372097ecb11ed2b9666905b85b0ff0010664003df37610b9a96759e42"
+    },
+    "HTML-PATH.md": {
+      "bytes": 3387,
+      "sha256": "85266fc0649e4939f7bf32bf9487b979981df3427f4bef885075345e262ef811"
+    },
+    "review-view.js": {
+      "bytes": 11966,
+      "sha256": "92236b2e48b184c28f045aa2c89717b6e78d2885258066dd40280b8860a3ab62"
+    },
+    "review-view.template.html": {
+      "bytes": 3090,
+      "sha256": "12f0047050a83a3f247be72dacd70621ae39cbd43b40cd06c572cc57f4587cc8"
+    },
+    "student-review.template.html": {
+      "bytes": 2609,
+      "sha256": "81bb7d3e66aa782f1473d6eb64674b742432f5f569683a3dd21d385db6cd3347"
+    },
+    "lead-review.template.html": {
+      "bytes": 3004,
+      "sha256": "f71598b1151d0419c9db2a545223c8cfa761b43ff30ca44cfa969f5986fb1901"
+    },
+    "review-view.css": {
+      "bytes": 11281,
+      "sha256": "5f90ee177feae1adf0810f76d7377f6e907a694cabc1b7cec33978f05382fc00"
+    },
+    "review-view.client.js": {
+      "bytes": 12656,
+      "sha256": "d61173abee03dbb5f89858da45032e6b1fedc337459f2d9192d2e75cd7d5608d"
+    },
+    "STUDENT-PATH.md": {
+      "bytes": 894,
+      "sha256": "d02b89bf5901a50bfaa7dadbbffebc688a49d3c3bc62de295cb96539ff267e7f"
+    },
+    "LEAD-PATH.md": {
+      "bytes": 1064,
+      "sha256": "adab2786a45d8340e95b2fb805aea48f96794961046b5e9878c4b06f0aa473cd"
+    },
+    "START-HERE.md": {
+      "bytes": 3906,
+      "sha256": "497dd6f54829d7c910cd895f4070253f966dff43ad0f5200ed1c1eaf6971e3c0"
+    },
+    "deck-to-paste.py": {
+      "bytes": 14270,
+      "sha256": "f88e95b01d81f72261a756ee2bbc3fc81d10bb6d0cbf8daee52e91fd606bde45"
+    }
+  },
+  "files": {
+    "START-HERE.md": {
+      "bytes": 3912,
+      "chars": 3912,
+      "sha256": "977da39bb44cf96a06faaf77bd99743989df9472f85e2fecfd50b7bde5d6c4f0"
+    },
+    "STUDENT-SETUP.txt": {
+      "bytes": 48321,
+      "chars": 48319,
+      "sha256": "72c1d118619addd9dfed826eb90f08452983030c9b609de63b151595fca1522b"
+    },
+    "STUDENT-INPUT-TEMPLATE.txt": {
+      "bytes": 1326,
+      "chars": 1326,
+      "sha256": "8c7bd21172fefe144d5299b74c8f3516d11fd95d2a244b859c96497ea75d8903"
+    },
+    "student-review.template.html": {
+      "bytes": 2609,
+      "chars": 2606,
+      "sha256": "81bb7d3e66aa782f1473d6eb64674b742432f5f569683a3dd21d385db6cd3347"
+    },
+    "LEAD-SETUP.txt": {
+      "bytes": 47144,
+      "chars": 47138,
+      "sha256": "75b5317b0e08117ee6e12eff50db62948ee11c6fb21cc9e91df908a88d4921ee"
+    },
+    "LEAD-INPUT-TEMPLATE.txt": {
+      "bytes": 1199,
+      "chars": 1199,
+      "sha256": "9582c5bcbcd68d02d9d5186b60b264d8e846649fc019ef567a9990aa799f2729"
+    },
+    "lead-review.template.html": {
+      "bytes": 3004,
+      "chars": 3001,
+      "sha256": "f71598b1151d0419c9db2a545223c8cfa761b43ff30ca44cfa969f5986fb1901"
+    },
+    "review-view.js": {
+      "bytes": 11966,
+      "chars": 11958,
+      "sha256": "92236b2e48b184c28f045aa2c89717b6e78d2885258066dd40280b8860a3ab62"
+    },
+    "review-view.css": {
+      "bytes": 11281,
+      "chars": 11281,
+      "sha256": "5f90ee177feae1adf0810f76d7377f6e907a694cabc1b7cec33978f05382fc00"
+    },
+    "review-view.client.js": {
+      "bytes": 12656,
+      "chars": 12654,
+      "sha256": "d61173abee03dbb5f89858da45032e6b1fedc337459f2d9192d2e75cd7d5608d"
+    },
+    "deck-to-paste.py": {
+      "bytes": 14270,
+      "chars": 14270,
+      "sha256": "f88e95b01d81f72261a756ee2bbc3fc81d10bb6d0cbf8daee52e91fd606bde45"
+    },
+    "HTML-PATH.md": {
+      "bytes": 3387,
+      "chars": 3387,
+      "sha256": "85266fc0649e4939f7bf32bf9487b979981df3427f4bef885075345e262ef811"
+    },
+    "COVER-SHEET.md": {
+      "bytes": 3912,
+      "chars": 3912,
+      "sha256": "977da39bb44cf96a06faaf77bd99743989df9472f85e2fecfd50b7bde5d6c4f0"
+    }
+  }
+}

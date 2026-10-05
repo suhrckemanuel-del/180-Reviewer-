@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src blob: data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>180 Reviewer · Lead review desk</title>
+<style>/* VIEW_CSS */</style>
+</head>
+<body data-audience="lead">
+<a class="skip" href="#review">Skip to review</a>
+<header class="masthead"><div class="brand"><span class="brand-mark" aria-hidden="true">180°</span> REVIEWER</div><span class="local-label">PRIVATE · LOCAL FILE</span></header>
+<p id="provenance" class="provenance"></p>
+<div class="workspace">
+<aside class="sidebar" aria-label="Review tools">
+  <p class="eyebrow">Review desk</p>
+<p class="audience-label">Lead / review</p>
+  <p class="muted">Verify evidence. Record decisions and reasons.</p>
+  <details class="sidebar-group" open><summary>Contents</summary><nav id="section-nav" aria-label="Review sections"></nav></details>
+  <details class="sidebar-group" open><summary>Files &amp; tools</summary><div class="tools"><button id="print">Print review</button><button id="download-review">Save source review</button><button id="save-notes">Export lead record</button><label class="file-button">Restore lead record<input id="restore-notes" type="file" accept=".json,application/json"></label><label class="file-button">Attach source PDF<input id="source-pdf" type="file" accept=".pdf,application/pdf"></label><button id="theme" aria-pressed="false">Dark appearance</button></div></details>
+  <section id="lead-summary"><p class="eyebrow">Lead record</p><h2>Human decisions</h2><p id="unresolved" role="status"></p><label>Lead name<input id="lead-name" type="text" autocomplete="off"></label><label>Overall note<textarea id="lead-note" rows="3" placeholder="What should the team keep, clarify or leave out?"></textarea></label><p class="muted">These are your judgments. The reviewer does not approve client work.</p></section>
+  <p class="muted privacy">Nothing is uploaded or automatically saved. Save your notes before closing.</p>
+  <p id="status" role="status" aria-live="polite"></p>
+</aside>
+<main id="review" tabindex="-1">
+  <div class="document-heading"><p class="eyebrow">Deliverable feedback</p><h1 id="review-title"></h1><p id="review-meta" class="muted"></p></div>
+  <details class="source-strip"><summary>Evidence in the original <span id="source-count"></span></summary><p class="muted">Attach the original PDF to open its pages. Underlined numbers are cited by a finding; they are not page ratings.</p><div id="page-nav" class="page-nav"></div></details>
+  <div id="review-content"></div>
+
+  <footer><p id="integrity"></p><p>A named human signs off before client use.</p></footer>
+</main>
+</div>
+<script id="review-data" type="application/json">"VIEW_DATA"</script>
+<script>/* VIEW_CLIENT */</script>
+</body></html>

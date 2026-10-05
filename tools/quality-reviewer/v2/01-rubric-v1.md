@@ -259,7 +259,7 @@ as an assumption. An unsourced headline number reads as invented." **Bad feedbac
 provided in the material. The reviewer flags that a source is missing, it does not
 adjudicate facts it cannot see.
 
-### Dimension 5. Analysis and insight [Failure taxonomy C (S6, verified), jagged frontier (S4, verified)]
+### Dimension 5. Analysis and insight [Failure taxonomy C (S6, verified)]
 
 **Definition.** Whether the deliverable interprets its evidence and draws implications,
 rather than only describing what is known.

@@ -1,0 +1,23 @@
+NO ATTEMPT GATE. Review the complete deliverable immediately when the required inputs are present. A pre-review read is optional and only for learning measurement.
+
+AUDIENCE: student
+MODE: deep
+CLIENT TYPE (anonymized): e.g. small environmental non-profit, call it Client A
+ARTIFACT TYPE: kickoff problem frame | research plan | interview guide | synthesis memo | draft deck | final recommendation deck | implementation roadmap
+CLIENT QUESTION: the one decision the client needs help with
+INTENDED AUDIENCE: e.g. the client's board, the executive director
+PROJECT STAGE: early | mid | final
+DRAFT MATURITY: rough | working draft | near final
+SPECIFIC FEEDBACK REQUESTED: what the team most wants checked
+KNOWN CONSTRAINTS: budget, staff, timeline, capacity that recommendations must fit
+WHAT THE TEAM IS UNSURE ABOUT: their own open questions
+EVIDENCE AND SOURCE NOTES: where key numbers and claims come from
+RECOMMENDATIONS (if any): the current recommendation in one or two lines
+IMPLEMENTATION PLAN (if any): the current plan in one or two lines
+
+DELIVERABLE TEXT (one block per slide or section, with numbers):
+<paste here>
+
+PRE-REVIEW READ (optional; only for a learning measurement):
+<before seeing feedback, what you think the weakest part is and why. Leave blank for
+ordinary use. The review runs in full either way.>
