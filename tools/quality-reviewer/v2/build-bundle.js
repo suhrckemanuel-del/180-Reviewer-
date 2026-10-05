@@ -23,43 +23,35 @@ const V = __dirname;
 const REL = path.join(V, 'releases');
 
 /* ===================================================================== SWITCHES
- * THE AUDIENCE SWITCH. This is the one place the attempt gate's audience is set.
- *
- * 'students'  -- students type a read before the review; team leads go straight through.
- *                This is the default and it is the chapter's ruling of 2026-09-20.
- * 'everyone'  -- nobody is exempt.
- *
- * Flipping this is a one-line edit followed by --release. Both copies of the gate (the
- * system prompt and the team input template) are generated from it, so they cannot
- * disagree. It is NOT a free switch: ticket 21's "refused 16 of 16" was measured on an
- * unconditional gate, and the branched gate had to be re-measured separately. A flip is
- * a different prompt again and needs its own run before it ships. See 29-handover.md 5.5.
+ * Ordinary use reviews immediately. An unaided pre-review read is optional and belongs
+ * only to learning measurement. The token is retained in the manifest/register so older
+ * releases and records remain interpretable.
  */
-const ATTEMPT_GATE_AUDIENCE = 'students';
+const ATTEMPT_GATE_AUDIENCE = 'none';
 
-/* The Google Drive folder the refusal message points a student at. One fixed folder,
- * "anyone with the link -- viewer", and the link must never change: it is baked into
- * bundles already in people's hands. Set it once, here. --release refuses while it is
- * null, because a release that cannot tell a student where to get a fresh copy is a dead
- * end at the one moment the tool has already failed them. */
-const DRIVE_FOLDER_URL = null;
+/* Stable consultant entry point. Access for intended consultants must be checked before
+ * distribution; generating a local bundle does not publish or validate that access. */
+const DISTRIBUTION_URL = 'https://github.com/suhrckemanuel-del/180-Reviewer-';
 
 /* The prompt version these sources are. The single source of truth: --check asserts that
  * paste 2's record stamp and every generated artifact agree with it. */
-const PROMPT_VERSION = 'frozen-2026-09-19';
+const PROMPT_VERSION = 'candidate-2026-10-05-split';
 /* ============================================================================ */
 
 const GATE_AUDIENCE = {
+  none:
+    'NO ATTEMPT GATE. Review the complete deliverable immediately when the required ' +
+    'inputs are present. A pre-review read is optional and only for learning measurement.',
   students:
     'WHO IT APPLIES TO: MODE short and MODE deep. It does NOT apply to MODE lead.\n' +
-    'Set by ATTEMPT_GATE_AUDIENCE in build-bundle.js. Default: students.',
+    'Set by ATTEMPT_GATE_AUDIENCE in build-bundle.js.',
   everyone:
     'WHO IT APPLIES TO: every mode, including MODE lead. Nobody is exempt.\n' +
-    'Set by ATTEMPT_GATE_AUDIENCE in build-bundle.js. Default: students.',
+    'Set by ATTEMPT_GATE_AUDIENCE in build-bundle.js.',
 };
 
 const TEST_KEYS = { k1: '0000-TESTKIT', k2: 'TESTKIT-00' };
-const TEST_DRIVE = '(test build -- no Drive folder; see 30-publishing.md)';
+const TEST_DRIVE = DISTRIBUTION_URL + ' (local candidate; consultant access not yet verified)';
 
 // ---- sources ---------------------------------------------------------------
 
@@ -94,12 +86,13 @@ function sources() {
 
 function fill(text, keys, drive) {
   const audience = GATE_AUDIENCE[ATTEMPT_GATE_AUDIENCE];
-  if (!audience) throw new Error('ATTEMPT_GATE_AUDIENCE must be students or everyone');
+  if (!audience) throw new Error('ATTEMPT_GATE_AUDIENCE must be none, students or everyone');
   const out = text
+    .split('<<PROMPT_VERSION>>').join(PROMPT_VERSION)
     .split('<<GATE_AUDIENCE>>').join(audience)
     .split('<<BUNDLE_KEY_1>>').join(keys.k1)
     .split('<<BUNDLE_KEY_2>>').join(keys.k2)
-    .split('<<DRIVE_FOLDER_URL>>').join(drive);
+    .split('<<DISTRIBUTION_URL>>').join(drive);
   const left = out.match(/<<[A-Z_]+>>/g);
   if (left) throw new Error('unsubstituted placeholders: ' + [...new Set(left)].join(', '));
   return out;
@@ -135,9 +128,10 @@ function coverSheet(keys, drive) {
 '\n' +
 '## 1. What to do\n' +
 '\n' +
-'Paste **REVIEWER-SETUP.txt** into a new chat as one message. Then paste your deliverable.\n' +
-'Then type your own read of it: what you think its weakest part is, in your own words. Two\n' +
-'or three sentences is enough, and nothing is grading it.\n' +
+'Paste **REVIEWER-SETUP.txt** into a new chat as one message. Then fill **TEAM-INPUT-TEMPLATE.txt**\n' +
+'and attach your selected original deliverable through an authorized route.\n' +
+'Then read the complete review. A pre-review read is optional and only needed when someone\n' +
+'is measuring learning.\n' +
 '\n' +
 '## 2. Check the first line of what comes back\n' +
 '\n' +
@@ -164,12 +158,14 @@ drive + '\n' +
 
 function manifest(src, files, keys) {
   const sha = s => crypto.createHash('sha256').update(s, 'utf8').digest('hex');
-  const srcFiles = ['04-prompt-templates.md', 'CHAT-CONTEXT.md'];
+  const srcFiles = ['04-prompt-templates.md', 'CHAT-CONTEXT.md', 'HTML-PATH.md', 'review-view.js', 'review-view.template.html', 'student-review.template.html', 'lead-review.template.html', 'review-view.css', 'review-view.client.js', 'STUDENT-PATH.md', 'LEAD-PATH.md', 'START-HERE.md', 'deck-to-paste.py'];
   const m = {
     keys: { part1: keys.k1, part2: keys.k2 },
     generatedAt: new Date().toISOString(),
     promptVersion: PROMPT_VERSION,
     attemptGateAudience: ATTEMPT_GATE_AUDIENCE,
+    audiences: ['student', 'lead'],
+    audienceFiles: {student: ['STUDENT-SETUP.txt','STUDENT-INPUT-TEMPLATE.txt','student-review.template.html'], lead: ['LEAD-SETUP.txt','LEAD-INPUT-TEMPLATE.txt','lead-review.template.html']},
     sources: {},
     files: {},
   };
@@ -186,12 +182,49 @@ function manifest(src, files, keys) {
 
 function buildRelease(keys, drive) {
   const src = sources();
-  const files = {
-    'REVIEWER-SETUP.txt': setupFile(src, keys, drive),
-    'TEAM-INPUT-TEMPLATE.txt': teamInput(src, keys, drive),
-    'COVER-SHEET.md': coverSheet(keys, drive),
-  };
+  const files = audienceFiles(src, keys, drive);
+  files['COVER-SHEET.md'] = files['START-HERE.md'];
   files['MANIFEST.json'] = JSON.stringify(manifest(src, files, keys), null, 2) + '\n';
+  return files;
+}
+
+
+function audienceSetup(src, keys, drive, audience) {
+  // Methodology is shared. Remove audience-specific dialogue/admin from the shared context.
+  let context = src.p2.slice(src.p2.indexOf('## 0.'));
+  const coaching = context.indexOf('AFTER THE FULL REVIEW (');
+  const record = context.indexOf('=== PASTE-BACK RECORD ===');
+  const remainder = context.indexOf('## ', record);
+  if (coaching < 0 || record < 0 || remainder < 0) throw new Error('Audience context boundaries missing');
+  context = context.slice(0, audience === 'student' ? record : coaching) + context.slice(remainder);
+  if (audience === 'lead') {
+    context = context.replace('Aim for 80-110 words of commentary per finding', 'Aim for 40-70 words of commentary per finding');
+    const start = context.indexOf('   Question: <');
+    const end = context.indexOf('\n\n2. <', start);
+    if (start < 0 || end < 0) throw new Error('Question boundary missing');
+    context = context.slice(0,start) + '   Question: <the unresolved decision or evidence the lead should verify. No student exercise.>' + context.slice(end);
+  }
+  const contract = read(audience.toUpperCase() + '-PATH.md');
+  return fill([
+    audience.toUpperCase() + ' SETUP -- paste this entire file into a fresh chat.',
+    'Generated from shared methodology and an audience contract. Version ' + PROMPT_VERSION + '.',
+    contract, src.p1, context,
+    '===== AUDIENCE CONTRACT: applies to this path and takes precedence over generic mode examples =====', contract,
+  ].join('\n\n'), keys, drive);
+}
+function audienceInput(src, keys, drive, audience) {
+  let input = src.p3.replace('MODE: short | deep | lead', 'AUDIENCE: ' + audience + '\nMODE: ' + (audience === 'lead' ? 'lead' : 'deep'));
+  if (audience === 'lead') input = input.slice(0, input.indexOf('PRE-REVIEW READ')) + 'UNRESOLVED DECISIONS: what needs a human decision or additional evidence\n';
+  return fill(input, keys, drive);
+}
+function audienceFiles(src, keys, drive) {
+  const files = {'START-HERE.md': fill(read('START-HERE.md'), keys, drive)};
+  for (const audience of ['student', 'lead']) {
+    files[audience.toUpperCase() + '-SETUP.txt'] = audienceSetup(src, keys, drive, audience);
+    files[audience.toUpperCase() + '-INPUT-TEMPLATE.txt'] = audienceInput(src, keys, drive, audience);
+    files[audience + '-review.template.html'] = read(audience + '-review.template.html');
+  }
+  for (const file of ['review-view.js','review-view.css','review-view.client.js','deck-to-paste.py','HTML-PATH.md']) files[file] = read(file);
   return files;
 }
 
@@ -259,22 +292,12 @@ function releaseDirs() {
 // ---- commands --------------------------------------------------------------
 
 function cmdRelease(note) {
-  if (!DRIVE_FOLDER_URL) {
-    console.error('REFUSED: DRIVE_FOLDER_URL is not set in build-bundle.js.\n' +
-      '\n' +
-      'The refusal the reviewer shows a student whose paste was cut names this folder and\n' +
-      'tells them to paste again. A release without it hands a student a dead end at the\n' +
-      'one moment the tool has already failed them. Create the folder (one fixed folder,\n' +
-      '"anyone with the link -- viewer"), set the constant, and rerun. The link must never\n' +
-      'change afterwards: it is baked into every bundle issued. 30-publishing.md section 3.');
-    return 1;
-  }
   const keys = mintKeys();
   if (releaseDirs().indexOf(keys.k1) !== -1 || registerKeys().some(function (k) { return k.k1 === keys.k1; })) {
     console.error('REFUSED: key ' + keys.k1 + ' already exists. Rerun to mint another.');
     return 1;
   }
-  const files = buildRelease(keys, DRIVE_FOLDER_URL);
+  const files = buildRelease(keys, DISTRIBUTION_URL);
   const dir = path.join(REL, keys.k1);
   fs.mkdirSync(dir, { recursive: true });
   Object.keys(files).forEach(function (name) { fs.writeFileSync(path.join(dir, name), files[name], 'utf8'); });
@@ -283,18 +306,24 @@ function cmdRelease(note) {
   Object.keys(files).forEach(function (name) {
     console.log('  ' + name + '  ' + files[name].length + ' chars');
   });
-  console.log('\nNot published yet. 30-publishing.md sections 2 to 4. The publish is not finished\n' +
-    'until --verify-drive prints IDENTICAL.');
+  console.log('\nGenerated locally, not published. Verify consultant access and delivery before distribution.');
   return 0;
 }
 
 function testKitFiles() {
   const src = sources();
-  return {
+  const out = {
     'TEST-KIT/PASTE-1-system-prompt.txt': fill(src.p1, TEST_KEYS, TEST_DRIVE),
     'TEST-KIT/PASTE-2A-chat-path.md': fill(src.p2, TEST_KEYS, TEST_DRIVE),
     'TEST-KIT/PASTE-3-team-input-template.txt': fill(src.p3, TEST_KEYS, TEST_DRIVE),
+    'TEST-KIT/PASTE-2C-artifact-path.md': read('HTML-PATH.md'),
+    'TEST-KIT/REVIEWER-SETUP.txt': setupFile(src, TEST_KEYS, TEST_DRIVE),
+    'TEST-KIT/TEAM-INPUT-TEMPLATE.txt': teamInput(src, TEST_KEYS, TEST_DRIVE),
+    'TEST-KIT/COVER-SHEET.md': coverSheet(TEST_KEYS, TEST_DRIVE),
   };
+  const split = audienceFiles(src, TEST_KEYS, TEST_DRIVE);
+  for (const [name, body] of Object.entries(split)) out['TEST-KIT/' + name] = body;
+  return out;
 }
 
 function cmdSyncTestKit() {
@@ -331,20 +360,27 @@ function cmdCheck() {
       PROMPT_VERSION + '". Every record a pilot produced would name the wrong prompt.');
   }
 
-  // 4. every release agrees with the register, with itself, and with its sources
+  // 4. immutable historical releases agree with their register and recorded file hashes.
   const rk = registerKeys();
-  const curSha = crypto.createHash('sha256').update(read('CHAT-CONTEXT.md'), 'utf8').digest('hex');
   releaseDirs().forEach(function (dir) {
     const d = path.join(REL, dir);
     let man;
     try { man = JSON.parse(fs.readFileSync(path.join(d, 'MANIFEST.json'), 'utf8')); }
     catch (e) { fail.push(dir + ': unreadable MANIFEST.json'); return; }
+    if (!man.keys || typeof man.keys.part1 !== 'string' || typeof man.keys.part2 !== 'string' || !man.files) {
+      fail.push(dir + ': incomplete manifest'); return;
+    }
     const keys = { k1: man.keys.part1, k2: man.keys.part2 };
+    if (keys.k1 !== dir) fail.push(dir + ': folder differs from manifest key');
+    const requiredFiles = man.audiences ? ['STUDENT-SETUP.txt','LEAD-SETUP.txt','STUDENT-INPUT-TEMPLATE.txt','LEAD-INPUT-TEMPLATE.txt','START-HERE.md'] : ['REVIEWER-SETUP.txt', 'TEAM-INPUT-TEMPLATE.txt', 'COVER-SHEET.md'];
+    for (const required of requiredFiles) {
+      if (!man.files[required]?.sha256) fail.push(dir + ': manifest omits required file ' + required);
+    }
     const hits = rk.filter(function (k) { return k.k1 === keys.k1; });
     if (hits.length === 0) fail.push(dir + ': key not in REGISTER.md');
     if (hits.length > 1) fail.push(dir + ': key appears ' + hits.length + ' times in REGISTER.md');
     const coverP = path.join(d, 'COVER-SHEET.md');
-    const setupP = path.join(d, 'REVIEWER-SETUP.txt');
+    const setupP = path.join(d, man.audiences ? 'STUDENT-SETUP.txt' : 'REVIEWER-SETUP.txt');
     const cover = fs.existsSync(coverP) ? fs.readFileSync(coverP, 'utf8') : '';
     const setup = fs.existsSync(setupP) ? fs.readFileSync(setupP, 'utf8') : '';
     if (cover.indexOf(keys.k1 + '/' + keys.k2) === -1) {
@@ -354,10 +390,17 @@ function cmdCheck() {
         setup.indexOf('BUNDLE KEY (part 2): ' + keys.k2) === -1) {
       fail.push(dir + ': REVIEWER-SETUP.txt does not embed the key pair the cover sheet prints');
     }
-    if (man.sources && man.sources['CHAT-CONTEXT.md'] && man.sources['CHAT-CONTEXT.md'].sha256 !== curSha) {
-      fail.push(dir + ': the sources have changed since this release was cut. Cut a new ' +
-        'release; never change a bundle under a key already in circulation.');
+    if (hits.length === 1 && hits[0].k2 !== keys.k2) fail.push(dir + ': register key pair differs');
+    for (const [name, metadata] of Object.entries(man.files || {})) {
+      if (path.basename(name) !== name || !/^[a-f0-9]{64}$/.test(metadata?.sha256 || '')) {
+        fail.push(dir + ': invalid manifest file entry'); continue;
+      }
+      const file = path.join(d, name);
+      if (!fs.existsSync(file) || crypto.createHash('sha256').update(lf(fs.readFileSync(file, 'utf8'))).digest('hex') !== metadata.sha256) {
+        fail.push(dir + ': immutable release file hash mismatch: ' + name);
+      }
     }
+
   });
 
   if (fail.length) {
@@ -371,7 +414,7 @@ function cmdCheck() {
 }
 
 function cmdVerifyDrive(file, key) {
-  const p = path.join(REL, String(key), 'REVIEWER-SETUP.txt');
+  const p = path.join(REL, String(key), path.basename(file).startsWith('LEAD-') ? 'LEAD-SETUP.txt' : path.basename(file).startsWith('STUDENT-') ? 'STUDENT-SETUP.txt' : 'REVIEWER-SETUP.txt');
   if (!fs.existsSync(p)) { console.error('no such release: ' + key); return 1; }
   const want = fs.readFileSync(p, 'utf8');
   const got = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
@@ -384,8 +427,8 @@ function cmdVerifyDrive(file, key) {
   const show = function (s) { return JSON.stringify(s.slice(Math.max(0, i - 40), i + 40)); };
   console.error('DIFFERENT at character ' + i + ' (line ' + line + ')');
   console.error('  generated: ' + show(want));
-  console.error('  drive doc: ' + show(got));
-  console.error('\nRe-paste the Doc from releases/' + key + '/REVIEWER-SETUP.txt. Never edit the Doc.');
+  console.error('  downloaded copy: ' + show(got));
+  console.error('\nObtain a fresh copy from releases/' + key + '/REVIEWER-SETUP.txt. Never edit a versioned bundle.');
   return 1;
 }
 
@@ -396,7 +439,7 @@ function usage() {
     '  --release [--note "<what changed>"]   mint a key pair and write a release',
     '  --check                               fail on any drift (joins check-docs.js)',
     '  --sync-test-kit                       regenerate the TEST-KIT pastes',
-    '  --verify-drive <file> --release <key> diff a Drive copy-out against a release',
+    '  --verify-copy <file> --release <key> compare a downloaded setup with a release',
     '',
     'Sources are hand-edited: 04-prompt-templates.md sections A and B, CHAT-CONTEXT.md.',
     'Everything under releases/ and TEST-KIT/PASTE-* is generated. Fix a source and',
@@ -411,7 +454,7 @@ function main(argv) {
   const val = function (f) { const i = a.indexOf(f); return i === -1 ? null : a[i + 1]; };
   if (has('--check')) return cmdCheck();
   if (has('--sync-test-kit')) return cmdSyncTestKit();
-  if (has('--verify-drive')) return cmdVerifyDrive(val('--verify-drive'), val('--release'));
+  if (has('--verify-copy') || has('--verify-drive')) return cmdVerifyDrive(val('--verify-copy') || val('--verify-drive'), val('--release'));
   if (has('--release')) return cmdRelease(val('--note'));
   return usage();
 }

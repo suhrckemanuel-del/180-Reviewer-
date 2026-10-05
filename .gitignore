@@ -1,6 +1,7 @@
 # Client-confidential material never goes in this repo.
 # Real deliverables, decks and extracted text live outside it. Anonymize before committing any example.
 _client-private/
+validation/issue-*/
 *client*.pdf
 *client*.pptx
 

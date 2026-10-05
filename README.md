@@ -1,5 +1,9 @@
 # The 180DC Deliverable Reviewer
 
+> **Current scope and issue plan:** see [PROJECT-PLAN-2026-09-30.md](PROJECT-PLAN-2026-09-30.md).
+> It supersedes the historical decision map and prior realignment as the working plan.
+> **Current progress and split-design acceptance:** [CURRENT-MAP.md](CURRENT-MAP.md).
+
 A reviewer that makes a consultant think harder about their own work. **It does not write the work,
 and it does not grade it.**
 
@@ -26,41 +30,32 @@ long version and the evidence behind each choice.
 
 ## What it actually is
 
-There is no app, no login and no website. It is **a prompt, a context pack and your deliverable**,
-pasted into whatever chat model you already have.
+The review itself runs in a chat model. The intended student flow is to receive the complete
+review first, then use the same chat as a plain-language coach to reason through what a finding
+means and how they might address it with evidence. An unaided first read is optional in normal
+use and is collected before feedback only when measuring learning. An optional HTML view is
+implemented locally under issue #3 as a faithful rendering of the same review; coaching continues in chat.
+The old hosted review desk is not the current release path.
 
-**As a consultant:**
+**Start supervised testing:** [Start here](tools/quality-reviewer/v2/releases/1006-NCEECNQ/START-HERE.md).
+The [candidate PR](https://github.com/suhrckemanuel-del/180-Reviewer-/pull/6) is open for owner review.
+Choose STUDENT-SETUP.txt / STUDENT-INPUT-TEMPLATE.txt for complete feedback and optional
+same-chat reasoning, or LEAD-SETUP.txt / LEAD-INPUT-TEMPLATE.txt for concise evidence checks
+and human keep/ask/cut decisions. Optional HTML uses student-review.html or lead-review.html
+with separate templates, local notes and exports. The candidate remains subject to owner review.
 
-> **No release has been cut yet.** `build-bundle.js --release` refuses until a distribution URL is
-> set, and that decision — a GitHub link rather than a Google Drive folder — was only taken on
-> 2026-09-24 and is not built. Until it is, the usable copies live in
-> [`tools/quality-reviewer/v2/TEST-KIT/`](tools/quality-reviewer/v2/TEST-KIT/) and carry test keys
-> rather than release keys. The steps below are the real ones; only the folder changes.
-
-1. Open `release/` and take the three files.
-2. Read `COVER-SHEET.md`. One page.
-3. Open a new chat. Paste **`REVIEWER-SETUP.txt` as one message**.
-4. Fill in `TEAM-INPUT-TEMPLATE.txt` — the client question, the audience, your constraints, your
-   sources, then your deck as text — and paste it.
-5. **Type your own read first**: what you think the weakest part is, two or three sentences.
-   *The reviewer refuses to review until you do.* That is deliberate — see
-   [VISION.md](VISION.md#attempt-first).
-6. **Check the first line reads exactly `KEYS: <part1>/<part2>`**, against the cover sheet. If it
-   does not, your chat silently dropped part of the paste. Start a new chat and paste again.
-7. Read the findings. Every one carries a verbatim quote from your own work and where it is. **If
-   you cannot find a quote in your own deck, that finding is wrong — drop it.** Nothing is checking
-   this but you.
-
-**As a team lead:** the same, with `MODE: lead` — denser, no typed attempt required, no coaching.
+The old approved checkpoint is historical and does not approve this split. Software checks
+use an existing private saved review with labelled provenance; no new prompt-performance,
+learning-gain, account-capacity or pilot-acceptance claim follows. Consultant access and
+human workflow checks remain. A named human signs off before client use.
 
 ## What it deliberately will not do
 
 | It will not | Because |
 |---|---|
 | Give a grade, score or readiness level | The same deliverable was given **two different levels on byte-identical input**. That half is not produced at all. |
-| Write your slide, your title or your wording | If the sentence arrives finished, no thinking happened. Tested three ways over 26 runs; see [decisions/parked-features.md](decisions/parked-features.md). |
 | Approve anything | A named human signs off on client work. That rule does not move. |
-| Review before you have tried | The generation effect. You learn from the gap between your read and its read, and there is no gap if you never read it. |
+| Require a solo first read in routine use | It is a learning-measurement step, not an access gate. |
 
 ## How it gets better
 
@@ -84,9 +79,9 @@ decision 4.
 
 | | |
 |---|---|
-| `release/` | What a consultant copies, once a release is cut. **Generated — never edit by hand.** Does not exist yet. |
-| [`tools/quality-reviewer/v2/TEST-KIT/`](tools/quality-reviewer/v2/TEST-KIT/) | The same three files with test keys. What to use today. |
-| [`tools/quality-reviewer/v2/`](tools/quality-reviewer/v2/) | The system. `04-prompt-templates.md` and `CHAT-CONTEXT.md` are the only two files that ship; `build-bundle.js` generates the release from them. |
+| `tools/quality-reviewer/v2/releases/` | Immutable versioned consultant bundles, once generated. Generation alone does not publish or approve a pilot. |
+| [`tools/quality-reviewer/v2/TEST-KIT/`](tools/quality-reviewer/v2/TEST-KIT/) | Generated student/lead starting files and Start here guide with test keys. |
+| [`tools/quality-reviewer/v2/`](tools/quality-reviewer/v2/) | Prompt/context sources, bundle generator, local intake and deterministic review view. |
 | [`tools/quality-reviewer/v2/01-rubric-v1.md`](tools/quality-reviewer/v2/01-rubric-v1.md) | The ten dimensions, with anchors, sub-checks and worked good/bad feedback. |
 | [`tools/quality-reviewer/v2/10-source-register.md`](tools/quality-reviewer/v2/10-source-register.md) | Every claim the rubric rests on, with its limitation and which dimension it grounds. |
 | [`research/`](research/) | The evidence base: deliverable quality, student failure modes, professional-services QA, training and transfer, plus a McKinsey reading base. |
@@ -105,27 +100,34 @@ undetected, which is why it is generated rather than copied.
 
 ## Honest status
 
-**Works and is measured:** quote-or-abstain held across 55 quotes on two model families with zero
-fabrications, even with the system prompt entirely absent. The attempt gate refuses and cannot be
-argued past. The bundle-key interlock catches a silently truncated paste.
+**Historical measurements:** quote-or-abstain held across 55 quotes on two model families in
+older tests. Those results do not validate the current candidate. The former attempt gate is
+removed from ordinary use. The bundle-key interlock also has a recorded false alarm.
 
 **Known broken or unmeasured, and carried deliberately:**
 
-- **No release exists.** The one hard blocker, and it is a decision about where consultants get the
-  files, not a bug.
+- **No accepted consultant release exists.** Registered split candidate `1006-NCEECNQ` is
+  prepared for PR review and supervised testing. Generation and publication do not establish
+  owner approval, learning gains or pilot acceptance.
 
-- The prompt tells the model to score the ten dimensions "as binary sub-checks" and **never supplies
-  the sub-checks** — so it invents them each run. The real ones are in `01-rubric-v1.md` and do not
-  fit the token budget yet.
-- **The free-tier ceiling has never been measured.** The bundle is ~12,000 tokens and nobody knows
-  where the cliff is.
+- Candidate 2e removes unsupported binary sub-check scoring and uses the ten dimensions
+  qualitatively. Three actual-PDF local reviews and cross-agent AI audits are complete. They found
+  severity inflation and missed decision questions; no human lead adjudication or case-author
+  learning observation was collected. The candidate remains NO-GO. Historical synthetic runs do not
+  count.
+- The historical attempt gate is absent from current ordinary use. Its older measurements do
+  not validate the revised full-review-first flow.
+- **Account capacity has not been measured.** No current token, free-tier or paste-limit claim
+  is made. The actual consultant account must be tested.
 - **The path that ships has never been scored.** Every measurement on record ran a different path.
 - The bundle-key interlock **false-alarmed once on a complete bundle** — see
   [decisions/issues/29-the-interlock-false-alarmed-on-a-complete-bundle.md](decisions/issues/29-the-interlock-false-alarmed-on-a-complete-bundle.md).
 - The tool behaves **measurably differently on different model families**, and a consultant brings
   their own.
 
-The full list is in [decisions/AUDIT-2026-09-24.md](decisions/AUDIT-2026-09-24.md).
+The historical audit is in [decisions/AUDIT-2026-09-24.md](decisions/AUDIT-2026-09-24.md).
+Current implementation status and checks are in
+[validation/SPLIT-EXPERIENCES-2026-10-06.md](validation/SPLIT-EXPERIENCES-2026-10-06.md).
 
 ---
 

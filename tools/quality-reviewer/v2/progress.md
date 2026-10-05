@@ -192,7 +192,7 @@ Done this session:
   died. 3 of 181 triage rows exist. Instructions patched to append-per-file so a killed
   agent loses at most one file.
 
-Resume from [eval-cases-real/intake-work/NEXT-SESSION-PROMPT.md](eval-cases-real/intake-work/NEXT-SESSION-PROMPT.md).
+Resume from eval-cases-real/intake-work/NEXT-SESSION-PROMPT.md (private historical intake record, not distributed).
 
 ## Session 5 (2026-07-05 to 2026-07-07): local-mirror pivot, triage complete, 14 real cases built
 

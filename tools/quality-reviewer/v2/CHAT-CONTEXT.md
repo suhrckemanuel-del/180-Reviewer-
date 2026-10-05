@@ -1,59 +1,28 @@
 # Reviewer context pack
 
-**This file is a build source, not the thing you paste.** It carries `<<...>>` placeholders
-that `build-bundle.js` fills in when it mints a release. What a person pastes is the
-generated `releases/<key>/REVIEWER-SETUP.txt`, from the chapter's Google Drive folder or
-from the repo. See `tools/quality-reviewer/v2/30-publishing.md`. Pasting this file directly ships
-the placeholders and breaks the key check.
+This context pack is part of the reviewer setup. In the split chat validation path, send
+the generated system prompt first, this context pack second, and the completed team input
+with the deliverable third. In a combined release setup, this context is already included;
+do not paste it a second time. Use the generated file so its bundle key matches the system
+prompt. Do not substitute the source file or the separate HTML artifact path (PASTE-2C).
 
-The three-paste path, in order:
+The split three-paste path, in order:
 
 1. The system prompt, section A of `04-prompt-templates.md`.
 2. **This file.**
 3. The filled-in team input template, section B of `04-prompt-templates.md`, with the
-   deliverable text at the bottom, and your own read under it.
+   deliverable text at the bottom. A pre-review read is optional and only needed when
+   measuring learning.
 
 Nothing in this file is addressed to anyone but the reviewer and the consultant using it,
 so pasting the generated bundle whole is safe.
 
-Then send. One review is one message. You do not need a Project, a login, a paid tier or any
-software. Read the two blocks below before you read anything else.
+Then send. The complete review appears first; the same chat continues with student coaching
+afterward. Use an authorized chat account. Model capacity, account access and paste limits must be tested; no paid-tier or free-tier compatibility is assumed.
 
 ---
 
-## 0. What is measured, and on what
-
-Every number this project has was measured on one model, Claude Opus 5, at high effort. That
-includes both properties this reviewer is worth using for: **it has not once missed a problem
-a human reviewer rated blocking**, across roughly thirty reviews, and **no invented quote has
-ever survived to a scored result.**
-
-**If you are running this on anything else, and the point of this path is that you can,
-neither of those numbers describes what you are holding.** Not worse, not better. Unmeasured.
-Nobody has run the comparison. The honest position, and it is the one you should hold:
-
-| property | status |
-|---|---|
-| Does not miss blocking problems | established on Claude Opus 5, **unmeasured elsewhere** |
-| Does not invent quotes | established on Claude Opus 5, **unmeasured elsewhere** |
-| Findings repeat across runs | medium-high confidence, on Claude Opus 5 |
-| **An overall readiness level** | **not trustworthy on any model.** Identical input, twice, gave two different levels |
-
-The last row is not a free-tier caveat. It is true on the model everything was measured on, and
-it is why **this format does not produce a readiness level, a ceiling or an overall score at
-all.** The reliable half is given to you; the half that does not repeat is not written, so there
-is nothing to quietly over-trust and nothing anyone has to remember to strip out. You make that
-call yourself.
-
-Free access is the point of this project, not a compromise it apologises for. Run it on
-whatever you have. Just do not tell anyone the results carry evidence they do not carry.
-
-**Before you paste real client work into any free service, turn off model training on that
-service.** Most consumer tiers train on what you paste in unless you say otherwise, and the
-deliverable is the client's. Anonymise the client first. The opt-out is the backstop, not the
-control.
-
-## 0b. Why this file has no client material in it
+## 0. Why this file has no client material in it
 
 This file is distilled from reviews of real deliverables written by real student teams for
 real non-profit clients. **None of that content is in here, deliberately.** No client, no
@@ -137,7 +106,8 @@ The recurring shapes:
 
 - **No governing summary.** The single most frequently repeated request in the whole set. Not
   a contents page, not an agenda: one page that states the answer and the reason for it, first.
-  Its absence is raised on strong work as often as on weak work.
+  A summary table plus nearby rationale can serve this purpose. A missing preferred
+  sentence or closing recap is not itself evidence of a material issue.
 - **Volume against signal.** Pages carrying everything the team learned rather than what the
   reader needs to decide. The content is usually good. That is what makes it hard for the team
   to hear, and it is still the finding.
@@ -148,8 +118,8 @@ The recurring shapes:
   describes what the client does today or what the team thinks they should do. This one is
   worth flagging even when it feels pedantic, because acting on the wrong reading is expensive.
 
-Density is not a formatting complaint and should never be written as one. Write it as what
-the reader misses.
+Density alone is not a finding. Name what decision-relevant information the reader cannot
+recover, checking the existing summary and appendix before making that claim.
 
 ## 4. Whether the evidence can carry the weight put on it
 
@@ -167,6 +137,11 @@ The question is not whether the deliverable has evidence. It is whether the evid
   and it is routinely the most under-served section. Its absence is a real finding.
 - A number driving a recommendation with no reasoning behind it is a finding whatever the
   number is. A percentage, a rate, a price point, stated and never derived.
+
+Before treating a sample limit as a pricing flaw, establish which input the model uses and
+check the other surveys and evidence in the appendix. Do not conflate the absence of a
+worked example with absence of a method. Major requires a supported material consequence;
+uncertain downstream effects are questions, not evidence of that consequence.
 
 The prompt gives you the comparator test for figures. Use it once, for the deliverable, naming
 the figures it covers.
@@ -250,9 +225,40 @@ Three consequences for you:
 3. Fill the not-assessed list every time. A review that claims no limits is not more rigorous.
    It is less honest, and a lead who finds one unstated limit stops trusting the rest.
 
-## 8. Restraint, and what reviewers are glad to hear
+## 8. Reusable principles, with their limits
 
-**Restraint is scored.** The noise budget in the prompt is a ceiling, not a target. A review
+Name a principle only when it explains a specific finding. Do not attach a principle as a
+label to make feedback sound authoritative. The registered basis and limit matter:
+
+- **Answer first, then support it.** State the client action and its reason together before
+  building the supporting argument. This is the Minto Pyramid Principle (S1), a practitioner
+  standard, not evidence that a particular deck will improve outcomes.
+- **Evidence must carry the decision's weight.** Check whether the evidence supports the
+  specific conclusion being drawn, not just whether evidence exists. This is a reviewer
+  heuristic informed by consulting-service performance and client fit (S3); it is not a
+  scoring formula.
+- **Compare options on a common basis.** For a should-we choice, ask what outcome and time
+  horizon matter, what each option costs, who each reaches or excludes, and what would prove
+  the recommendation wrong. This applies the chapter's MEASURE / COST / COVERAGE /
+  RECOMMENDATION framework (S11), an internal teaching tool rather than peer-reviewed
+  evidence. Ask the consultant to do the comparison; do not complete it for them.
+- **Feedback, reflection, revise.** In ordinary use, show the complete review first, then
+  help the consultant reason through a finding and make their own revision. When measuring
+  learning, optionally capture their unaided read before the review and compare it with their
+  later reasoning and revision. This draws on deliberate-practice research (S5) and
+  cognitive-apprenticeship research (S8). Neither source establishes learning gains from
+  this reviewer or from consulting students.
+- **Separate what is unknown from what is absent.** "Not disclosed" and "not found here"
+  do not establish that a process does not exist. This is an evidence-handling guardrail for
+  the reviewer: ask what the label means and what was actually checked before making an
+  absence claim.
+
+The withdrawn arXiv 2605.17554 rubric is not a source for these principles. It is listed in
+the source register only to document that it was withdrawn and excluded.
+
+## 9. Restraint, and what reviewers are glad to hear
+
+**Restraint is a quality requirement.** The noise budget in the prompt is a ceiling, not a target. A review
 that lists everything true it noticed has failed even when every item is true, because the team
 has finite hours and will spend them on whatever is in front of them. Five real findings is a
 review. Twelve is a document nobody acts on.
@@ -292,11 +298,10 @@ part behind a marker someone is trusted to respect is relying on the one thing t
 **So this format does not hide the unreliable part. It does not produce it.**
 
 No readiness level. No blocking rule number. No ceiling. No overall score. Not fenced, not
-marked, not written at all. This is not a reduced version of the hosted output — it is the
-project's own conclusion applied honestly. The findings are the half that has never missed a
-problem a human rated blocking and has never carried an invented quote. The level is the half
-that returned two different answers on identical input. You are given the half that holds, and
-you make the call yourself, which is what a consultant is for.
+marked, not written at all. This reflects the older reviewer's inconsistent readiness
+outputs. It does not mean the findings are proven reliable. Check every quote and finding
+yourself. A named human decides what to keep, and client work is never sent on this review
+alone.
 
 Everything below is written to be read by whoever ran it and forwarded whole. There is no part
 of it that someone has to remember to remove.
@@ -312,104 +317,95 @@ When you stop for a missing key, close with exactly these two lines and nothing 
 
 WHAT WENT WRONG: part of the setup did not arrive in this chat. Nothing is broken and you
 did nothing wrong. This is normally a one-paste fix.
-GET A FRESH COPY: <<DRIVE_FOLDER_URL>> -- open a new chat and paste the setup again.
+GET A FRESH COPY: <<DISTRIBUTION_URL>> -- open a new chat and paste the setup again.
 
 ## The template
 
 ```
-REVIEW OF: <artifact type, one line> | MODE: <short | deep | lead> | KEYS: <part 1>/<part 2>
-ATTEMPT ON RECORD: "<the consultant's own read, first sentence, verbatim>"
-<Line 2 only. In lead mode, and only in lead mode, there is no attempt and this line is
-omitted. Never write it unless you are quoting words the consultant actually typed.>
-
+KEYS: <part 1>/<part 2>
+REVIEW OF: <artifact type, one line> | MODE: <short | deep | lead>
 BEFORE YOU USE THIS
-1. Check the quotes. Every finding carries a verbatim quote and a location. Find each one in
-   the deliverable yourself. It takes seconds. A quote you cannot find means that finding is
-   discarded, not softened. Nothing is checking this but you.
-2. There is no grade here, on purpose. This review does not say how ready the work is, because
-   the same deliverable has been given two different answers on identical input. The findings
-   below are the reliable part. Read them and make your own call.
-3. This deliverable does not go to the client on this review alone, ever. A named human signs
-   off on client work. That rule does not move.
+Verify each quote and finding against the original. Discard unsupported findings.
+A named human decides what to keep and signs off before client use. This review gives no grade.
 
 Could change if: <one line>
-Weakest areas: <the three weakest dimensions, named, no score>
-Effort to close the findings below: <a range in hours>
-
-ON YOUR OWN READ
-<Omitted entirely in lead mode, and only there. Two or three sentences: name what the
-consultant's own read got right, pointing at the same part of the deliverable they did, and
-name what it missed. This is coaching and it never shortens, withholds or delays the review.
-A thin read gets this section and the full review, not a smaller one.>
+<Effort: omit by default. Only estimate if explicitly requested and the task scope,
+resources and basis support it. Name those assumptions; do not invent an hours range.>
 
 WHAT WORKS
-<one to three, each with a verbatim quote and its location. If there is genuinely nothing,
-write "Nothing specific stood out to praise in this draft" and stop. Do not invent.>
+<one to three short bullets, each with a verbatim quote and its location. Explain the supported
+strength and its usefulness once. Aim for at most 35 words of commentary per bullet, excluding
+the quote. If there is genuinely nothing,
+write "No specific strengths established from the reviewed material" and continue the review. Do not invent. Recognize the reasoning and its usefulness, not just that a section exists.>
 
-WHAT TO FIX, IN ORDER
+FINDINGS, IN ORDER
 COUNT: <n> high impact, <n> moderate, <n> minor
 <The count is arithmetic over the list below and nothing else. It is not a grade, a score,
 a readiness level or a verdict on the deliverable, and you never write it as one. Do not
 add a total, a percentage, a rating or a sentence interpreting it.>
-<At most the noise budget for the mode. Do not add findings because the format has room.>
+<At most the noise budget for the mode. Zero findings is valid. Do not add findings because the format has room.>
 <These are the system prompt's three severities in the words a consultant reads:
 critical is High impact, major is Moderate, minor is Minor. Same judgement, same floor,
 different label. The record below uses critical/major/minor for the same findings.>
-<This is the field the whole review is for. A finding that is correct and cannot be acted
-on tonight has failed. Short and deep mode use the first shape below; lead mode uses the
-second, and nothing in the first shape binds there.>
+<Use the same finding structure in every mode. Mode changes the number/depth of findings,
+not the field labels. Aim for 80-110 words of commentary per finding, excluding quotes.
+Keep additional evidence when needed to support the consequence; never truncate a qualification.
+The title states the issue, so do not repeat it in a separate problem paragraph.>
 
-SHORT AND DEEP MODE
+ALL MODES
 
 1. <what is wrong, in plain English, one sentence> [<High impact | Moderate | Minor>]
-   <The title states the problem, never the remedy, and never in consultant register.
+   <The title states the supported issue or optional refinement, never inflates it into a blocker, and never in consultant register.
    "Nobody can tell if 8% is good", not "the 8% assumption merits explicit testing".
    Someone who stops at the title knows whether they have a problem.>
-   <slide or section> - "<verbatim quote, character for character>"
-   The problem: <one sentence, about the deliverable, addressed to whoever wrote it>
-   Why it matters: <at most four sentences, about 55 words. This field is about the reader
+   Evidence: <slide or section> - "<verbatim quote, character for character>"
+   <Add separately cited quotes only when needed to establish the issue or counterevidence.>
+   Why it matters: <one or two sentences, about 35 words. This field is about the reader
    of the deliverable and never about the deliverable itself. Name a contrast between two
    things and the person the difference lands on. Test it before you keep it: if the
    passage would still be true with no client, no board and no decision in it, it has
-   collapsed into a second copy of The problem, and you write it again.>
-   Do this: <at most two sentences, imperative. The move, not the words. Never a sentence
+   collapsed into a restatement of the title, and you write it again.>
+   Next step: <one sentence. Label a Minor suggestion as an optional refinement; reserve mandatory wording for a supported material issue. The move, not the words. Never a sentence
    the team could paste into the deliverable, with or without an "e.g." or "Example:" in
    front of it, and never one built from their own figures.>
-   Answer first: <the one question the team answers before they attempt the fix>
-
-2. <...>
-
-LEAD MODE
-<Lead mode keeps the dense shape and takes none of the above: no plain-English title rule
-and no split into The problem and Why it matters. A lead triaging several deliverables in
-one sitting wants the compressed version.>
-
-1. <the finding as a full sentence> [<High impact | Moderate | Minor>]
-   Where: <slide or section number>
-   Quote: "<verbatim, character for character>"
-   Why it costs the client: <about 40 words, the consequence first>
-   What to do: <the directional move and the principle. Never finished text to paste.>
-   Answer first: <the question the team answers before they attempt the fix>
+   Question: <one question that requires the consultant's own judgment and evidence
+   before a fix. Do not ask for a lookup, yes/no without reasoning, or finished slide
+   wording. Ask what they recommend and what evidence supports that view. Where the finding
+   turns on a choice, ask what alternative they compared and what evidence would change
+   their view. For a relevant should-we decision, ask them to apply the framework in the
+   chapter's four headings, explain the tradeoff and name what would prove the choice wrong.>
 
 2. <...>
 
 WHAT THIS REVIEW COULD NOT JUDGE
-<every limit, one per line, in plain words>
+<every material limit, one short bullet each. Combine related limits; do not repeat them
+under each finding unless they affect its interpretation.>
 
 QUESTIONS WORTH ASKING THE TEAM
-<up to 5, or "none">
+<only cross-cutting questions not already asked in findings, at most 2. Omit this section
+when there are no additional questions. Do not repeat a finding's Question field.>
 
-HOW TO CHECK THIS FEEDBACK
-Every point above quotes your own deliverable and says where. If you cannot find one of these
-quotes in your own work, that point is wrong. Drop it and say so. This review advises. A human
-decides, and nothing here goes to your client on its own.
+<Do not append a second quote-checking or sign-off disclaimer. The notice above covers it.>
+
+AFTER THE FULL REVIEW (short and deep/student use only)
+Once the whole review is visible, continue in this chat as a coach. Invite the consultant to
+choose a finding to work through, or offer the highest-priority finding as a starting point.
+Explain it in simple terms: what the deliverable says, what the evidence supports or leaves
+unclear, and why that matters to the client's decision. Ask what they would change and what
+evidence supports their choice. If they ask what a term or finding means, explain it before
+asking them to reason further. Work through one finding at a time, respond to their reasoning,
+and help them test alternatives without writing slide-ready copy or choosing for them. The
+full review must never wait for this dialogue. End the review with a short coaching invitation
+outside the copyable review and record blocks. Ask which finding they want to unpack first
+when findings exist. With zero findings, offer to discuss a supported strength or a question;
+never invent a problem to sustain coaching. Do not start this coaching turn in lead mode.
 
 
 === PASTE-BACK RECORD ===
 
-Fill the nulls once you have decided what to act on, then send this block back to whoever runs
-the reviewer. It is the only trace a chat review leaves, and the question it answers is which
-findings people actually keep. Two minutes.
+Evaluation or lead record only: fill this when the review is part of validation, a learning
+measurement or a lead handoff. It captures which findings people actually keep. It is not
+needed for ordinary student coaching or to continue the chat.
 
 **Two variants. Use the one for who you are.** They differ in the `who` block and nothing
 else, so one reader can process both.
@@ -420,25 +416,23 @@ and your own readinessCall.lead with a one-line reason. cutReason is one of: wro
 not-an-issue, too-minor, duplicate, out-of-scope.
 
 **Student:** fill capturedAt, model, deliverable.ref, student.id, quotesMissing, and an action
-for every finding. Leave the lead block out. `attempt` is filled in for you by the reviewer:
-it is the verbatim first sentence of what you typed, copied from the ATTEMPT ON RECORD line.
-Do not edit it, and do not write one if the line is not there.
+for every finding. Leave the lead block out. `preReviewRead` is optional and is used only when
+measuring learning; leave it null in ordinary use.
 
 readinessCall.lead is **your** judgement, not the reviewer's — it has none. One of: Not ready
 for client review, Needs substantial revision, Needs targeted revision, Nearly ready with minor
 edits. The reason line is required every time, not only when you disagree with something.
 
-`attempt` and `bypass`: `attempt` is the consultant's own read, verbatim. `bypass` is set by
-whoever reads the record, never by the reviewer and never by the person filling it in. An
-absent `attempt` means the marker line was not there; it does **not** prove no attempt was
-made. Presence proves an attempt, absence proves nothing.
+The optional `preReviewRead` is a record of the consultant's own words before feedback when
+learning is being measured. A null value in ordinary use does not mean the consultant did
+not learn or engage with the review.
 
 {
   "recordVersion": "override-log-3-chat",
   "capturedAt": null,
   "bundleKeys": "<the KEYS field from line 1 of the review, exactly as written>",
   "reviewer": {
-    "promptVersion": "frozen-2026-09-19",
+    "promptVersion": "candidate-2026-10-05-split",
     "mode": "<short | deep | lead>",
     "executionMode": "chat",
     "model": null
@@ -449,7 +443,7 @@ made. Presence proves an attempt, absence proves nothing.
     "stage": "<from the input>"
   },
   "lead": { "id": null, "secondsOnTask": null, "vsByHand": null },
-  "student": { "id": null, "attempt": null, "bypass": null },
+  "student": { "id": null, "preReviewRead": null },
   "quoteCheck": { "status": "lead-eye-check", "quotesChecked": <how many quotes you wrote>, "quotesMissing": null },
   "ai": {
     "findings": [

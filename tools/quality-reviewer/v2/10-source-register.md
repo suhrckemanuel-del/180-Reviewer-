@@ -152,13 +152,31 @@ in prior research, not re-checked here), Withdrawn (must not be relied on).
 - **Dimensions.** Meta (learning claims).
 - **Status.** Verified (with the null caveat).
 
+### S11. Chapter decision-case framework
+- **Citation.** 180 Degrees Consulting Delft-Rotterdam, case workshop slide
+  `Warmtewerk-Framework-Slide-v2.pptx`, transcribed in
+  [frameworks/decision-case-framework.md](../../../frameworks/decision-case-framework.md).
+- **Claim used.** A should-we decision can be examined through four headings: MEASURE
+  (decision metric, horizon and constraint), COST (cost per result and what happens anyway),
+  COVERAGE (who is reached or excluded and at what scale), and RECOMMENDATION (choice, start,
+  cost and evidence that would prove the choice wrong).
+- **Relevance.** Gives consultants a reusable structure for reasoning through relevant
+  decision cases without having the reviewer make the choice for them.
+- **Limitation.** This is the chapter's internal teaching framework, not peer-reviewed
+  research. Its source draws on case-interview preparation material. Use only for
+  should-we choices and present it as a framework, not as empirical evidence.
+- **Scope.** Cross-cutting coaching aid for relevant should-we decisions, not a rubric
+  dimension or a scoring criterion.
+- **Status.** Verified against the chapter slide transcription on 2026-10-01.
+
 ---
 
 ## Dropped or cautioned sources
 
 ### D1. arXiv 2605.17554, five-criterion consulting rubric
 - **Status.** Withdrawn on 2026-05-30.
-- **Action.** Do not cite as an authority. The five criteria it proposed (data
+- **Action.** Retained here only to document its removal. Do not cite it as an authority or
+  use it to justify the prompt, context pack, dimensions or principles. The five criteria it proposed (data
   integrity, analytical rigor, relevance and focus, execution precision, format and
   deliverability) are defensible on their own and overlap our dimensions, but the
   design must rest on S1 to S10, not on this paper. v1's SYSTEM-PROMPT references it

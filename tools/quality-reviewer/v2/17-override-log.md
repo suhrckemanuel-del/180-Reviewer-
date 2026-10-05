@@ -309,7 +309,7 @@ the repo.
 ## 7. What Wednesday needs
 
 The live desk already runs on a real review
-([build-desk.js](../../../website/reviewer-mockups/build-desk.js) `--live`), so the demo shows
+(build-desk.js (historical sibling-repository tool, not distributed here) `--live`), so the demo shows
 the real loop rather than a picture of one.
 
 For the demo itself, in priority order:
