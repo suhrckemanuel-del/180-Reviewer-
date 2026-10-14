@@ -58,11 +58,15 @@ takes the choice to the board:
   the refusal cannot be argued past.
 - **Ungated:** the full review appears immediately.
 
-**Version one is team-lead mode**, for the team-lead session on 27 Oct, so the first pair of
-variants is a lead-mode pair. In that session the cold read happens in the room, by hand, before
-the reviewer runs, whichever variant ships. **Student mode follows later.** Consultants will be
-required to use the reviewer. When and how that happens is not yet set, and the same gated or
-ungated choice applies to student mode when it is built.
+**Version one is team-lead mode**, ready by 26 Oct for the team-lead session on 27 Oct, so the
+first pair of variants is a lead-mode pair. In that session the cold read happens in the room, by
+hand, before the reviewer runs, whichever variant ships.
+
+**Student mode follows shortly after**, for the consultant session on 3 Nov, and it is deliberately
+simpler: a check of the consultant's work against the chapter's principles, not the full review.
+The worry is consultants leaning on AI instead of learning to consult. The student tool should help
+them line their work up with the principles, not give them a reviewer to depend on. The same gated
+or ungated choice applies to student mode as well.
 
 The case for the gate is still the generation effect and the "answer key" model: the junior
 attempts the work, the AI grades the attempt, and the difference is where the learning is. There is
