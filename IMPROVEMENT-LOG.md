@@ -56,3 +56,13 @@ is a device nobody has tested.
 - Target 80–110 commentary words per finding, preserving all evidence and needed qualifications.
   Standardize HTML section/field labels and collapse optional discussion controls. Existing
   saved reviews retain their content; no new model run was used for the interface preview.
+
+## 2026-10-17 — Manuel, an old 180DC deliverable (34 slides, .pptx), 1006-NCEECNQ as a skill on Claude Free
+
+- First real use as a skill. It triggered, the script ran, both keys were correct, and 20 of 20 quotes
+  were verbatim on the cited slide. The owner judged the findings "pretty okay".
+- What was wrong: the output is a ~1,400-word wall of text, and the main issue arrives around word 250
+  after the key lines, caveats and strengths. Too high a barrier for a lead to read.
+- What was wrong: the setup refers to the lead HTML view and an exported lead record but carries no
+  schema for either, so neither was produced.
+- What changed: nothing yet. Both points go to the skill's shape (180-Reviewer- issue 13).
