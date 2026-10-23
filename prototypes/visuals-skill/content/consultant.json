@@ -1,0 +1,44 @@
+{
+  "_note": "PROTOTYPE. Everything in this file stands in for the consultant's own words. The skill lays these out verbatim and never writes them. Invented organisation and data.",
+  "org": "Northside Community Pantry (invented)",
+  "source_owner": "pantry booking log",
+  "slides": [
+    {
+      "id": "answer",
+      "tag": "Missed pickups · the answer",
+      "title": "Send text reminders to phone bookings too: missed pickups could fall from 1 in 9 to 1 in 14",
+      "reasons": [
+        "Reminders worked for online bookings: missed pickups fell from 19% to 7%",
+        "Phone bookings got no reminder and stayed at 19%",
+        "Phone is a third of bookings but more than half of missed pickups"
+      ],
+      "footnote": "1 in 14 assumes phone bookings respond to reminders as online bookings did. The pilot tests that.",
+      "notes": "Lead with the ask. The three lines underneath are the next three slides, in order. If they push back on 1 in 14, go straight to the footnote: it's an assumption and the pilot is how we check it."
+    },
+    {
+      "id": "trend",
+      "tag": "Missed pickups · what changed in July",
+      "title": "Reminders cut missed online pickups from 19% to 7%; phone bookings, which get none, stayed at 19%",
+      "notes": "Point at the dashed line first: that's 1 July, reminders start. Then the green line drops and stays down. The grey line is the comparison that matters: same pantry, same months, no reminder, no change."
+    },
+    {
+      "id": "share",
+      "tag": "Missed pickups · where they come from now",
+      "title": "Phone bookings are a third of bookings but more than half of missed pickups",
+      "notes": "Read the two bars top to bottom. Phone is the dark part. Same people, a third of the bookings, more than half of the missed parcels. That's where the next gain is."
+    },
+    {
+      "id": "next",
+      "tag": "Missed pickups · next step",
+      "title": "Next: ask every phone caller for a mobile number for eight weeks, then compare missed pickups with online",
+      "rows": [
+        ["Owner", "Intake coordinator"],
+        ["Timeframe", "Eight weeks from the first booking with the new field"],
+        ["Measure", "Missed-pickup rate, phone against online, every week"],
+        ["First step", "Add a mobile-number field to the phone booking form"],
+        ["We'd be wrong if", "Phone missed pickups are still above 15% in week eight"]
+      ],
+      "notes": "End on the decision we need from them: yes to the form change. Everything else follows from that one field."
+    }
+  ]
+}
