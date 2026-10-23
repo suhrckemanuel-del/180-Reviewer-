@@ -1,0 +1,354 @@
+<!doctype html>
+<!-- TEMPLATE for scripts/build_deck_walk.py (issue 23, from prototype visual-directions/05-route.html). The deck as a transit line.
+The team fixes a deck in slide order, so findings are laid out as stops from slide 1 to the last slide, quotes sit
+at the slide they come from, one finding across several slides is a numbered red loop, and empty stretches collapse.
+A sticky slide bar and a slide viewer let you step through the deck itself. Two data objects: REVIEW is what Claude
+writes (same contract as the asset); DECK is what a build script would fill from deck.json at no token cost
+(invented here). No boxed content: the line and the type carry it. Invented content. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Line</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;500;600;800;900&family=Overpass+Mono:wght@400;600&display=swap">
+<style>
+  /* A transit line down the deck: stops are slides, red loops tie one problem across slides, the note is the ticket. */
+  :root {
+    --page: #fbfbf8; --ink: #141613; --grey: #60675b; --soft: #e8ebe2; --green: #78B038; --deep: #2a5512;
+    --loop: #d92d3a; --pen: rgba(120,176,56,.42);
+    --sans: "Overpass", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Overpass Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --x: 34px;  /* the line's position inside the route gutter */
+    --gut: 70px;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--page); }
+  body { margin: 0; color: var(--ink); font: 400 16px/1.5 var(--sans); }
+  body.locked { overflow: hidden; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 120px max(16px, env(safe-area-inset-left, 0px)); }
+  .lab { font: 600 11px/1.3 var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+  button { font: inherit; color: inherit; }
+  button:focus-visible { outline: 3px solid var(--loop); outline-offset: 2px; }
+
+  /* sticky slide bar: one tick per slide, tap to open that slide */
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--page); z-index: 10; }
+  .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; background: var(--page); padding: 10px 0 8px; border-bottom: 1px solid var(--soft); }
+  .bar .row { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; }
+  .bar button { all: unset; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0 2px; border-radius: 999px; }
+  .bar button:focus-visible { outline: 2px solid var(--loop); }
+  .bar button b { font: 700 11px/1 var(--mono); color: var(--grey); }
+  .bar button i { width: 7px; height: 7px; border-radius: 50%; background: var(--soft); }
+  .bar .t-find i { background: var(--ink); } .bar .t-echo i { background: var(--loop); } .bar .t-keep i { background: var(--green); }
+  .bar .t-find b, .bar .t-echo b, .bar .t-keep b { color: var(--ink); }
+  .bar .cur { background: var(--ink); } .bar .cur b { color: var(--page); }
+  .bar .hint { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; color: var(--grey); white-space: nowrap; }
+  @media (max-width: 480px) { .bar .hint .key { display: none; } }
+
+  /* top of the page */
+  .sign { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .bullet { width: 30px; height: 30px; border-radius: 50%; background: var(--green); color: var(--ink); display: grid; place-items: center; font: 900 13px/1 var(--sans); }
+  .sign .lab { color: var(--grey); }
+  h1 { font: 900 34px/1.02 var(--sans); letter-spacing: -.02em; margin: 16px 0 8px; text-wrap: balance; }
+  .lede { font-size: 18px; line-height: 1.4; color: var(--grey); margin: 0 0 14px; max-width: 58ch; }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { border-radius: 999px; padding: 5px 11px 4px; border: 1.5px solid var(--ink); }
+  .pill.solid { background: var(--ink); color: var(--page); }
+  .pill.green { background: var(--green); border-color: var(--green); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 22px 0 6px; color: var(--grey); align-items: center; }
+  .legend i { display: inline-block; vertical-align: -3px; margin-right: 6px; border-radius: 50%; }
+
+  /* the route */
+  .route { position: relative; padding-left: var(--gut); margin-top: 18px; }
+  .route svg { position: absolute; left: 0; top: 0; width: var(--gut); height: 100%; overflow: visible; }
+  .route svg .loop { cursor: pointer; transition: opacity .2s; }
+  .stop { position: relative; padding: 4px 0 30px; scroll-margin-top: 90px; }
+  .dot { position: absolute; left: calc(var(--x) - var(--gut)); top: 4px; transform: translate(-50%, 0); width: 24px; height: 24px; border-radius: 50%; background: var(--page); z-index: 1; }
+  .High .dot { background: var(--ink); box-shadow: 0 0 0 4px var(--page); }
+  .Moderate .dot { border: 5px solid var(--ink); box-shadow: 0 0 0 4px var(--page); }
+  .Minor .dot { width: 18px; height: 18px; top: 7px; border: 3px solid var(--ink); box-shadow: 0 0 0 4px var(--page); }
+  .echo .dot { width: 14px; height: 14px; top: 9px; border: 3px solid var(--loop); box-shadow: 0 0 0 4px var(--page); }
+  .keep .dot { background: var(--green); box-shadow: 0 0 0 4px var(--page); display: grid; place-items: center; font: 900 13px/1 var(--sans); }
+  .gap .dot, .limits .dot { width: 10px; height: 10px; top: 7px; background: var(--page); border: 2px solid #9aa194; box-shadow: 0 0 0 3px var(--page); }
+  .end .dot { width: 30px; height: 12px; top: 6px; border-radius: 6px; background: var(--ink); }
+  .where { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 4px; }
+  .slide { all: unset; cursor: pointer; font: 900 15px/1 var(--sans); letter-spacing: .01em; border-bottom: 2px solid var(--soft); padding-bottom: 2px; }
+  .slide:hover { border-bottom-color: var(--ink); }
+  .slide:focus-visible { outline: 3px solid var(--loop); outline-offset: 2px; }
+  .slide::after { content: " ▸"; color: var(--grey); font-size: 11px; }
+  .sev { border-radius: 999px; padding: 3px 9px 2px; border: 1.5px solid var(--ink); }
+  .sev.High { background: var(--ink); color: var(--page); }
+  .sev.Minor { border-color: transparent; color: var(--grey); padding-left: 0; }
+  .main-tag { color: var(--deep); }
+  .stop h2 { font: 800 22px/1.15 var(--sans); letter-spacing: -.012em; margin: 4px 0 8px; text-wrap: balance; }
+  .q { margin: 8px 0; font: 500 16px/1.4 var(--sans); }
+  .q mark { background: linear-gradient(transparent 46%, var(--pen) 46%, var(--pen) 94%, transparent 94%); color: inherit; }
+  .q small { font: 600 10.5px/1 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--grey); margin-left: 6px; white-space: nowrap; }
+  .why { color: var(--grey); margin: 6px 0 10px; }
+  .next { font-weight: 700; margin: 0 0 6px; padding-left: 22px; text-indent: -22px; }
+  .next::before { content: "→"; display: inline-block; width: 22px; text-indent: 0; color: var(--deep); }
+  .askq { margin: 0 0 12px; padding-left: 22px; text-indent: -22px; }
+  .askq::before { content: "?"; display: inline-block; width: 22px; text-indent: 0; font-weight: 900; color: var(--grey); }
+  .decide { display: flex; flex-wrap: wrap; gap: 6px; }
+  .decide button { cursor: pointer; border-radius: 999px; border: 1.5px solid var(--ink); background: transparent; padding: 8px 14px 7px; font-weight: 700; font-size: 14px; }
+  .decide .on.send { background: var(--green); border-color: var(--green); }
+  .decide .on.ask { background: var(--ink); color: var(--page); }
+  .decide .on.out { background: var(--soft); border-color: var(--soft); color: var(--grey); text-decoration: line-through; }
+  .stop.d-out > :not(.dot):not(.decide) { opacity: .4; }
+  .ref { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; color: var(--loop); font: 600 11px/1 var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+  .ref .n { background: var(--loop); color: #fff; border-radius: 999px; padding: 3px 6px 2px; }
+  .ref:focus-visible { outline: 2px solid var(--loop); outline-offset: 2px; }
+  .loopno { display: inline-flex; align-items: center; gap: 5px; color: var(--loop); }
+  .loopno .n { background: var(--loop); color: #fff; border-radius: 999px; padding: 3px 6px 2px; }
+  .gap { padding-bottom: 26px; color: var(--grey); }
+  .gap .slide, .echo .slide { font-size: 14px; }
+  .keep h2 { font-size: 19px; }
+  .limits p { margin: 2px 0 0; color: var(--grey); font-size: 15px; }
+  .limits .t, .end .t { font: 900 15px/1 var(--sans); }
+  .end { padding-bottom: 8px; }
+  .stop.flash h2, .stop.flash .q { animation: flash 1.2s ease-out; }
+  @keyframes flash { 0% { background: rgba(217,45,58,.14); } 100% { background: transparent; } }
+
+  /* the ticket */
+  .ticket { position: relative; margin-top: 34px; background: var(--ink); color: var(--page); border-radius: 18px; }
+  .ticket .stub { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; padding: 18px 20px 16px; flex-wrap: wrap; }
+  .ticket .stub b { display: block; font: 900 26px/1 var(--sans); letter-spacing: -.01em; }
+  .ticket .counts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ticket .counts span { border-radius: 999px; padding: 4px 10px 3px; border: 1.5px solid var(--page); }
+  .ticket .counts .f { background: var(--green); border-color: var(--green); color: var(--ink); }
+  .perf { position: relative; border-top: 2px dashed #4a5045; margin: 0 18px; }
+  .perf::before, .perf::after { content: ""; position: absolute; top: -13px; width: 24px; height: 24px; border-radius: 50%; background: var(--page); }
+  .perf::before { left: -31px; } .perf::after { right: -31px; }
+  .ticket pre { margin: 0; padding: 18px 20px 6px; white-space: pre-wrap; overflow-wrap: anywhere; font: 400 15.5px/1.55 var(--sans); }
+  .ticket .foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 20px 18px; }
+  .ticket .foot .lab { color: #a8b19f; }
+  .copy { cursor: pointer; border: 0; border-radius: 999px; background: var(--green); color: var(--ink); padding: 12px 20px 11px; font-weight: 800; font-size: 16px; }
+
+  /* floating progress capsule */
+  .float { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 5;
+           display: flex; align-items: center; gap: 10px; background: var(--ink); color: var(--page); border-radius: 999px; padding: 6px 6px 6px 16px; box-shadow: 0 8px 24px -10px rgba(0,0,0,.5); max-width: calc(100vw - 24px); }
+  .float .ticks { display: flex; gap: 4px; }
+  .float .ticks i { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #8d9488; }
+  .float .ticks .send { background: var(--green); border-color: var(--green); } .float .ticks .ask { background: var(--page); border-color: var(--page); }
+  .float .ticks .out { background: #555b52; border-color: #555b52; }
+  .float button { cursor: pointer; border: 0; border-radius: 999px; background: var(--page); color: var(--ink); padding: 8px 14px 7px; font-weight: 800; font-size: 14px; white-space: nowrap; }
+  body.locked .float { display: none; }
+
+  /* slide viewer: a sheet from the bottom on phones, a panel on the right on wide screens */
+  .scrim { position: fixed; inset: 0; background: rgba(20,22,19,.45); z-index: 20; }
+  .viewer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--page); border-radius: 22px 22px 0 0; max-height: 88vh; overflow: auto;
+            padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); box-shadow: 0 -10px 40px -16px rgba(0,0,0,.4); }
+  .viewer .grab { width: 44px; height: 5px; border-radius: 999px; background: #cfd3c8; margin: 0 auto 10px; }
+  .viewer .vh { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .viewer .vh b { font: 900 20px/1 var(--sans); }
+  .x { cursor: pointer; border: 0; background: var(--soft); border-radius: 999px; width: 36px; height: 36px; font-size: 16px; font-weight: 800; }
+  .slidepic { aspect-ratio: 16 / 9; max-width: 100%; background: #fff; border: 1px solid #d6d9d0; border-radius: 6px; padding: 5% 6%; overflow: hidden;
+              display: flex; flex-direction: column; gap: .5em; font-size: clamp(9px, 2.6vw, 13px); touch-action: pan-y; user-select: none; }
+  img.slidepic { padding: 0; display: block; width: 100%; height: auto; object-fit: contain; }
+  .slidepic .st { font: 800 1.55em/1.15 var(--sans); }
+  .slidepic .it { font: 400 1em/1.35 var(--sans); color: #333; }
+  .slidepic .it mark { background: var(--pen); color: inherit; }
+  .slidepic .img { flex: 1; min-height: 30%; border-radius: 4px; background: repeating-linear-gradient(135deg, #eef0ea 0 6px, #e2e5dc 6px 12px); display: grid; place-items: center; color: var(--grey); font: 600 .85em/1 var(--mono); text-transform: uppercase; }
+  .stand-in { margin: 6px 0 0; color: var(--grey); }
+  .steps { display: flex; justify-content: space-between; gap: 8px; margin: 12px 0 14px; }
+  .steps button { cursor: pointer; border: 1.5px solid var(--ink); background: transparent; border-radius: 999px; padding: 9px 16px 8px; font-weight: 800; font-size: 14px; }
+  .steps button:disabled { opacity: .3; cursor: default; }
+  .onslide h3 { margin: 0 0 8px; }
+  .onslide .it2 { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--soft); }
+  .onslide .it2 b { font: 800 16px/1.25 var(--sans); }
+  .onslide .go { all: unset; cursor: pointer; grid-column: 2; color: var(--deep); font: 700 14px/1.2 var(--sans); }
+  .onslide .go:focus-visible { outline: 2px solid var(--loop); }
+  .onslide .none { color: var(--grey); padding: 10px 0; border-top: 1px solid var(--soft); }
+
+  @media (min-width: 900px) {
+    .viewer { left: auto; top: 0; width: 460px; max-height: none; border-radius: 22px 0 0 22px; padding-top: 18px; }
+    .viewer .grab { display: none; }
+    .slidepic { font-size: 12.5px; }
+  }
+  @media (min-width: 720px) { h1 { font-size: 44px; } :root { --x: 42px; --gut: 88px; } }
+  @media (prefers-reduced-motion: reduce) { .stop.flash h2, .stop.flash .q { animation: none; } }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="float" id="float"></div>
+<div id="sheet"></div>
+<script>
+// Filled by scripts/build_deck_walk.py from review.json. Every string comes from the chat review, unchanged.
+const REVIEW = {"check": "Quotes checked by script: 11 of 11 found on the cited slide.", "slides": 18, "main": {"title": "The deck recommends the booking app but never says what it costs or who sets it up.", "why": "The board is asked to approve a change it cannot price, and nobody is named to start it.", "slides": [2, 14]}, "findings": [{"title": "The recommendation has no cost, owner or first step", "severity": "High", "slides": [14, 15], "next": "Add who sets the app up, what it costs per year and the first step for next month.", "quotes": [{"text": "We recommend adopting a volunteer booking app.", "slide": 14}, {"text": "Next steps: explore options with the board", "slide": 15}], "why": "The board approves budget lines. Without a yearly cost and a named owner it cannot say yes, so the decision slides to the next meeting.", "ask": "Did the client give the team a budget ceiling?"}, {"title": "The summary promises a pilot that slide 15 never gives", "severity": "Moderate", "slides": [2, 15], "next": "Make slide 15 deliver the pilot the summary describes, or bring the summary down to what the deck supports.", "quotes": [{"text": "A three-month pilot will test the app with two shift teams.", "slide": 2}, {"text": "Next steps: explore options with the board", "slide": 15}], "why": "A board member who reads only the summary expects a pilot ready to run. The closing slide asks them to keep exploring instead.", "ask": "Is the pilot agreed with the client, or the team's own idea?"}, {"title": "Nobody can tell if 30% unfilled shifts is bad", "severity": "Moderate", "slides": [7], "next": "Name what the 30% should be compared with: last year, a similar food bank, or the client's own target.", "quotes": [{"text": "30% of shifts are unfilled at least once a month", "slide": 7}], "why": "The case for change rests on this number. Without last year's figure or a target, the board cannot tell a crisis from normal churn.", "ask": "Does the client track a target fill rate?"}, {"title": "The adoption claim rests on 12 volunteers reached on WhatsApp", "severity": "Minor", "slides": [9, 17], "next": "Optional: say who the survey did not reach, next to the claim on slide 9.", "quotes": [{"text": "Most volunteers would use an app (9 of 12 surveyed)", "slide": 9}, {"text": "Survey sent to the volunteer WhatsApp group", "slide": 17}], "why": "Volunteers already on WhatsApp are the ones most likely to use an app. The ones the change could lose were not asked.", "ask": "How many volunteers are in the WhatsApp group?"}, {"title": "Analysis titles name topics, not conclusions", "severity": "Minor", "slides": [8, 10], "next": "Optional: rewrite each analysis title as the finding it proves.", "quotes": [{"text": "Volunteer demographics", "slide": 8}, {"text": "Current tools", "slide": 10}], "why": "A board member flipping through slides 7 to 12 learns the topics but not what the team found, so the argument only lives in the speaker's head.", "ask": "Will the team present this, or will it be read without them?"}], "works": [{"title": "The interview synthesis is concrete", "quote": "Coordinators spend about 4 hours a week chasing replies", "slide": 6}, {"title": "The options are compared side by side", "quote": "Option comparison: WhatsApp, shared spreadsheet, booking app", "slide": 12}], "couldntJudge": "whether a booking app suits these volunteers (needs domain knowledge); the values in the slide 11 chart (image only); prices of the named apps (not in the deck)", "stamp": "1017-PROTO01"};
+
+// Filled by scripts/build_deck_walk.py from deck.json and the rendered deck, never written by Claude.
+// text: {slide: [lines]}, images: {slide: "data:image/jpeg;base64,..."} (empty when the deck could not be rendered).
+const DECK = {"text": {"1": ["Volunteer scheduling at Oakfield Food Bank", "180DC · Deliverable 2"], "2": ["Executive summary", "Shift coverage is slipping as volunteer numbers grow", "A three-month pilot will test the app with two shift teams.", "We recommend a volunteer booking app"], "3": ["Project scope", "How can coordinators fill shifts with less effort?"], "4": ["Approach", "6 coordinator interviews", "12 volunteer survey responses", "3 scheduling tools compared"], "5": ["Section 1 · Situation"], "6": ["What coordinators told us", "Coordinators spend about 4 hours a week chasing replies", "Last-minute gaps are filled by the same few people"], "7": ["Shift coverage", "30% of shifts are unfilled at least once a month", "Gaps cluster on weekday mornings"], "8": ["Volunteer demographics", "Age bands", "Years volunteering"], "9": ["Volunteer attitudes", "Most volunteers would use an app (9 of 12 surveyed)", "Reminders were the most wanted feature"], "10": ["Current tools", "WhatsApp group", "Paper rota on the warehouse wall"], "11": ["Weekly demand against volunteers"], "12": ["Option comparison: WhatsApp, shared spreadsheet, booking app", "Cost · effort · reach"], "13": ["Section 3 · Recommendation"], "14": ["Recommendation", "We recommend adopting a volunteer booking app.", "Automated reminders", "Self-service shift swaps"], "15": ["Next steps", "Next steps: explore options with the board"], "16": ["Thank you", "Questions?"], "17": ["Appendix A · Survey method", "Survey sent to the volunteer WhatsApp group", "12 responses over two weeks"], "18": ["Appendix B · Interview guide"]}, "images": {}};
+
+const F = REVIEW.findings, N = REVIEW.slides;
+const S = { d: {}, view: null, focus: null };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const sl = a => (a.length > 1 ? "slides " : "slide ") + a.join(", ");
+const first = f => Math.min(...f.slides);
+const LABEL = { send: "Fix it", ask: "Ask first", out: "Leave out" };
+const m = /(\d+) of (\d+)/.exec(REVIEW.check);
+const multi = F.map((f, i) => i).filter(i => F[i].slides.length > 1);     // findings that get a loop
+const lane = Object.fromEntries(multi.map((i, k) => [i, k]));              // each loop keeps its own lane
+
+function note() {
+  const send = F.filter((_, i) => S.d[i] === "send"), ask = F.filter((_, i) => S.d[i] === "ask");
+  const L = [`Main issue: ${REVIEW.main.title}`];
+  if (send.length) L.push("", "To fix, in slide order:", ...send.sort((a, b) => first(a) - first(b)).map((f, i) => `${i + 1}. ${f.next} (${sl(f.slides)})`));
+  if (ask.length) L.push("", "Before you change anything:", ...ask.map(f => `- ${f.ask}`));
+  if (REVIEW.works.length) L.push("", "Keep:", ...REVIEW.works.map(w => `- ${w.title} (slide ${w.slide})`));
+  return L.join("\n");
+}
+
+function kindOf(n) {
+  if (F.some(f => first(f) === n)) return "find";
+  if (F.some(f => f.slides.includes(n))) return "echo";
+  if (REVIEW.works.some(w => w.slide === n)) return "keep";
+  return "";
+}
+
+// one entry per slide that has something on it; empty runs collapse into a single "nothing flagged" stop
+function stops() {
+  const out = []; let gap = [];
+  const flush = () => { if (gap.length) out.push({ kind: "gap", from: gap[0], to: gap[gap.length - 1] }); gap = []; };
+  for (let n = 1; n <= N; n++) {
+    const here = [];
+    F.forEach((f, i) => { if (first(f) === n) here.push({ kind: "find", n, i }); });
+    const echoes = F.map((f, i) => i).filter(i => first(F[i]) !== n && F[i].slides.includes(n));
+    if (echoes.length) here.push({ kind: "echo", n, is: echoes });
+    REVIEW.works.forEach((w, i) => { if (w.slide === n) here.push({ kind: "keep", n, i }); });
+    if (here.length) { flush(); out.push(...here); } else gap.push(n);
+  }
+  flush();
+  return out;
+}
+
+const slideBtn = (n, label) => `<button type="button" class="slide" data-view="${n}" aria-label="Show slide ${n}">${label || "Slide " + n}</button>`;
+const qhtml = (qs, n) => [...new Set(qs.map(q => q.text))].map(t => `<p class="q"><mark>${esc(t)}</mark><small>slide ${n}</small></p>`).join("");
+
+function stopHTML(s) {
+  const isMain = s.n && REVIEW.main.slides.includes(s.n);
+  if (s.kind === "gap") return `<div class="stop gap" id="s${s.from}"><span class="dot"></span><div class="where">${slideBtn(s.from, s.from === s.to ? `Slide ${s.from}` : `Slides ${s.from}–${s.to}`)}<span class="lab">nothing flagged</span></div></div>`;
+  if (s.kind === "keep") { const w = REVIEW.works[s.i];
+    return `<div class="stop keep" id="s${s.n}"><span class="dot">✓</span><div class="where">${slideBtn(s.n)}<span class="lab pill green">Keep</span></div>
+      <h2>${esc(w.title)}</h2><p class="q"><mark>${esc(w.quote)}</mark></p></div>`; }
+  if (s.kind === "echo") return `<div class="stop echo" id="s${s.n}" data-loops="${s.is.join(" ")}"><span class="dot"></span>
+      <div class="where">${slideBtn(s.n)}${s.is.map(i => `<button type="button" class="ref" data-jump="${i}"><span class="n">${pad(i + 1)}</span>back to ${sl([first(F[i])])}</button>`).join("")}${isMain ? `<span class="lab main-tag">· main issue</span>` : ""}</div>
+      ${qhtml(s.is.flatMap(i => F[i].quotes.filter(q => q.slide === s.n)), s.n)}</div>`;
+  const f = F[s.i], later = f.slides.filter(n => n !== s.n);
+  return `<div class="stop ${f.severity} ${S.d[s.i] ? "d-" + S.d[s.i] : ""}" id="f${s.i}" data-loop="${s.i}"><span class="dot"></span>
+      <div class="where">${slideBtn(s.n)}<span class="lab sev ${f.severity}">${f.severity}</span>
+        ${later.length ? `<span class="lab loopno"><span class="n">${pad(s.i + 1)}</span>also ${sl(later)}</span>` : `<span class="lab">${pad(s.i + 1)}</span>`}
+        ${isMain ? `<span class="lab main-tag">· main issue</span>` : ""}</div>
+      <h2>${esc(f.title)}</h2>${qhtml(f.quotes.filter(q => q.slide === s.n), s.n)}<p class="why">${esc(f.why)}</p>
+      <p class="next">${esc(f.next)}</p><p class="askq">${esc(f.ask)}</p>
+      <div class="decide">${Object.entries(LABEL).map(([k, v]) => `<button type="button" class="${k} ${S.d[s.i] === k ? "on" : ""}" data-k="${k}" data-i="${s.i}" aria-pressed="${S.d[s.i] === k}">${v}</button>`).join("")}</div></div>`;
+}
+
+function render() {
+  const c = { send: 0, ask: 0, out: 0 }; Object.values(S.d).forEach(v => c[v]++);
+  const done = Object.keys(S.d).length;
+  const bar = `<div class="bar"><div class="row" style="--n:${N}">${Array.from({ length: N }, (_, k) => k + 1).map(n =>
+      `<button type="button" class="t-${kindOf(n)} ${S.view === n ? "cur" : ""}" data-view="${n}" aria-label="Show slide ${n}"><b>${n}</b><i></i></button>`).join("")}</div>
+      <div class="hint lab"><span>Tap a slide to open it</span><span class="key">● problem <span style="color:var(--loop)">●</span> later slide <span style="color:var(--green)">●</span> keep</span></div></div>`;
+  document.getElementById("app").innerHTML = bar + `
+    <div class="sign"><span class="bullet">180</span><span class="lab">Lead review · ${N} slides · quotes ${m ? `${m[1]}/${m[2]}` : "—"}</span></div>
+    <h1>${esc(REVIEW.main.title)}</h1><p class="lede">${esc(REVIEW.main.why)}</p>
+    <div class="pills lab"><span class="pill solid">Main issue · ${sl(REVIEW.main.slides)}</span><span class="pill">${F.length} findings</span><span class="pill">${esc(REVIEW.check)}</span></div>
+    <div class="legend lab"><span><i style="width:14px;height:14px;background:var(--ink)"></i>High</span><span><i style="width:14px;height:14px;border:4px solid var(--ink)"></i>Moderate</span>
+      <span><i style="width:11px;height:11px;border:2.5px solid var(--ink)"></i>Minor</span><span><i style="width:18px;height:0;border-radius:0;border-top:3px solid var(--loop)"></i>Same problem, later slide</span>
+      <span><i style="width:14px;height:14px;background:var(--green)"></i>Keep</span></div>
+    <div class="route" id="route"><svg id="lines" aria-hidden="true"></svg>
+      ${stops().map(stopHTML).join("")}
+      <div class="stop limits"><span class="dot"></span><div class="where"><span class="t">Couldn't judge</span></div><p>${esc(REVIEW.couldntJudge)}</p></div>
+      <div class="stop end"><span class="dot"></span><div class="where"><span class="t">End of deck</span><span class="lab">slide ${N}</span></div></div></div>
+    <section class="ticket" id="ticket" aria-label="Note to the team">
+      <div class="stub"><div><span class="lab" style="color:#a8b19f">Note to the team</span><b>Your hand-back</b></div>
+        <div class="counts lab"><span class="f">${c.send} to fix</span><span>${c.ask} to ask</span><span>${c.out} left out</span></div></div>
+      <div class="perf"></div><pre id="msg">${esc(note())}</pre>
+      <div class="foot"><span class="lab">AI review, no grade. You decide what to keep.<br>180dc-review-lead · ${esc(REVIEW.stamp)}</span><button type="button" class="copy" id="copy">Copy note</button></div></section>`;
+  document.getElementById("float").innerHTML = `<span class="lab">${done}/${F.length} decided</span><span class="ticks">${F.map((_, i) => `<i class="${S.d[i] || ""}"></i>`).join("")}</span><button type="button" id="jump">Note ↓</button>`;
+  sheet();
+  requestAnimationFrame(draw);
+}
+
+// the line and the numbered loops are drawn after layout, from the dots' real positions
+function draw() {
+  const route = document.getElementById("route"), svg = document.getElementById("lines"); if (!route) return;
+  const r0 = route.getBoundingClientRect(), x = parseFloat(getComputedStyle(route).getPropertyValue("--x"));
+  const y = el => { const b = el.querySelector(".dot").getBoundingClientRect(); return b.top - r0.top + b.height / 2; };
+  const all = [...route.querySelectorAll(".stop")];
+  let paths = `<line x1="${x}" x2="${x}" y1="${y(all[0])}" y2="${y(all[all.length - 1])}" stroke="#78B038" stroke-width="7" stroke-linecap="round"/>`;
+  const starts = {}; route.querySelectorAll(".stop[data-loop]").forEach(s => starts[s.dataset.loop] = y(s));
+  route.querySelectorAll(".stop[data-loops]").forEach(s => s.dataset.loops.split(" ").forEach(i => {
+    const a = starts[i], b = y(s), bx = x - 13 - lane[i] * 7.5, mid = (a + b) / 2;
+    const dim = S.focus != null && +i !== S.focus ? 0.15 : 1, w = S.focus === +i ? 3.6 : 2.6;
+    paths += `<g class="loop" data-focus="${i}" opacity="${dim}">
+      <path d="M ${x - 8} ${a} C ${bx} ${a}, ${bx} ${a + 14}, ${bx} ${a + 24} L ${bx} ${b - 24} C ${bx} ${b - 14}, ${bx} ${b}, ${x - 8} ${b}" fill="none" stroke="#d92d3a" stroke-width="${w}" stroke-linecap="round"/>
+      <path d="M ${bx} ${a + 24} L ${bx} ${b - 24}" stroke="transparent" stroke-width="16"/>
+      <circle cx="${bx}" cy="${mid}" r="9" fill="#d92d3a"/><text x="${bx}" y="${mid + 3.5}" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff" font-family="Overpass, system-ui, sans-serif">${pad(+i + 1)}</text></g>`;
+  }));
+  svg.setAttribute("viewBox", `0 0 ${svg.clientWidth} ${route.clientHeight}`);
+  svg.innerHTML = paths;
+}
+
+// the slide viewer: the slide itself (text stand-in here), arrows to step, and what the review says about it
+function slidePic(n) {
+  if (DECK.images[n]) return `<img class="slidepic" src="${DECK.images[n]}" alt="Slide ${n}">`;
+  const t = DECK.text[n] || [], quotes = F.flatMap(f => f.quotes).concat(REVIEW.works.map(w => ({ text: w.quote, slide: w.slide }))).filter(q => q.slide === n).map(q => q.text);
+  const hl = s => quotes.some(q => s.includes(q) || q.includes(s)) ? `<mark>${esc(s)}</mark>` : esc(s);
+  return `<div class="slidepic" id="pic">${t.length ? `<div class="st">${hl(t[0])}</div>` + t.slice(1).map(s => s === "[image]" ? `<div class="img">chart · image only</div>` : `<div class="it">${hl(s)}</div>`).join("") : `<div class="it">Slide ${n}</div>`}</div>`;
+}
+function sheet() {
+  const el = document.getElementById("sheet"), n = S.view;
+  document.body.classList.toggle("locked", !!n);
+  if (!n) { el.innerHTML = ""; return; }
+  const here = F.map((f, i) => i).filter(i => F[i].slides.includes(n)), keep = REVIEW.works.filter(w => w.slide === n);
+  el.innerHTML = `<div class="scrim" data-close="1"></div><div class="viewer" role="dialog" aria-label="Slide ${n}">
+    <div class="grab"></div><div class="vh"><b>Slide ${n} <span class="lab" style="color:var(--grey)">of ${N}</span></b><button type="button" class="x" data-close="1" aria-label="Close">✕</button></div>
+    ${slidePic(n)}${DECK.images[n]
+      ? [...new Set(F.flatMap(f => f.quotes).concat(REVIEW.works.map(w => ({ text: w.quote, slide: w.slide }))).filter(q => q.slide === n).map(q => q.text))].map(t => `<p class="q"><mark>${esc(t)}</mark></p>`).join("")
+      : `<p class="stand-in lab">No picture of this slide in this build · its text</p>`}
+    <div class="steps"><button type="button" data-view="${n - 1}" ${n <= 1 ? "disabled" : ""}>← ${n > 1 ? n - 1 : ""}</button><button type="button" data-view="${n + 1}" ${n >= N ? "disabled" : ""}>${n < N ? n + 1 : ""} →</button></div>
+    <div class="onslide"><h3 class="lab">On this slide</h3>
+      ${here.map(i => `<div class="it2"><span class="lab sev ${F[i].severity}">${pad(i + 1)}</span><b>${esc(F[i].title)}</b>
+        <button type="button" class="go" data-jump="${i}">Go to finding ${pad(i + 1)} →</button></div>`).join("")}
+      ${keep.map(w => `<div class="it2"><span class="lab pill green">Keep</span><b>${esc(w.title)}</b></div>`).join("")}
+      ${here.length || keep.length ? "" : `<p class="none">Nothing flagged on this slide.</p>`}</div></div>`;
+  const pic = document.getElementById("pic");
+  if (pic) { let x0 = null;
+    pic.addEventListener("touchstart", e => x0 = e.touches[0].clientX, { passive: true });
+    pic.addEventListener("touchend", e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) view(n + (dx < 0 ? 1 : -1)); x0 = null; }); }
+}
+function view(n) { if (n < 1 || n > N) return; S.view = n; sheet(); document.querySelectorAll(".bar button").forEach(b => b.classList.toggle("cur", +b.dataset.view === n)); }
+function closeView() { S.view = null; sheet(); document.querySelectorAll(".bar .cur").forEach(b => b.classList.remove("cur")); }
+function jump(i) {
+  closeView(); S.focus = i; draw();
+  const el = document.getElementById("f" + i); el.scrollIntoView({ behavior: "smooth", block: "start" });
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+}
+
+document.addEventListener("click", e => {
+  const g = e.target.closest(".loop"); if (g) { S.focus = S.focus === +g.dataset.focus ? null : +g.dataset.focus; draw(); return; }
+  const t = e.target.closest("button, .scrim"); if (!t) return;
+  if (t.dataset.close) closeView();
+  else if (t.dataset.view) view(+t.dataset.view);
+  else if (t.dataset.jump != null) jump(+t.dataset.jump);
+  else if (t.dataset.k) { const i = t.dataset.i; if (S.d[i] === t.dataset.k) delete S.d[i]; else S.d[i] = t.dataset.k; S.focus = +i in lane ? +i : S.focus; render(); }
+  else if (t.id === "jump") document.getElementById("ticket").scrollIntoView({ behavior: "smooth", block: "start" });
+  else if (t.id === "copy") {
+    const ok = () => { t.textContent = "Copied"; setTimeout(() => t.textContent = "Copy note", 1600); };
+    const pick = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById("msg")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "Selected. Copy it from here"; };
+    try { navigator.clipboard.writeText(note()).then(ok, pick); } catch (err) { pick(); }
+  }
+});
+addEventListener("keydown", e => {
+  if (!S.view) return;
+  if (e.key === "ArrowRight") view(S.view + 1); else if (e.key === "ArrowLeft") view(S.view - 1); else if (e.key === "Escape") closeView();
+});
+addEventListener("resize", () => requestAnimationFrame(draw));
+if (document.fonts) document.fonts.ready.then(() => requestAnimationFrame(draw));
+render();
+</script>
+</body>
+</html>
