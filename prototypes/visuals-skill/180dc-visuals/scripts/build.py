@@ -100,7 +100,10 @@ def colour(highlight, any_highlight, i):
 def range_label(c, a, b):
     unit, dec = c.get("unit", ""), int(c.get("decimals", 0))
     if c.get("label") == "span":
-        return fmt(b - a, c.get("span_unit", unit), dec)
+        su = c.get("span_unit", unit)
+        if round(b - a, dec) == 1 and su.endswith("s"):
+            su = su[:-1]  # 1.0 quarter, not 1.0 quarters
+        return fmt(b - a, su, dec)
     return f"{fmt(a, unit, dec)}–{fmt(b, unit, dec)}"
 
 

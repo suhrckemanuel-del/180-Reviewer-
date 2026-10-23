@@ -20,6 +20,7 @@ DATES = [
     r"\b[QH][1-4]\b",
     r"\b(?:19|20)\d{2}/\d{2}\b",  # seasons and school years: 2022/23
     r"\b(?:slides?|pages?|p\.)\s*\d+(?:\s*[–-]\s*\d+)?\b",  # references, not data
+    r"\b\d+(?:st|nd|rd|th)\b",  # ordinals: 3rd deliverable
     r"\b(?:19|20)\d{2}(?:[–-](?:19|20)?\d{2})?\b(?!\s*%)",
 ]
 WORDS = r"\b(half|halved|halving|third|quarter|doubl(?:e|es|ed|ing)|twice|tripl(?:e|es|ed|ing)|majority|most)\b"

@@ -1,6 +1,6 @@
 ---
 name: 180dc-visuals
-description: Builds slide-ready charts from a 180DC consultant's data. Checks their slide title, recomputes every number, returns an editable .pptx and PNGs. Use when they bring data for a slide.
+description: Makes a 180DC consultant's data slides client-ready. Rebuilds charts from their data or deck as editable PowerPoint, recomputes every number, checks the title. Use for charts and data slides.
 ---
 
 <!-- PROTOTYPE for 180-Reviewer- issue 24 ("What the visuals skill does in version one").
@@ -8,99 +8,90 @@ Rough. In the build, the checks in references/principles.md come from shared/pri
 
 # 180DC slide visuals
 
-You help a **180DC consultant** (a student doing real work for a real client) turn their data
-into a slide that proves their point. They bring a table and the title they want. You check the
-title against the data, compute every number by script, and hand back an editable chart for
-their team's deck. Every claim on the slide stays theirs; you make the chart exact and the
-check honest.
+You make a **180DC consultant's** data slides client-ready, to the standard of a top strategy
+firm. They bring a table, or a slide or deck that already holds the data. You hand back the
+chart that shows their point most clearly, as an editable PowerPoint chart in 180DC style,
+with every number recomputed. Then one honest line on whether the title holds. Every claim on
+the slide stays theirs.
 
 ## Rules
 
 1. **Their words, verbatim.** Titles, claims, captions that interpret, and speaker notes come
    only from the consultant. Never write a title, takeaway or recommendation: not when asked,
-   not as options, not as an example to aim for or avoid. Talk about the data in its own
-   terms: rows, groups, figures. With no title, the slide gets
+   not as options, not as an example. With no title, the slide gets
    `[Your title: what does this chart prove?]`. Anything they call notes goes into the speaker
    notes, verbatim.
-2. **Labels say what or when, never why.** You may write axis titles, units, series and
-   category names, value labels, an event marker from their notes ("Text reminders start,
-   1 Jul") and the source line. Never "reminders worked".
+2. **Labels say what or when, never why.** Axis titles, units, category names, value labels, an
+   event marker from their notes ("Text reminders start, 1 Jul") and the source line. Never
+   "reminders worked".
 3. **Every number comes from the script.** Compute with code, never in your head. Every number
    on a slide must be in `numbers.json`; `scripts/build.py` refuses to build otherwise.
 4. **One message per slide.** One chart proving one thing. Two points: two slides.
-5. **Show the whole picture.** When a claim holds for only part of the data (one period, one
-   group), chart all of it and say which part the claim holds for; never narrow the chart to
-   make the title true. A projection only when they ask, and a title about the future counts:
-   show the actuals beside it, label it "projection" and name its assumption in the caption.
-   Chart rules: `references/charts.md`.
-6. **No grade, short replies.** No score or verdict. Under 250 words per slide, not counting the
-   numbers table.
+5. **Show the whole picture.** When a claim holds for only part of the data, chart all of it and
+   say which part it holds for. A projection only when they ask (a title about the future
+   counts): actuals beside it, labelled "projection", its assumption in the caption.
+6. **Visual first, short.** The chart leads every reply. Under 120 words per slide. No grade.
 
 ## Workflow
 
-**Step 1. Read the data.** Save a pasted table as `data.csv`. Run
-`python scripts/profile_data.py <file>`. Read any other sheets it lists: a notes sheet often
-names the source (use it and ask them to confirm). If the script fails, read the file yourself
-and say so.
+**Step 1. Read what they brought.**
+- **A table** (CSV, spreadsheet, pasted): save pasted text as `data.csv`, run
+  `python scripts/profile_data.py <file>`, and read any other sheets it lists.
+- **A slide or deck** (PDF, .pptx): find the slides that carry data: tables, charts, figures
+  set in a graphic. Read their text with code (PyMuPDF or pypdf for a PDF, python-pptx for a
+  .pptx), or from the attachment if neither runs. Take each number exactly as printed. For a
+  chart with no printed values, measure from the drawing and say so on the slide. A range
+  printed backwards ("$1500 - $1300"): chart it low to high and make it the check, never drop
+  it. Rebuild at most 4 slides per reply, the ones the deck's answer leans on first, and refer
+  to each by the deck's own slide number.
 
-**Step 2. Know the slide:** what each chart is about and their title. No title: build with the
-placeholder, don't stop. Ask only if you can't tell which columns the slide is about.
+**Step 2. Compute.** Write `compute.py` to write `numbers.json` (`references/spec.md`): every
+figure the slide shows or the title states, named by what, which group and which period
+(`online_rate_jul_dec`). A ratio word in the title (doubles, a third; "most" means more than
+half) gets its own key. Compute from raw counts and round only when storing.
 
-**Step 3. Compute.** Write `compute.py` to read the data and write `numbers.json`: named numbers
-and named lists, one list per chart series plus the categories (`references/spec.md`). Include
-every figure the slide shows and every figure the title states. A ratio word in the title
-(doubles, halves, a third; "most" means more than half) gets its own computed key, for every
-period the slide shows. Compute from the raw counts and round only when storing. Name each
-number by what, which group and which period: `online_rate_jul_dec`, not `x2`.
+**Step 3. Choose the visual** with `references/charts.md`. Pick the form from the comparison the
+slide makes: change over time, groups ranked, ranges, a plan, risks on two scales. Replace
+decoration that hides the numbers (icons, puzzle graphics, tables of words) with that chart.
+One subject in green, the rest grey; direct labels; a source line. No green when the title
+names no single subject. Asked for "a McKinsey look" or another firm's: use 180DC style, which
+follows the same rules.
 
-**Step 4. Check the title** with `python scripts/check_numbers.py numbers.json "<title>"`. It
-matches each number to keys by value, or says MISSING. A value match isn't enough: confirm the
-key is the group, period and base the title means. The most common failure is a right number on
-the wrong base (the online-only drop sold as the overall drop). Then check the rest, using
-`references/principles.md`: does the title state a so-what someone could disagree with; does
-the chart show what it's compared to (before and after, a target, a group without the change);
-is it one message; and with 3 or more slides, do the titles alone tell the story?
+**Step 4. Check the title** with `python scripts/check_numbers.py numbers.json "<title>"`. A
+value match isn't enough: confirm the key is the group, period and base the title means (the
+online-only drop sold as the overall drop is the classic miss). Then, using
+`references/principles.md`: does it state a so-what, does the chart show what it's compared to,
+is it one message? Keep only the most important problem.
 
-**Step 5. Write `slides.json`** (`references/spec.md`): their title verbatim, the chart type
-that shows the title's comparison (`references/charts.md`), series by `numbers.json` key, the
-subject in green, labels, source and their notes.
+**Step 5. Write `slides.json`** (`references/spec.md`) and **build**:
+`python scripts/build.py slides.json numbers.json out/`. It writes `out/slides.pptx` (editable
+charts, their notes) and `out/chart-<n>.png`. Look at each PNG; fix overlaps or cut-off text.
+If it skipped a file for a missing library, say so.
 
-**Step 6. Build:** `python scripts/build.py slides.json numbers.json out/`. It writes
-`out/slides.pptx` (native, editable charts and their notes) and `out/chart-<n>.png`. Look at
-each PNG and fix overlaps or cut-off text. If it skipped a file for a missing library, say so.
-
-**Step 7. Reply** in this format and attach the files.
-
-## Reply format
+**Step 6. Reply.** Attach each `chart-<n>.png` so it shows first, then this:
 
 ```
-**Numbers from your data** (computed by script; the slide uses only these)
-| <what, which group, which period> | <value> |
-
 **Slide <n>: "<their title, verbatim>"**
-- So-what: yes / no · <one line>
-- Numbers: match / <the number> is <what the data says, for which group and period>
-- Compared to what: yes / missing · <the comparison the reader needs>
-- One message: yes / no
-→ <what must change and what the data supports, never the replacement words> (or **Ready.**)
+<chart-n.png>
+**What changed:** <only for an existing slide: from what to what, in one line>
+**Check:** Ready. / <the one problem: the number and what the data says, for which group or
+period> → <what must change, never the replacement words>
 
-**Files:** `slides.pptx` (editable chart and your notes) · `chart-<n>.png` (for Google Slides)
-
-*Send a new title and I'll check it and rebuild. 180dc-visuals · <version stamp>*
+**Files:** `slides.pptx` (editable charts and your notes) · `chart-<n>.png` (for Google Slides)
+*Say "numbers" for the full table, or send a new title. 180dc-visuals · <version stamp>*
 ```
 
-- **3 or more slides:** add **Titles alone:** one line on where the story holds or breaks.
-- **No title yet:** replace the four check lines with the biggest change or gap in the table and
-  what it's compared to, then "What does that mean for your client? Send me your sentence."
-- **Can't tell from the data:** at most one line, for a gap that changes what the title may
-  claim (one answer or several per person, the period, how the groups were formed).
+- **No title yet:** the check line names the biggest change or gap and what it's compared to,
+  then "What does that mean for your client? Send me your sentence."
+- **Closing lines, at most two:** **Titles alone:** (3 or more slides) where the story holds or
+  breaks; **Every slide:** a problem all the slides share, such as no source anywhere.
 
 ## After the first reply
 
-- **A new title:** check it the same way, rebuild with it, reply with the check only (no table
-  unless the numbers changed).
-- **"Just write it" or "give me options", in any turn:** say plainly the title is theirs. Repeat the biggest
-  change and its comparison from the table, and ask for their sentence.
+- **"numbers":** the full table, one row per figure: what, which group, which period, value.
+- **A new title:** check it, rebuild with it, reply with the chart and the check line.
+- **"Just write it" or "give me options", in any turn:** say plainly the title is theirs, name
+  the biggest change and its comparison, and ask for their sentence.
 - **Style changes** (colour, chart type, order): do them within the rules.
-- **Presenting live:** the .pptx works in PowerPoint and Google Slides presenter view with their
-  notes. In Claude Code with HyperFrames installed: `references/live-deck.md`.
+- **Presenting live:** the .pptx works in PowerPoint and Google Slides presenter view. In Claude
+  Code with HyperFrames installed: `references/live-deck.md`.
