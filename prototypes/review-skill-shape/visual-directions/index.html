@@ -1,0 +1,107 @@
+<meta charset="utf-8">
+<title>Reviewer Look Drafts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&family=Martian+Mono:wdth,wght@75..112.5,400;75..112.5,500&display=swap">
+<style>
+  /* Gallery of the four drafts as one ruled sheet, the same grammar as draft 04. Deliberately light-only. */
+  :root {
+    --page: #f6f6f2; --paper: #ffffff; --ink: #121411; --grey: #5f655b; --green: #78B038; --forest: #183a0e;
+    --sans: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Martian Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--page); color: var(--ink); font: 400 15.5px/1.5 var(--sans); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 56px; }
+  .lab { font: 500 10px/1.4 var(--mono); font-stretch: 85%; letter-spacing: .04em; text-transform: uppercase; color: var(--grey); }
+  .cells { display: grid; gap: 1px; background: var(--ink); border: 1px solid var(--ink); }
+  .cells > * { background: var(--paper); min-width: 0; }
+  h1 { font: 800 34px/1.04 var(--sans); letter-spacing: -.025em; margin: 6px 0 10px; text-wrap: balance; }
+  .intro { max-width: 64ch; margin: 0 0 22px; color: var(--grey); }
+  .draft { grid-template-columns: 1fr; margin-bottom: 22px; }
+  .draft .tabs { display: grid; grid-template-columns: auto 1fr auto; gap: 1px; background: var(--ink); }
+  .draft .tabs > * { background: var(--paper); padding: 8px 12px; }
+  .draft .no { font: 800 15px/1.2 var(--sans); }
+  .draft .verdict { background: var(--ink) !important; color: var(--paper); }
+  .draft .verdict.lead { background: var(--green) !important; color: var(--forest); }
+  .draft .text { padding: 16px 14px; }
+  .draft h2 { font: 800 23px/1.1 var(--sans); letter-spacing: -.015em; margin: 0 0 8px; }
+  .draft p { margin: 0 0 10px; }
+  .draft ul { margin: 0 0 12px; padding-left: 18px; color: var(--grey); }
+  .open { display: inline-block; background: var(--ink); color: var(--paper); text-decoration: none; padding: 10px 14px; font-weight: 700; }
+  .open:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px; background: #eef0ea !important; align-content: start; }
+  .shots img { width: 100%; max-width: 100%; display: block; border: 1px solid var(--ink); }
+  .shots.one { grid-template-columns: 1fr; }
+  .sec { font: 800 13px/1 var(--sans); letter-spacing: .02em; text-transform: uppercase; margin: 36px 0 10px; }
+  .refs { grid-template-columns: repeat(3, 1fr); }
+  .refs figure { margin: 0; padding: 10px; }
+  .refs img { width: 100%; display: block; border: 1px solid #d6d9d0; }
+  .refs figcaption { margin-top: 6px; font-size: 13.5px; }
+  .rules { grid-template-columns: 1fr 1fr; }
+  .rules > div { padding: 12px 14px; }
+  .rules h3 { font: 800 15px/1.2 var(--sans); margin: 0 0 6px; }
+  .rules ul { margin: 0; padding-left: 18px; }
+  @media (min-width: 780px) {
+    .draft { grid-template-columns: 1fr 1fr; }
+    .draft .tabs { grid-column: 1 / -1; }
+  }
+  @media (max-width: 640px) { .refs { grid-template-columns: 1fr 1fr; } .rules { grid-template-columns: 1fr; } }
+</style>
+
+<div class="wrap">
+  <div class="lab">180DC reviewer · issue 23 · invented deck and review</div>
+  <h1>Four drafts of the lead's review view</h1>
+  <p class="intro">Each draft shows the same review of the same invented deck. Only the presentation changes. Open a draft to try it; 03 and 04 let you decide each finding and build a note to the team.</p>
+
+  <section class="cells draft">
+    <div class="tabs"><span class="no">01</span><span class="lab">Look options</span><span class="lab verdict">Rejected</span></div>
+    <div class="text"><h2>Three recolours of the old layout</h2>
+      <p>Steep, Vercel and Ramp styles applied to the existing chat reply and deck walk, side by side.</p>
+      <ul><li>Every block was still a rounded card with a soft shadow.</li><li>Recolouring didn't change how it reads: it still looked made by Claude.</li></ul>
+      <a class="open" href="01-look-options.html">Open draft 01</a></div>
+    <div class="shots one"><img src="screenshots/01-look-options.jpg" alt="Draft 01 at phone width"></div>
+  </section>
+
+  <section class="cells draft">
+    <div class="tabs"><span class="no">02</span><span class="lab">Paper</span><span class="lab verdict">Good direction</span></div>
+    <div class="text"><h2>The deck as paper on a desk</h2>
+      <p>Each finding is pinned to its slide: the quote sits on a 16:9 sheet with a green highlighter, and the note is clipped over the corner.</p>
+      <ul><li>Main issue as a large sentence, no box.</li><li>Counts on a printed label; slides as a segmented strip.</li><li>Calm, but read-only: the lead still has to work out what to send.</li></ul>
+      <a class="open" href="02-paper.html">Open draft 02</a></div>
+    <div class="shots"><img src="screenshots/02-paper-top.jpg" alt="Draft 02, top"><img src="screenshots/02-paper-finding.jpg" alt="Draft 02, a finding"></div>
+  </section>
+
+  <section class="cells draft">
+    <div class="tabs"><span class="no">03</span><span class="lab">Hand-back</span><span class="lab verdict">Too loud</span></div>
+    <div class="text"><h2>Built around the lead's job</h2>
+      <p>Swipe one finding per card and choose send to team, ask first, or leave out. The last card is a note to paste to the team.</p>
+      <ul><li>The right idea: the lead ends with something to send.</li><li>Too much colour, and the big rounded cards slip back into the Claude look.</li></ul>
+      <a class="open" href="03-hand-back.html">Open draft 03</a></div>
+    <div class="shots"><img src="screenshots/03-hand-back-top.jpg" alt="Draft 03, cover"><img src="screenshots/03-hand-back-finding.jpg" alt="Draft 03, a finding"></div>
+  </section>
+
+  <section class="cells draft">
+    <div class="tabs"><span class="no">04</span><span class="lab">Review sheet</span><span class="lab verdict lead">Front-runner</span></div>
+    <div class="text"><h2>One ruled sheet, with decisions</h2>
+      <p>The calm of 02 and the hand-back of 03. Findings sit on slide frames, each ends in a send / ask / leave-out row, and the sheet ends in the note.</p>
+      <ul><li>Boxes are ruled cells that share one line: square corners, no shadows, no tinted panels.</li><li>Green only on the main issue and the lead's "send" choices.</li><li>Schibsted Grotesk and Martian Mono instead of Claude-like fonts.</li></ul>
+      <a class="open" href="04-review-sheet.html">Open draft 04</a></div>
+    <div class="shots"><img src="screenshots/04-review-sheet-top.jpg" alt="Draft 04, top"><img src="screenshots/04-review-sheet-finding.jpg" alt="Draft 04, a finding"></div>
+  </section>
+
+  <h2 class="sec">What we changed, and where it came from</h2>
+  <div class="cells rules">
+    <div><h3>Why the early drafts looked like Claude</h3><ul><li>Every block a floating card: big round corners, soft shadow, pastel panel.</li><li>The main issue in a tinted box with a stripe down its left edge.</li><li>Red, amber and grey severity chips, which read as a grade.</li><li>A bookish serif and plain system sans, close to Claude's own chat fonts.</li></ul></div>
+    <div><h3>What we borrowed instead</h3><ul><li>Ruled cells that share lines (Ramp, Browserbase, Attio).</li><li>The slide itself as the object, with highlighted quotes (Ramp, Superhuman).</li><li>Printed labels and a port strip (teenage engineering, Ramp).</li><li>One loud colour, used only where the lead acts (Ramp).</li></ul></div>
+  </div>
+  <div class="cells refs" style="margin-top:12px">
+    <figure><img src="screenshots/ref-ramp.jpg" alt="Ramp homepage"><figcaption><b>Ramp</b> · invoice with an attached panel, single accent</figcaption></figure>
+    <figure><img src="screenshots/ref-browserbase.jpg" alt="Browserbase homepage"><figcaption><b>Browserbase</b> · ruled logo cells, block highlight</figcaption></figure>
+    <figure><img src="screenshots/ref-attio.jpg" alt="Attio homepage"><figcaption><b>Attio</b> · tab cells fused to the panel</figcaption></figure>
+    <figure><img src="screenshots/ref-teenage.jpg" alt="teenage engineering product"><figcaption><b>teenage engineering</b> · printed labels, port strip</figcaption></figure>
+    <figure><img src="screenshots/ref-superhuman.jpg" alt="Superhuman homepage"><figcaption><b>Superhuman</b> · highlight inside the text</figcaption></figure>
+    <figure><img src="screenshots/ref-sprig.jpg" alt="Sprig homepage"><figcaption><b>Sprig</b> · two-tone headline</figcaption></figure>
+  </div>
+  <p class="lab" style="margin-top:22px">Reference screenshots via styles.refero.design. The deck and review in every draft are invented.</p>
+</div>
