@@ -107,5 +107,7 @@ if __name__ == "__main__":
     nums = json.load(open(sys.argv[1], encoding="utf-8"))
     lines, ok = check(nums, sys.argv[2:])
     print("\n".join(lines) if lines else "  no numbers found")
-    print("ALL NUMBERS MATCH" if ok else "SOME NUMBERS ARE MISSING: fix the text or compute them")
+    eye = any("CHECK BY EYE" in l for l in lines)
+    print(("ALL NUMBERS MATCH" + (", BUT THE WORDS MARKED CHECK BY EYE ARE NOT CHECKED YET" if eye else ""))
+          if ok else "SOME NUMBERS ARE MISSING: fix the text or compute them")
     sys.exit(0 if ok else 1)

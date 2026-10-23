@@ -28,4 +28,4 @@ numbers table.
 - **The source line** names the dataset, the period and the count of rows or records. If they
   haven't said where the data comes from, use `Source: [add source]` and tell them.
 - **Text a reader needs** is 14 pt or more on the slide. If it doesn't fit, cut categories.
-- No pie, donut, 3D, dual axis, gradient or shadow.
+- No pie, donut, 3D, dual axis, gradient or shadow. No invented or smoothed points.
