@@ -15,6 +15,14 @@ first in the file. Use the slide's `title` field, or the slide image when you ca
 callout, so use it only when it reads as a heading. When none of these tells you which line is
 the title, don't build a title or ghost-deck finding on that slide.
 
+## Weak is not absent
+
+Before saying a deck never states something, search every slide for it. If it is there in weak
+form (hedged, buried in a list, one point among six), quote that and say what is wrong with it
+("your summary says returning donors are 'very promising' in the middle of a paragraph, not as
+the answer"). "Never" and "missing" are only for what is truly not in the deck. A consultant who
+finds the line you said was missing stops trusting the rest.
+
 ## A deck inside the deck
 
 A deliverable often contains something the team made *for* the client to use: a pitch deck for
