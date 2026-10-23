@@ -58,10 +58,34 @@ def docx(path):
     return [{'n': 1, 'items': [p for p in paras if p]}]
 
 
+def pdf_largest(page):
+    # the text set in the page's largest font: usually the title, sometimes a number or divider
+    chunks = []
+    def visit(text, cm, tm, font, size):
+        if text.strip():
+            chunks.append((round(abs(size * tm[3] * cm[3]), 1), text.strip()))
+    try:
+        page.extract_text(visitor_text=visit)
+    except Exception:
+        return None
+    if not chunks:
+        return None
+    top = max(s for s, _ in chunks)
+    return clean(' '.join(t for s, t in chunks if s == top).replace('ﬁ', 'fi').replace('ﬂ', 'fl'))
+
+
 def pdf(path):
     try:
         from pypdf import PdfReader
-        pages = [pg.extract_text() or '' for pg in PdfReader(path).pages]
+        reader = PdfReader(path)
+        pages = [pg.extract_text() or '' for pg in reader.pages]
+        largest = [pdf_largest(pg) for pg in reader.pages]
+        slides = [{'n': i, 'items': [clean(l) for l in p.splitlines() if clean(l)]}
+                  for i, p in enumerate(pages, 1)]
+        for s, big in zip(slides, largest):
+            if big:
+                s['largest_text'] = big
+        return slides
     except ImportError:
         try:
             out = subprocess.run(['pdftotext', '-layout', path, '-'], capture_output=True,
