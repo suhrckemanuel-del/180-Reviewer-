@@ -9,6 +9,9 @@ Pick the form from the comparison the title makes, not from the data's shape.
 | Groups against each other on one measure | `bar` (horizontal), sorted largest first unless the order means something; "Other" always last. Survey answers: chart counts, shares in the numbers table |
 | Parts of a whole, or shares in two populations | `stacked100` (horizontal), at most 4 parts |
 | One number against a target | no chart: a large figure and its target in the caption, or a `bar` with two bars |
+| Price or cost ranges, options with a low and high estimate | `range`, sorted by spread; a `marker` line for a figure to test against the ranges |
+| A plan over time (steps, phases) | `range` with `band_labels` (quarters or months) and `"label": "span"`: a Gantt |
+| Risks or options rated on two scales (likelihood and impact) | `matrix`, never a table of Low/Medium/High words |
 
 When two forms fit, pick the one that shows whether the claim holds across periods or groups
 (two groups by season beats one pooled pair of bars), and keep the pooled figures in the

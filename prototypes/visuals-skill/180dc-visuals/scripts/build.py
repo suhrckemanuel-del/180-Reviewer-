@@ -12,7 +12,7 @@ from check_numbers import check
 
 GREEN, GREY, DARK, INK, MUTED, RULE = "78B038", "A3A8AE", "3A3F45", "1D2124", "6B7075", "E3E5E1"
 PLACEHOLDER = "[Your title: what does this chart prove?]"
-TYPES = ("line", "column", "bar", "stacked100")
+TYPES = ("line", "column", "bar", "stacked100", "range", "matrix")
 
 
 def fail(msg):
@@ -33,7 +33,31 @@ def resolve(slide, nums, n):
         return None
     if c.get("type") not in TYPES:
         fail(f"slide {n}: chart type must be one of {', '.join(TYPES)}")
+    if c["type"] == "matrix":
+        xs, ys = c.get("x_levels") or [], c.get("y_levels") or []
+        for p in c.get("points", []):
+            if p.get("x") not in xs or p.get("y") not in ys:
+                fail(f"slide {n}: matrix point {p.get('name')!r} must use one of the x_levels and y_levels")
+        return xs, ys
     cats = nums.get(c.get("categories"))
+    if c["type"] == "range":
+        if not isinstance(cats, list):
+            fail(f"slide {n}: categories key {c.get('categories')!r} is not a list in numbers.json")
+        lo, hi = nums.get(c.get("low")), nums.get(c.get("high"))
+        if not (isinstance(lo, list) and isinstance(hi, list) and len(lo) == len(hi) == len(cats)):
+            fail(f"slide {n}: range needs 'low' and 'high' keys naming lists as long as the categories")
+        for cat, a, b in zip(cats, lo, hi):
+            if a > b:
+                fail(f"slide {n}: {cat!r} has low {a} above high {b}: fix the data or say which is right")
+        mk = c.get("marker")
+        if mk and not isinstance(nums.get(mk.get("key")), (int, float)):
+            fail(f"slide {n}: marker key {mk.get('key')!r} is not a number in numbers.json")
+        bands = c.get("band_labels")
+        if bands and not isinstance(nums.get(bands), list):
+            fail(f"slide {n}: band_labels key {bands!r} is not a list in numbers.json")
+        c["_bands"] = nums.get(bands) if bands else None
+        c["_marker"] = float(nums[mk["key"]]) if mk else None
+        return [str(x) for x in cats], [("low", [float(v) for v in lo], False), ("high", [float(v) for v in hi], False)]
     if not isinstance(cats, list):
         fail(f"slide {n}: categories key {c.get('categories')!r} is not a list in numbers.json")
     series = []
@@ -58,8 +82,10 @@ def resolve(slide, nums, n):
 def slide_texts(slide):
     c = slide.get("chart") or {}
     out = [slide.get("title") or "", slide.get("caption") or "", slide.get("source") or "",
-           c.get("y_label") or "", (c.get("event") or {}).get("label") or ""]
+           c.get("y_label") or "", (c.get("event") or {}).get("label") or "",
+           (c.get("marker") or {}).get("label") or ""]
     out += [s.get("name", "") for s in c.get("series", [])]
+    out += [p.get("name", "") for p in c.get("points", [])]
     return [t for t in out if t]
 
 
@@ -71,6 +97,54 @@ def colour(highlight, any_highlight, i):
 
 # ---------- PNG (matplotlib) ----------
 
+def range_label(c, a, b):
+    unit, dec = c.get("unit", ""), int(c.get("decimals", 0))
+    if c.get("label") == "span":
+        return fmt(b - a, c.get("span_unit", unit), dec)
+    return f"{fmt(a, unit, dec)}–{fmt(b, unit, dec)}"
+
+
+def png_footer(fig, slide):
+    import textwrap
+    foot = "   ".join(x for x in (slide.get("caption"), slide.get("source")) if x)
+    if foot:
+        foot = "\n".join(textwrap.wrap(foot, 150))
+        fig.text(0.01, 0.005, foot, fontsize=11, color="#" + MUTED, ha="left", va="bottom")
+    return 0.05 + 0.03 * (foot or "").count("\n")
+
+
+def build_matrix_png(slide, data, path, plt):
+    from matplotlib.patches import Rectangle
+    c = slide["chart"]
+    xs, ys = data
+    fig, ax = plt.subplots(figsize=(12, 5.6), dpi=200)
+    ax.axis("off")
+    for i in range(len(xs)):
+        for j in range(len(ys)):
+            ax.add_patch(Rectangle((i, j), 1, 1, facecolor="#F3F4F1", edgecolor="white", linewidth=5))
+    cells = {}
+    for p in c.get("points", []):
+        cells.setdefault((xs.index(p["x"]), ys.index(p["y"])), []).append(p)
+    for (i, j), ps in cells.items():
+        for k, p in enumerate(ps):
+            y = j + 0.5 + (len(ps) - 1) * 0.15 - k * 0.3
+            h = p.get("highlight")
+            ax.text(i + 0.5, y, p["name"], ha="center", va="center", fontsize=15, fontweight="bold" if h else "normal",
+                    color="#" + INK, bbox=dict(boxstyle="square,pad=0.4", fc="#" + (GREEN if h else "D5D8D3"), ec="none"))
+    for i, lv in enumerate(xs):
+        ax.text(i + 0.5, -0.07, lv, ha="center", va="top", fontsize=14, color="#" + MUTED)
+    for j, lv in enumerate(ys):
+        ax.text(-0.05, j + 0.5, lv, ha="right", va="center", fontsize=14, color="#" + MUTED)
+    ax.text(len(xs) / 2, -0.32, c.get("x_label", ""), ha="center", va="top", fontsize=14, fontweight="bold")
+    ax.text(-0.5, len(ys) / 2, c.get("y_label", ""), ha="center", va="center", rotation=90, fontsize=14, fontweight="bold")
+    ax.set_xlim(-0.6, len(xs) + 0.02)
+    ax.set_ylim(-0.5, len(ys) + 0.02)
+    bottom = png_footer(fig, slide)
+    fig.tight_layout(rect=(0, bottom, 1, 1))
+    fig.savefig(path, facecolor="white")
+    plt.close(fig)
+
+
 def build_png(slide, data, path):
     import matplotlib
     matplotlib.use("Agg")
@@ -79,9 +153,11 @@ def build_png(slide, data, path):
     from matplotlib import font_manager
     have = {f.name for f in font_manager.fontManager.ttflist}
     family = next((f for f in ("IBM Plex Sans", "Arial", "Liberation Sans") if f in have), "DejaVu Sans")
-    plt.rcParams.update({"font.family": family,
+    plt.rcParams.update({"font.family": family, "text.parse_math": False,  # "$2,000–$20,000" is money, not maths
                          "font.size": 15, "axes.edgecolor": "#" + RULE, "text.color": "#" + INK})
     c = slide["chart"]
+    if c["type"] == "matrix":
+        return build_matrix_png(slide, data, path, plt)
     cats, series = data
     unit, dec = c.get("unit", ""), int(c.get("decimals", 0))
     anyh = any(h for _, _, h in series)
@@ -90,7 +166,7 @@ def build_png(slide, data, path):
     for side in ("top", "right", "left"):
         ax.spines[side].set_visible(False)
     ax.tick_params(colors="#" + MUTED, length=0)
-    ax.grid(axis="x" if c["type"] in ("bar", "stacked100") else "y", color="#" + RULE, linewidth=1)
+    ax.grid(axis="x" if c["type"] in ("bar", "stacked100", "range") else "y", color="#" + RULE, linewidth=1)
     ax.set_axisbelow(True)
     tick = FuncFormatter(lambda v, _: fmt(v, unit, 0 if float(v).is_integer() else 1))
     t = c["type"]
@@ -112,6 +188,35 @@ def build_png(slide, data, path):
         ax.set_xlim(-0.3, n - 1 + max(1.6, n * 0.16))
         ax.set_xticks(x, cats)
         ax.yaxis.set_major_formatter(tick)
+    elif t == "range":
+        lo, hi = series[0][1], series[1][1]
+        hc = c.get("highlight_category")
+        cols = ["#" + (GREEN if cats[k] == hc else GREY) for k in range(n)] if hc else ["#" + DARK] * n
+        ax.barh(range(n), [b - a for a, b in zip(lo, hi)], left=lo, height=0.55, color=cols, zorder=3)
+        bands = c.get("_bands")
+        if bands:
+            xmin, xmax = 0, len(bands)
+            ax.grid(False)
+            for k in range(len(bands) + 1):
+                ax.axvline(k, color="#" + RULE, linewidth=1, zorder=1)
+            ax.set_xticks([k + 0.5 for k in range(len(bands))], bands)
+            ax.xaxis.tick_top()
+        else:
+            xmin = c.get("x_min", 0)
+            xmax = c.get("x_max") or max(hi) * 1.18
+            ax.xaxis.set_major_formatter(tick)
+        pad = (xmax - xmin) * 0.012
+        for k, (a, b) in enumerate(zip(lo, hi)):
+            ax.text(b + pad, k, range_label(c, a, b), va="center", fontsize=14,
+                    fontweight="bold" if hc and cats[k] == hc else "normal", zorder=4)
+        mv = c.get("_marker")
+        if mv is not None:
+            ax.axvline(mv, color="#" + INK, linestyle=(0, (4, 4)), linewidth=1.8, zorder=5)
+            ax.text(mv + pad, -0.8, c["marker"].get("label", ""), va="center", fontsize=14, fontweight="bold", zorder=5)
+        ax.set_xlim(xmin, xmax)
+        ax.set_yticks(range(n), cats)
+        ax.set_ylim(n - 0.4, -1.1 if mv is not None else -0.6)
+        ax.spines["bottom"].set_visible(False)
     elif t == "column":
         w = 0.8 / len(series)
         for i, (name, vals, h) in enumerate(series):
@@ -160,13 +265,9 @@ def build_png(slide, data, path):
         ax.axvline(xe, color="#" + INK, linestyle=(0, (4, 4)), linewidth=1.5, zorder=1)
         ax.text(xe + 0.08, ax.get_ylim()[1], ev["label"], va="top", fontsize=14, fontweight="bold")
     if c.get("y_label"):
-        (ax.set_xlabel if t in ("bar", "stacked100") else ax.set_ylabel)(c["y_label"], color="#" + MUTED, fontsize=14)
-    foot = "   ".join(x for x in (slide.get("caption"), slide.get("source")) if x)
-    if foot:
-        import textwrap
-        foot = "\n".join(textwrap.wrap(foot, 150))
-        fig.text(0.01, 0.005, foot, fontsize=11, color="#" + MUTED, ha="left", va="bottom")
-    fig.tight_layout(rect=(0, 0.05 + 0.03 * (foot or "").count("\n"), 1, 1))
+        (ax.set_xlabel if t in ("bar", "stacked100", "range") else ax.set_ylabel)(c["y_label"], color="#" + MUTED, fontsize=14)
+    bottom = png_footer(fig, slide)
+    fig.tight_layout(rect=(0, bottom, 1, 1))
     fig.savefig(path, facecolor="white")
     plt.close(fig)
 
@@ -191,13 +292,15 @@ def build_pptx(slides, datas, path):
     CX, CY, CW, CH = Inches(0.6), Inches(1.95), Inches(12.1), Inches(4.5)
     PX, PY, PW, PH = 0.08, 0.1, 0.78, 0.76  # plot area inside the chart frame, as fractions
 
-    def text(sl, x, y, w, h, s, size, color=INK, bold=False):
+    def text(sl, x, y, w, h, s, size, color=INK, bold=False, align=None):
         tf = sl.shapes.add_textbox(x, y, w, h).text_frame
         tf.word_wrap = True
+        if align:
+            tf.paragraphs[0].alignment = align
         r = tf.paragraphs[0].add_run()
         r.text, r.font.size, r.font.bold, r.font.color.rgb = s, Pt(size), bold, rgb(color)
 
-    def pin_plot_area(chart):
+    def pin_plot_area(chart, px=PX, pw=PW):
         pa = chart._chartSpace.find(qn("c:chart")).find(qn("c:plotArea"))
         old = pa.find(qn("c:layout"))
         if old is not None:
@@ -207,8 +310,118 @@ def build_pptx(slides, datas, path):
         pa.insert(0, lay)
         ml = etree.SubElement(lay, qn("c:manualLayout"))
         for tag, val in (("layoutTarget", "inner"), ("xMode", "edge"), ("yMode", "edge"),
-                         ("x", PX), ("y", PY), ("w", PW), ("h", PH)):
+                         ("x", px), ("y", PY), ("w", pw), ("h", PH)):
             etree.SubElement(ml, qn("c:" + tag)).set("val", str(val))
+
+    def finish(sl, s, c):
+        if c.get("y_label") and c["type"] != "matrix":
+            text(sl, CX, CY - Inches(0.3), Inches(8), Inches(0.3), c["y_label"], 13, MUTED)
+        foot_y = CY + CH + Inches(0.1)
+        if s.get("caption"):
+            text(sl, CX, foot_y, CW, Inches(0.35), s["caption"], 14)
+            foot_y += Inches(0.38)
+        if s.get("source"):
+            text(sl, CX, foot_y, CW, Inches(0.35), s["source"], 11, MUTED)
+
+    def vline(sl, x, label):
+        y0, y1 = CY + int(CH * PY), CY + int(CH * (PY + PH))
+        ln = sl.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, x, y0, x, y1 + Inches(0.1))
+        ln.line.color.rgb, ln.line.width, ln.line.dash_style = rgb(INK), Pt(1.5), MSO_LINE_DASH_STYLE.DASH
+        if label:  # under the plot, clear of the axis labels
+            text(sl, x + Inches(0.06), y1 + Inches(0.02), Inches(5), Inches(0.35), label, 14, bold=True)
+
+    def matrix(sl, c, data):
+        from pptx.enum.shapes import MSO_SHAPE
+        from pptx.enum.text import MSO_ANCHOR
+        xs, ys = data
+        gx, gy = CX + Inches(1.6), CY + Inches(0.1)
+        cw, chh = (CW - Inches(2.0)) // len(xs), (CH - Inches(0.9)) // len(ys)
+        cells = {}
+        for p in c.get("points", []):
+            cells.setdefault((xs.index(p["x"]), ys.index(p["y"])), []).append(p)
+        for i in range(len(xs)):
+            for j in range(len(ys)):
+                x, y = gx + i * cw, gy + (len(ys) - 1 - j) * chh
+                box = sl.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, y, cw - Inches(0.06), chh - Inches(0.06))
+                box.fill.solid()
+                box.fill.fore_color.rgb = rgb("F3F4F1")
+                box.line.fill.background()
+                box.shadow.inherit = False
+                ps = cells.get((i, j), [])
+                tf = box.text_frame
+                tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+                for k, p in enumerate(ps):
+                    para = tf.paragraphs[0] if k == 0 else tf.add_paragraph()
+                    para.alignment = PP_ALIGN.CENTER
+                    r = para.add_run()
+                    r.text = p["name"]
+                    r.font.size, r.font.bold = Pt(15), bool(p.get("highlight"))
+                    r.font.color.rgb = rgb(GREEN if p.get("highlight") else INK)
+        for i, lv in enumerate(xs):
+            text(sl, gx + i * cw, gy + len(ys) * chh, cw, Inches(0.3), lv, 13, MUTED, align=PP_ALIGN.CENTER)
+        for j, lv in enumerate(ys):
+            text(sl, CX + Inches(0.6), gy + (len(ys) - 1 - j) * chh + chh // 2 - Inches(0.15), Inches(1.0), Inches(0.3), lv, 13, MUTED)
+        text(sl, gx, gy + len(ys) * chh + Inches(0.3), Inches(4), Inches(0.3), c.get("x_label", "") + " →", 14, bold=True)
+        text(sl, CX, gy, Inches(1.2), Inches(0.3), c.get("y_label", "") + " ↑", 14, bold=True)
+
+    def ranges(sl, c, data):
+        cats, series = data
+        lo, hi = series[0][1], series[1][1]
+        unit, dec = c.get("unit", ""), int(c.get("decimals", 0))
+        bands = c.get("_bands")
+        cd = CategoryChartData()
+        cd.categories = cats
+        xmin, xmax = (0, len(bands)) if bands else (c.get("x_min", 0), c.get("x_max") or max(hi) * 1.18)
+        cd.add_series("start", lo)
+        cd.add_series("span", [b - a for a, b in zip(lo, hi)])
+        cd.add_series("label", [(xmax - xmin) * 0.3] * len(cats))  # invisible; carries the label past the bar end
+        ch = sl.shapes.add_chart(XL_CHART_TYPE.BAR_STACKED, CX, CY, CW, CH, cd).chart
+        ch.has_title, ch.has_legend = False, False
+        ch.font.size = Pt(14)
+        ch.font.color.rgb = rgb(MUTED)
+        ch.category_axis.reverse_order = True
+        ch.category_axis.tick_labels.font.color.rgb = rgb(INK)
+        ch.category_axis.format.line.color.rgb = rgb(RULE)
+        va = ch.value_axis
+        va.minimum_scale, va.maximum_scale = xmin, xmax
+        va.has_major_gridlines = True
+        va.major_gridlines.format.line.color.rgb = rgb(RULE)
+        va.format.line.fill.background()
+        if bands:
+            va.major_unit = 1
+            va.tick_labels.font.size = Pt(1)
+            va.tick_labels.font.color.rgb = rgb("FFFFFF")
+        else:
+            va.tick_labels.number_format = ('"' + unit + '"' if unit in ("€", "$", "£") else "") + "#,##0" + ('"%"' if unit == "%" else "")
+            va.tick_labels.number_format_is_linked = False
+        plot = ch.plots[0]
+        plot.gap_width, plot.overlap = 70, 100
+        base, span, pad = plot.series
+        for ser in (base, pad):
+            ser.format.fill.background()
+            ser.format.line.fill.background()
+        hc = c.get("highlight_category")
+        span.format.fill.solid()
+        span.format.fill.fore_color.rgb = rgb(DARK if not hc else GREY)
+        for k, cat in enumerate(cats):
+            if hc and cat == hc:
+                pt = span.points[k]
+                pt.format.fill.solid()
+                pt.format.fill.fore_color.rgb = rgb(GREEN)
+            lab = pad.points[k].data_label
+            lab.text_frame.text = range_label(c, lo[k], hi[k])
+            run = lab.text_frame.paragraphs[0].runs[0]
+            run.font.size, run.font.bold, run.font.color.rgb = Pt(14), bool(hc and cat == hc), rgb(INK)
+            lab.position = XL_LABEL_POSITION.INSIDE_BASE
+        px, pw = 0.25, 0.62  # room on the left for category names on one line
+        pin_plot_area(ch, px, pw)
+        to_x = lambda v: CX + int(CW * (px + pw * (v - xmin) / (xmax - xmin)))
+        if bands:
+            bw = int(CW * pw / len(bands))
+            for k, b in enumerate(bands):
+                text(sl, to_x(k), CY + int(CH * PY) - Inches(0.38), bw, Inches(0.3), str(b), 13, MUTED, align=PP_ALIGN.CENTER)
+        if c.get("_marker") is not None:
+            vline(sl, to_x(c["_marker"]), c["marker"].get("label", ""))
 
     for n, (s, data) in enumerate(zip(slides, datas), 1):
         sl = prs.slides.add_slide(prs.slide_layouts[5])  # Title Only: a real title, so outline view shows the ghost deck
@@ -225,6 +438,10 @@ def build_pptx(slides, datas, path):
         if data is None:
             continue
         c = s["chart"]
+        if c["type"] in ("matrix", "range"):
+            (matrix if c["type"] == "matrix" else ranges)(sl, c, data)
+            finish(sl, s, c)
+            continue
         cats, series = data
         unit, dec = c.get("unit", ""), int(c.get("decimals", 0))
         anyh = any(h for _, _, h in series)
@@ -308,14 +525,7 @@ def build_pptx(slides, datas, path):
             ln = sl.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, x, y0, x, y1)
             ln.line.color.rgb, ln.line.width, ln.line.dash_style = rgb(INK), Pt(1.5), MSO_LINE_DASH_STYLE.DASH
             text(sl, x + Inches(0.08), y0 - Inches(0.05), Inches(4), Inches(0.4), ev["label"], 14, bold=True)
-        if c.get("y_label"):
-            text(sl, CX, CY - Inches(0.3), Inches(8), Inches(0.3), c["y_label"], 13, MUTED)
-        foot_y = CY + CH + Inches(0.1)
-        if s.get("caption"):
-            text(sl, CX, foot_y, CW, Inches(0.35), s["caption"], 14)
-            foot_y += Inches(0.38)
-        if s.get("source"):
-            text(sl, CX, foot_y, CW, Inches(0.35), s["source"], 11, MUTED)
+        finish(sl, s, c)
     prs.save(path)
 
 

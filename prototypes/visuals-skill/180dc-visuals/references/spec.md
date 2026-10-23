@@ -62,3 +62,25 @@ A flat object. Values are numbers or lists of numbers (one per category), plus l
 - Keep `y_label` under about 40 characters and `caption` plus `source` under about 120, or the
   PNG wraps and crowds.
 - `y_max` and `decimals` are optional.
+
+### `range` (cost ranges, Gantt plans)
+
+```json
+{"type": "range", "categories": "option_names", "low": "option_low", "high": "option_high",
+ "unit": "€", "x_max": 50000, "highlight_category": "Option B",
+ "marker": {"key": "slide_estimate", "label": "Estimate on the slide: €40,000"}}
+```
+- `low` and `high` name lists; the build stops if a low is above its high (a range written
+  backwards is a finding to report, not to fix silently).
+- `marker` draws a dashed line at a numbers.json value: use it to test a figure against ranges.
+- Gantt: `"band_labels": "<key of a list like Q1…Q6>"`, start and end in band units,
+  `"label": "span"` and `"span_unit": "quarters"` to print each duration.
+
+### `matrix` (likelihood × impact)
+
+```json
+{"type": "matrix", "x_levels": ["Low", "Medium", "High"], "y_levels": ["Low", "Medium", "High"],
+ "x_label": "Likelihood", "y_label": "Impact",
+ "points": [{"name": "Labour", "x": "Medium", "y": "High", "highlight": true}]}
+```
+Levels are words, so there are no numbers to check; each point must use a listed level.
