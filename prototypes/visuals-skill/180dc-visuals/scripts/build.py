@@ -92,7 +92,7 @@ def build_png(slide, data, path):
     ax.tick_params(colors="#" + MUTED, length=0)
     ax.grid(axis="x" if c["type"] in ("bar", "stacked100") else "y", color="#" + RULE, linewidth=1)
     ax.set_axisbelow(True)
-    tick = FuncFormatter(lambda v, _: fmt(v, unit, 0))
+    tick = FuncFormatter(lambda v, _: fmt(v, unit, 0 if float(v).is_integer() else 1))
     t = c["type"]
     if t == "line":
         x = list(range(n))
@@ -236,6 +236,7 @@ def build_pptx(slides, datas, path):
         kind = {"line": XL_CHART_TYPE.LINE, "column": XL_CHART_TYPE.COLUMN_CLUSTERED,
                 "bar": XL_CHART_TYPE.BAR_CLUSTERED, "stacked100": XL_CHART_TYPE.BAR_STACKED_100}[c["type"]]
         ch = sl.shapes.add_chart(kind, CX, CY, CW, CH, cd).chart
+        ch.has_title = False  # the slide title is theirs; PowerPoint would add the series name
         ch.font.size = Pt(14)
         ch.font.color.rgb = rgb(MUTED)
         horizontal = c["type"] in ("bar", "stacked100")
@@ -248,8 +249,8 @@ def build_pptx(slides, datas, path):
         va.format.line.fill.background()
         ch.category_axis.format.line.color.rgb = rgb(RULE)
         ch.category_axis.tick_labels.font.color.rgb = rgb(INK)
-        if c["type"] == "stacked100":
-            va.visible = False  # the segments carry their values
+        if horizontal:
+            va.visible = False  # the bars carry their values
         else:
             va.minimum_scale = 0
             if c.get("y_max"):
