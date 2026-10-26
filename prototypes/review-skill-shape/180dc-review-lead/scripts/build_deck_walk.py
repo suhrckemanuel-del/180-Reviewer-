@@ -4,7 +4,7 @@
 # extract_deck.py. The deck file is optional: with it, each slide is rendered to a small JPEG and embedded.
 # Rendering tries PyMuPDF, then pdftoppm; a .pptx goes through LibreOffice to PDF first. When none of that is
 # available the page still works and shows each slide's text instead of its picture.
-import base64, glob, json, os, re, shutil, subprocess, sys, tempfile
+import base64, glob, html, json, os, re, shutil, subprocess, sys, tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE = os.path.join(HERE, '..', 'assets', 'deck-line.html')
@@ -81,39 +81,88 @@ def passages(rects):
 def find(page, s):
     """Search the page for s as written, then with straight and curly quotes swapped: the quote check counts
     them as the same character, so a quote that passed it may use the other kind than the slide."""
-    straight = s.translate(str.maketrans({'‘': "'", '’': "'", '“': '"', '”': '"'}))
-    curly = re.sub(r'"([^"]*)"', '“\\1”', straight.replace("'", '’'))
-    for v in dict.fromkeys([s, curly, straight]):
+    curly = re.sub(r'"([^"]*)"', '“\\1”', straight(s).replace("'", '’'))
+    for v in dict.fromkeys([s, curly, straight(s)]):
         hits = page.search_for(v)
         if hits:
             return hits
     return []
 
 
+def straight(s):
+    return s.translate(str.maketrans({'‘': "'", '’': "'", '“': '"', '”': '"'}))
+
+
+def fitz_pages(pdf):
+    """A search function per page, through PyMuPDF. Raises ImportError when PyMuPDF isn't installed."""
+    import fitz
+    doc = fitz.open(pdf)
+
+    def page(n):
+        p = doc[n - 1]
+        w, h = p.rect.width, p.rect.height
+        return lambda s: [(r.x0 / w, r.y0 / h, r.x1 / w, r.y1 / h) for r in find(p, s)[:8]]
+    return page
+
+
+def poppler_pages(pdf):
+    """The same through poppler's word boxes (pdftotext -bbox-layout), for sandboxes with poppler but no PyMuPDF.
+    Words are matched in poppler's reading order, with straight and curly quotes counted as the same."""
+    def page(n):
+        try:
+            xml = subprocess.run(['pdftotext', '-bbox-layout', '-f', str(n), '-l', str(n), pdf, '-'],
+                                 capture_output=True, check=True).stdout.decode('utf-8', 'replace')
+        except (OSError, subprocess.CalledProcessError):
+            return lambda s: []
+        size = re.search(r'<page width="([\d.]+)" height="([\d.]+)"', xml)
+        if not size:
+            return lambda s: []
+        w, h = float(size[1]), float(size[2])
+        words = [(straight(html.unescape(t)), (float(a) / w, float(b) / h, float(c) / w, float(d) / h)) for a, b, c, d, t in
+                 re.findall(r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</word>', xml)]
+
+        def at(i, toks):
+            # inner words match whole; the first and last may sit inside punctuation ("help" in "help.")
+            last = len(toks) - 1
+            return all(words[i + j][0] == t if 0 < j < last else
+                       (t in words[i + j][0] if last == 0 else
+                        words[i + j][0].endswith(t) if j == 0 else words[i + j][0].startswith(t))
+                       for j, t in enumerate(toks))
+
+        def search(s):
+            toks = straight(s).split()
+            for i in range(len(words) - len(toks) + 1):
+                if at(i, toks):
+                    return [words[i + j][1] for j in range(len(toks))]
+            return []
+        return search
+    return page
+
+
 def quote_boxes(pdf, wanted):
     """Where each quote sits on its slide, as fractions of the page: {slide: {quote: [[x0, y0, x1, y1], ...]}},
-    and the slides where a quote was found only in part. Needs PyMuPDF; without it the page shows the slides
-    without highlight boxes."""
+    and the slides where a quote was found only in part. Uses PyMuPDF, else poppler; with neither, the page shows
+    the slides without highlight boxes."""
     try:
-        import fitz
+        page = fitz_pages(pdf)
     except ImportError:
-        return {}, []
-    doc, out, partly = fitz.open(pdf), {}, []
+        if not shutil.which('pdftotext'):
+            return {}, []
+        page = poppler_pages(pdf)
+    out, partly = {}, []
     for n, quotes in wanted.items():
-        page = doc[n - 1]
-        w, h = page.rect.width, page.rect.height
+        search = page(n)
         for q in quotes:
             words = q.split()
             # the whole quote first; a quote broken across lines or boxes is found by its two ends
-            hits = find(page, ' '.join(words))
+            hits = search(' '.join(words))
             if not hits and len(words) > 6:
-                head, tail = find(page, ' '.join(words[:5])), find(page, ' '.join(words[-5:]))
+                head, tail = search(' '.join(words[:5])), search(' '.join(words[-5:]))
                 hits = head + tail
                 if hits and not (head and tail):
                     partly.append(n)              # one end only: the box covers part of the quote
             if hits:
-                out.setdefault(n, {})[q] = [[round(x0 / w, 4), round(y0 / h, 4), round(x1 / w, 4), round(y1 / h, 4)]
-                                            for x0, y0, x1, y1 in passages([(r.x0, r.y0, r.x1, r.y1) for r in hits[:8]])]
+                out.setdefault(n, {})[q] = [[round(v, 4) for v in b] for b in passages(hits)]
     return out, partly
 
 

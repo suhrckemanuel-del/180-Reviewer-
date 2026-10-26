@@ -12,7 +12,9 @@ R = '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
 
 
 def clean(s):
-    return re.sub(r'\s+', ' ', s or '').strip()
+    # some PDF readers return an emoji as two halves; rejoin them, or drop a lone half, so the JSON can be written
+    s = (s or '').encode('utf-16', 'surrogatepass').decode('utf-16', 'replace')
+    return re.sub(r'\s+', ' ', s).strip()
 
 
 def pptx(path):
