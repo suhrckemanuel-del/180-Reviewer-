@@ -28,5 +28,7 @@ is a value the extraction may have broken is a question for the lead, not a find
 - **"Not disclosed" or "not found here"** is not "confirmed absent". A proposal to improve a
   process does not prove there is no process today.
 - **A disclosed method is not a missing method,** even without a worked example.
+- **Figures the deck labels** "illustrative", "assumption" or "example" are judged as that. A
+  finding that rests on them says the label is there.
 
 More patterns from past reviews: `case-patches.md`.

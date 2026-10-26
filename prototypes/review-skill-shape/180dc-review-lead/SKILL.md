@@ -81,7 +81,7 @@ Use markdown exactly like this. **Bold** the phrase in each line that a skimming
 what they cannot do because of it>. Slides <n, n>.
 
 ## Findings
-1. **<problem in plain words>** · <High | Moderate | Minor> · slide <n>
+1. **<problem in plain words>** · <High | Moderate | Minor> · slide <n, every slide it quotes>
    → <next step, one short line>
 2. ...
 
@@ -91,7 +91,7 @@ what they cannot do because of it>. Slides <n, n>.
 **Why it matters:** <about 35 words, about the client and the decision, not the deck>
 **Next step:** <the move, not the words. Minor ones say "optional">
 **Ask the team:** <the one thing the lead should check or decide>
-**Framework:** <review question> · <principle, only if one explains it>
+**Framework:** <principle>: <why it explains this finding, one sentence in the deck's own terms>
 
 ## What works
 - **<the strength, plain words>**: "<verbatim quote>" (slide <n>)
@@ -107,10 +107,20 @@ out loud: "Nobody can tell if 8% is good", not "the 8% assumption merits further
 nothing reached Moderate, the Main issue says so and the review stays short. If there are no
 supported strengths, write "No specific strengths established from the material." and move on.
 
-**Framework** names the review question the finding came from (Decision, Framing, Storyline,
-Evidence or Recommendation) and, when one explains it, a principle from
-`references/review-questions.md`: Minto pyramid, reader test, comparator test, or MEASURE / COST /
-COVERAGE. No other names. High and Moderate findings get the line; Minor ones leave it out.
+**Framework** names the principle behind a finding and says why it applies here, so the lead can
+explain the finding to the team. Use only these four, from `references/review-questions.md`:
+
+- **Minto pyramid:** the answer comes first, then the reasons that support it.
+- **Reader test:** someone reading only the summary and the titles can tell what to do.
+- **Comparator test:** every figure the recommendation leans on is set against something (a goal,
+  a benchmark, an option), so the reader can tell whether it is good or bad.
+- **MEASURE / COST / COVERAGE:** a should-we choice compares its options on what each achieves,
+  what it costs and whom it reaches.
+
+The reason names this deck's own slide, figure or claim, never a general truth. Give the line only
+to a High or Moderate finding that one of the four genuinely explains, and use each principle at
+most once per review. If none fits, or you can't say why in the deck's terms, leave the line out:
+no line is better than a forced one.
 
 ## Deck walk (only when the lead asks)
 
@@ -134,7 +144,7 @@ page and the slide pictures cost you nothing.
    ```
    Two markers decide how the slide is drawn. Put `"mark": "fix"` on a quote only when those words
    are themselves what the team changes (a topic title, a vague claim); every other quote is shown as
-   evidence. Put `"gap": true` on a finding whose problem is something missing (an analysis, a
+   evidence, including words that only show something is missing. Put `"gap": true` on a finding whose problem is something missing (an analysis, a
    comparison, a cost); its first slide gets an "add supporting analysis here" label, and
    `"gapSlide": n` moves the label when the addition belongs on another slide. Use only these keys: no copy of the
    review text, no extra fields. Leave out keys you have no value for.

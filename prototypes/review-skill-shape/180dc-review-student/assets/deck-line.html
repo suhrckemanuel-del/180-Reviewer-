@@ -67,8 +67,8 @@ writes (same contract as the asset); DECK is what a build script would fill from
   .Moderate .dot { border: 5px solid var(--ink); box-shadow: 0 0 0 4px var(--page); }
   .tag .dot { border: 5px solid var(--ink); box-shadow: 0 0 0 4px var(--page); }
   .sev.tag { text-transform: none; letter-spacing: 0; }
-  .dothis, .checkit { margin: 0 0 8px; }
-  .dothis .lab, .checkit .lab { color: var(--grey); margin-right: 8px; }
+  .dothis, .checkit, .fwwhy { margin: 0 0 8px; }
+  .dothis .lab, .checkit .lab, .fwwhy .lab { color: var(--grey); margin-right: 8px; }
   .Minor .dot { width: 18px; height: 18px; top: 7px; border: 3px solid var(--ink); box-shadow: 0 0 0 4px var(--page); }
   .echo .dot { width: 14px; height: 14px; top: 9px; border: 3px solid var(--loop); box-shadow: 0 0 0 4px var(--page); }
   .keep .dot { background: var(--green); box-shadow: 0 0 0 4px var(--page); display: grid; place-items: center; font: 900 13px/1 var(--sans); }
@@ -166,7 +166,7 @@ writes (same contract as the asset); DECK is what a build script would fill from
   /* highlight boxes: where each quote sits on the slide, found by the build script */
   .picwrap { position: relative; display: block; max-width: 100%; line-height: 0; }
   .hl { position: absolute; margin: -5px; padding: 4px; box-sizing: content-box; border: 2.5px solid var(--loop); border-radius: 5px;
-        background: rgba(217,45,58,.07); pointer-events: none; }
+        background: rgba(217,45,58,.07); box-shadow: 0 0 0 2px rgba(255,255,255,.85); pointer-events: none; }
   .hl.keep { border-color: var(--green); background: rgba(120,176,56,.12); }
   .hl.cited { border: 2px dashed var(--ink); background: rgba(20,22,19,.05); }
   .hl.cited i { background: var(--ink); }
@@ -248,6 +248,8 @@ const REVIEW = __REVIEW_JSON__;
 const DECK = __DECK_JSON__;
 
 const F = REVIEW.findings, N = REVIEW.slides;
+// a slide a finding quotes is one of its slides, even when the review line left it out
+F.forEach(f => { f.quotes = f.quotes || []; f.slides = [...new Set((f.slides || []).concat(f.quotes.map(q => q.slide)))]; });
 // a finding with no slide numbers sits at the slides its quotes come from
 F.forEach(f => { if (!f.slides || !f.slides.length) f.slides = [...new Set((f.quotes || []).map(q => q.slide))]; });
 const S = { d: {}, view: null, focus: null, fix: null, done: {} };
@@ -300,7 +302,9 @@ function stops() {
 }
 
 const more = f => f.nextDetail && f.nextDetail !== f.next ? `<details class="more"><summary>More on this step</summary><div>${esc(f.nextDetail)}</div></details>` : "";
-const fwTag = f => f.framework ? `<span class="lab fw">Framework · ${esc(f.framework)}</span>` : "";
+const fwParts = f => { const s = f.framework || "", i = s.indexOf(": "); return i < 0 ? [s, ""] : [s.slice(0, i), s.slice(i + 2)]; };
+const fwTag = f => f.framework ? `<span class="lab fw">Framework · ${esc(fwParts(f)[0])}</span>` : "";
+const fwWhy = f => fwParts(f)[1] ? `<p class="fwwhy"><span class="lab">${esc(fwParts(f)[0])}</span>${esc(fwParts(f)[1])}</p>` : "";
 const slideBtn = (n, label) => `<button type="button" class="slide" data-view="${n}" aria-label="Show slide ${n}">${label || "Slide " + n}</button>`;
 const qhtml = (qs, n) => [...new Set(qs.map(q => q.text))].map(t => `<p class="q"><mark>${esc(t)}</mark><small>slide ${n}</small></p>`).join("");
 
@@ -318,7 +322,7 @@ function stopHTML(s) {
       <div class="where">${slideBtn(s.n)}<span class="lab sev ${sevClass(f.severity)}">${esc(f.severity)}</span>${fwTag(f)}
         ${later.length ? `<span class="lab loopno"><span class="n">${pad(s.i + 1)}</span>also ${sl(later)}</span>` : `<span class="lab">${pad(s.i + 1)}</span>`}
         ${isMain ? `<span class="lab main-tag">· ${WORDS.main.toLowerCase()}</span>` : ""}</div>
-      <h2>${esc(f.title)}</h2>${qhtml(f.quotes.filter(q => q.slide === s.n), s.n)}<p class="why">${esc(f.why)}</p>
+      <h2>${esc(f.title)}</h2>${qhtml(f.quotes.filter(q => q.slide === s.n), s.n)}<p class="why">${esc(f.why)}</p>${fwWhy(f)}
       <p class="next">${esc(f.next)}</p>${more(f)}${f.do ? `<p class="dothis"><span class="lab">Do this</span>${esc(f.do)}</p>` : ""}
       ${f.ask ? `<p class="askq">${esc(f.ask)}</p>` : ""}${f.checkIt ? `<p class="checkit"><span class="lab">Check it</span>${esc(f.checkIt)}</p>` : ""}
       <div class="decide">${Object.entries(LABEL).map(([k, v]) => `<button type="button" class="${k} ${S.d[s.i] === k ? "on" : ""}" data-k="${k}" data-i="${s.i}" aria-pressed="${S.d[s.i] === k}">${v}</button>`).join("")}</div></div>`;
@@ -450,6 +454,7 @@ function fixView() {
             <ol class="chain">
               ${step("On the slide", qs.length ? qs.map(q => `<mark>${esc(q.text)}</mark>`).join("<br>") : `Quoted on ${sl(others)}`)}
               ${step("Why it matters", esc(f.why))}
+              ${fwParts(f)[1] ? step("Framework · " + esc(fwParts(f)[0]), esc(fwParts(f)[1])) : ""}
               ${step(STUDENT ? "Do this" : "Next step", esc(f.next) + (f.do ? `<br><span class="fx-do">${esc(f.do)}</span>` : "") + more(f))}
               ${f.checkIt ? step("Check it", esc(f.checkIt)) : f.ask ? step("Ask the team", esc(f.ask)) : ""}
             </ol>

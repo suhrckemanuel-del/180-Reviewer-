@@ -59,6 +59,8 @@ missing comparator; never invent one.
 
 ## Principles you may name
 
-Name one only when it explains the finding. Answer first, then support it (Minto pyramid, a
-practitioner standard). Evidence must carry the decision's weight. Compare options on a common
-basis. Separate what is unknown from what is absent.
+Four, and only these on the Framework line: the Minto pyramid (answer first, then support it; a
+practitioner standard), the reader test (question 3), the comparator test (question 4) and
+MEASURE / COST / COVERAGE (question 5). Name one only when it explains the finding, and say why
+in the deck's own terms. Two more ideas guide the review without being named: evidence must carry
+the decision's weight, and what is unknown is not the same as what is absent.
