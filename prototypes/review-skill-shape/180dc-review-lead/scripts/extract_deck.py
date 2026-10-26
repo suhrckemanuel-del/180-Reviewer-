@@ -7,6 +7,8 @@ import xml.etree.ElementTree as ET
 
 A = '{http://schemas.openxmlformats.org/drawingml/2006/main}t'
 W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
+P = '{http://schemas.openxmlformats.org/presentationml/2006/main}'
+R = '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
 
 
 def clean(s):
@@ -15,11 +17,17 @@ def clean(s):
 
 def pptx(path):
     z = zipfile.ZipFile(path)
-    names = [n for n in z.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml', n)]
-    names.sort(key=lambda n: int(re.search(r'(\d+)', n.rsplit('/', 1)[1]).group(1)))
+    # slides in presentation order, hidden ones left out, so numbers match what the lead sees
+    rels = ET.fromstring(z.read('ppt/_rels/presentation.xml.rels'))
+    target = {r.get('Id'): 'ppt/' + r.get('Target').lstrip('/').removeprefix('ppt/') for r in rels}
+    pres = ET.fromstring(z.read('ppt/presentation.xml'))
+    names = [target[s.get(R + 'id')] for s in pres.iter(P + 'sldId')]
     slides = []
-    for i, n in enumerate(names, 1):
+    for n in names:
         root = ET.fromstring(z.read(n))
+        if root.get('show') == '0':
+            continue
+        i = len(slides) + 1
         # one entry per paragraph, so titles, bullets and cells stay separate items
         paras = []
         for p in root.iter('{http://schemas.openxmlformats.org/drawingml/2006/main}p'):
@@ -47,9 +55,9 @@ def pdf(path):
         except (OSError, subprocess.CalledProcessError):
             print('EXTRACT: could not run (no PDF reader here). Read the attachment directly.')
             sys.exit(2)
-        pages = out.split('\f')
+        pages = out.rstrip('\f').split('\f')  # pdftotext ends every page with \f
     return [{'n': i, 'items': [clean(l) for l in p.splitlines() if clean(l)]}
-            for i, p in enumerate(pages, 1) if i <= len(pages)]
+            for i, p in enumerate(pages, 1)]
 
 
 def main():
@@ -61,7 +69,8 @@ def main():
     kind = src.lower().rsplit('.', 1)[-1]
     slides = {'pptx': pptx, 'docx': docx, 'pdf': pdf}[kind](src)
     unreadable = [s['n'] for s in slides if len(' '.join(s['items'])) < 20]
-    json.dump({'file': src, 'slides': slides, 'unreadable': unreadable}, open(out, 'w'),
+    json.dump({'file': src, 'kind': kind, 'slides': slides, 'unreadable': unreadable},
+              open(out, 'w', encoding='utf-8'),
               ensure_ascii=False, indent=1)
     print(f'EXTRACT: {len(slides)} slides/pages to {out}. '
           f'Little or no text on: {", ".join(map(str, unreadable)) or "none"} '
