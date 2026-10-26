@@ -106,3 +106,24 @@ title".
   at their own slide: the finding, the figure that proves it, what it means for the client. Then
   ask for their version and check it.
 - **"Go deeper on N":** for that check, the other slides with the same problem, quoted.
+- **"deck walk"** (or they ask to see the review on their slides): build it as a file. Don't write
+  the page yourself and don't open `assets/deck-line.html`: the script fills it, so the page and
+  the slide pictures cost you nothing. Write `review.json` from the review you already gave, word
+  for word, adding nothing. One finding per check that breaks, one strength per check that holds;
+  `slides` are the slides its quotes come from.
+  ```json
+  {"skill": "180dc-review-student", "check": "<quote-check line>",
+   "main": {"title": "<Fix first: the problem>", "why": "<what the client can't see or do>", "slides": [2]},
+   "findings": [{"title": "<check name, e.g. Pyramid>", "severity": "breaks", "slides": [2],
+                 "quotes": [{"text": "<verbatim>", "slide": 2}], "why": "<why it matters>",
+                 "next": "<do this>", "checkIt": "<check it>"}],
+   "works": [{"title": "<check name>", "quote": "<verbatim>", "slide": 9}],
+   "couldntJudge": "<the not-checked line, then any check not judged and why>",
+   "footer": "<the footer up to the skill name>", "stamp": "<version stamp>"}
+  ```
+  Run `scripts/build_deck_walk.py review.json deck.json <attached file> -o deck-walk.html`, writing
+  it where this chat offers files to download (`/mnt/user-data/outputs/` on Claude.ai), and share
+  that file. Reply in two lines: "Your deck walk: the review laid along your deck. Open Fix mode
+  next to your deck: it shows each slide with the problem boxed and walks you through the fix."
+  If the script's `Pictures:` note says there are none, add that the slides show as text. Don't
+  paste the JSON or the page into the chat. If the script cannot run, say so in one line.

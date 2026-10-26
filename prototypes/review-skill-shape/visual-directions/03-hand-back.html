@@ -1,0 +1,240 @@
+<!doctype html>
+<!-- PROTOTYPE for 180-Reviewer- issue 23. A second candidate for assets/deck-walk.html, built around the
+lead's actual job: go through the findings one card at a time, decide what goes back to the team, and leave
+with a note to paste to them. Same REVIEW contract as the asset; the note is assembled only from REVIEW
+strings. Decisions live in memory and reset on reload. Invented content. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hand-back</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=DM+Mono:wght@400;500&display=swap">
+<style>
+  /* A stack of cards the lead swipes through, stories-style, ending in the note they send. */
+  :root {
+    --bg: #eef1e6; --green: #78B038; --forest: #15320d; --sun: #ffd84a; --paper: #fffef8; --ink: #121410;
+    --mist: #e3e7d9; --grey: #5c6455; --line: #d5dacb;
+    --sans: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "DM Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body { margin: 0; color: var(--ink); font: 400 15.5px/1.5 var(--sans); }
+  .lab { font: 500 11px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+  button { font: inherit; color: inherit; }
+  button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+  /* progress: one segment per card, filled with the lead's decision */
+  .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+         padding: 12px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); }
+  .bar { display: flex; gap: 4px; max-width: 560px; margin: 0 auto; }
+  .bar button { all: unset; cursor: pointer; flex: 1; height: 6px; border-radius: 3px; background: var(--line); position: relative; }
+  .bar button.cur { box-shadow: 0 0 0 2px var(--ink); }
+  .bar .send { background: var(--green); } .bar .ask { background: var(--sun); } .bar .out { background: #a6ad9c; }
+  .bar .seen { background: var(--forest); }
+  .meta { display: flex; justify-content: space-between; max-width: 560px; margin: 8px auto 0; color: var(--grey); }
+
+  .track { display: flex; align-items: flex-start; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+           padding: 6px max(16px, env(safe-area-inset-right, 0px)) 28px max(16px, env(safe-area-inset-left, 0px)); scroll-padding-inline: 16px; }
+  .track::-webkit-scrollbar { display: none; }
+  .card { flex: 0 0 min(calc(100vw - 40px), 520px); scroll-snap-align: center; border-radius: 22px; padding: 22px 20px 20px;
+          background: var(--paper); box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 18px 40px -26px rgba(21,50,13,.45); display: flex; flex-direction: column; gap: 14px; }
+  @media (min-width: 700px) { .track { padding-inline: calc(50vw - 260px); scroll-padding-inline: calc(50vw - 260px); } }
+
+  /* cover */
+  .cover { background: var(--green); color: var(--forest); }
+  .cover .lab { color: var(--forest); }
+  .cover h1 { font: 800 33px/1.02 var(--sans); font-stretch: 78%; letter-spacing: -.01em; margin: 6px 0 0; text-wrap: balance; }
+  .cover .why { font-size: 17px; line-height: 1.4; margin: 0; color: var(--forest); opacity: .82; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cover .chip { background: var(--forest); color: var(--green); padding: 5px 8px; border-radius: 6px; }
+  .go { all: unset; cursor: pointer; margin-top: auto; background: var(--forest); color: var(--paper); border-radius: 14px; padding: 15px 18px;
+        font: 700 17px/1 var(--sans); display: flex; justify-content: space-between; }
+
+  /* finding */
+  .head { display: flex; justify-content: space-between; align-items: center; color: var(--grey); }
+  .sev { padding: 4px 7px; border-radius: 6px; color: var(--ink); background: var(--mist); }
+  .sev.High { background: var(--ink); color: var(--sun); }
+  .slides { font: 800 58px/.9 var(--sans); font-stretch: 62%; color: var(--green); letter-spacing: -.01em; margin-top: -2px; }
+  .slides span { font-size: 15px; font-stretch: 100%; font-weight: 600; color: var(--grey); letter-spacing: 0; margin-left: 4px; }
+  .quote { background: var(--sun); border-radius: 12px; padding: 12px 14px; font: 600 17px/1.32 var(--sans); }
+  .quote small { display: block; margin-top: 4px; font: 500 10.5px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: #6b5a10; }
+  .quote + .quote { margin-top: -6px; }
+  .card h2 { font: 800 25px/1.08 var(--sans); font-stretch: 85%; margin: 2px 0 0; letter-spacing: -.005em; text-wrap: balance; }
+  .card p { margin: 0; }
+  .why { color: var(--grey); }
+  .next { background: #e4f0d4; border-radius: 12px; padding: 12px 14px; font-weight: 600; color: var(--forest); }
+  .next .lab { display: block; margin-bottom: 3px; color: #4a7a1f; }
+  .askline .lab { color: var(--grey); margin-right: 6px; }
+  .decide { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 6px; margin-top: auto; padding-top: 4px; }
+  .decide button { cursor: pointer; border: 2px solid var(--ink); background: transparent; border-radius: 12px; padding: 11px 6px; font: 700 14px/1.15 var(--sans); }
+  .decide button.on.send { background: var(--green); border-color: var(--green); color: var(--forest); }
+  .decide button.on.ask { background: var(--sun); border-color: var(--sun); }
+  .decide button.on.out { background: var(--mist); border-color: var(--mist); color: var(--grey); }
+  .card.d-out > :not(.head):not(.decide) { opacity: .4; }
+
+  /* what works */
+  .works li { list-style: none; display: grid; grid-template-columns: 26px 1fr; gap: 2px 8px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .works ul { margin: 0; padding: 0; }
+  .tick { all: unset; cursor: pointer; width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--ink); display: grid; place-items: center; font-weight: 800; font-size: 14px; }
+  .tick.on { background: var(--green); border-color: var(--green); color: var(--forest); }
+  .works q { grid-column: 2; color: var(--grey); quotes: "“" "”"; }
+  .limits { background: var(--mist); border-radius: 12px; padding: 12px 14px; font-size: 14px; color: var(--grey); }
+  .limits .lab { display: block; color: var(--ink); margin-bottom: 3px; }
+
+  /* the note */
+  .note-card { background: var(--forest); color: var(--paper); }
+  .note-card .lab { color: var(--green); }
+  .note-card h2 { color: var(--paper); }
+  .msg { background: var(--paper); color: var(--ink); border-radius: 16px 16px 16px 4px; padding: 14px 16px; white-space: pre-wrap;
+         font: 400 14.5px/1.5 var(--sans); user-select: text; margin: 0; overflow-wrap: anywhere; }
+  .tally { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tally span { padding: 5px 8px; border-radius: 6px; }
+  .copy { all: unset; cursor: pointer; background: var(--green); color: var(--forest); border-radius: 14px; padding: 15px 18px; font: 700 17px/1 var(--sans); text-align: center; }
+  .small { font-size: 12.5px; color: #a9c48a; }
+  .nav { display: flex; justify-content: center; gap: 10px; padding: 0 16px 24px; }
+  .nav button { cursor: pointer; border: 0; background: var(--ink); color: var(--paper); border-radius: 999px; width: 44px; height: 44px; font-size: 18px; }
+  @media (prefers-reduced-motion: reduce) { .track { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="top"><div class="bar" id="bar"></div><div class="meta lab" id="meta"></div></div>
+<div class="track" id="track"></div>
+<div class="nav"><button type="button" id="prev" aria-label="Previous card">←</button><button type="button" id="next" aria-label="Next card">→</button></div>
+<script>
+// The skill replaces only this object. Every string comes from the chat review, unchanged.
+const REVIEW = {
+  check: "Quotes checked by script: 11 of 11 found on the cited slide.",
+  slides: 18,
+  main: { title: "The deck recommends the booking app but never says what it costs or who sets it up.",
+          why: "The board is asked to approve a change it cannot price, and nobody is named to start it.", slides: [2, 14] },
+  findings: [
+    { title: "The recommendation has no cost, owner or first step", severity: "High", slides: [14, 15],
+      next: "Add who sets the app up, what it costs per year and the first step for next month.",
+      quotes: [{ text: "We recommend adopting a volunteer booking app.", slide: 14 }, { text: "Next steps: explore options with the board", slide: 15 }],
+      why: "The board approves budget lines. Without a yearly cost and a named owner it cannot say yes, so the decision slides to the next meeting.",
+      ask: "Did the client give the team a budget ceiling?" },
+    { title: "The summary promises a pilot that slide 15 never gives", severity: "Moderate", slides: [2, 15],
+      next: "Make slide 15 deliver the pilot the summary describes, or bring the summary down to what the deck supports.",
+      quotes: [{ text: "A three-month pilot will test the app with two shift teams.", slide: 2 }, { text: "Next steps: explore options with the board", slide: 15 }],
+      why: "A board member who reads only the summary expects a pilot ready to run. The closing slide asks them to keep exploring instead.",
+      ask: "Is the pilot agreed with the client, or the team's own idea?" },
+    { title: "Nobody can tell if 30% unfilled shifts is bad", severity: "Moderate", slides: [7],
+      next: "Name what the 30% should be compared with: last year, a similar food bank, or the client's own target.",
+      quotes: [{ text: "30% of shifts are unfilled at least once a month", slide: 7 }],
+      why: "The case for change rests on this number. Without last year's figure or a target, the board cannot tell a crisis from normal churn.",
+      ask: "Does the client track a target fill rate?" },
+    { title: "The adoption claim rests on 12 volunteers reached on WhatsApp", severity: "Minor", slides: [9, 17],
+      next: "Optional: say who the survey did not reach, next to the claim on slide 9.",
+      quotes: [{ text: "Most volunteers would use an app (9 of 12 surveyed)", slide: 9 }, { text: "Survey sent to the volunteer WhatsApp group", slide: 17 }],
+      why: "Volunteers already on WhatsApp are the ones most likely to use an app. The ones the change could lose were not asked.",
+      ask: "How many volunteers are in the WhatsApp group?" },
+    { title: "Analysis titles name topics, not conclusions", severity: "Minor", slides: [8, 10],
+      next: "Optional: rewrite each analysis title as the finding it proves.",
+      quotes: [{ text: "Volunteer demographics", slide: 8 }, { text: "Current tools", slide: 10 }],
+      why: "A board member flipping through slides 7 to 12 learns the topics but not what the team found, so the argument only lives in the speaker's head.",
+      ask: "Will the team present this, or will it be read without them?" }
+  ],
+  works: [
+    { title: "The interview synthesis is concrete", quote: "Coordinators spend about 4 hours a week chasing replies", slide: 6 },
+    { title: "The options are compared side by side", quote: "Option comparison: WhatsApp, shared spreadsheet, booking app", slide: 12 }
+  ],
+  couldntJudge: "whether a booking app suits these volunteers (needs domain knowledge); the values in the slide 11 chart (image only); prices of the named apps (not in the deck)",
+  stamp: "1017-PROTO01"
+};
+
+const F = REVIEW.findings, nF = F.length;
+const S = { d: {}, keep: Object.fromEntries(REVIEW.works.map((_, i) => [i, true])), cur: 0, seen: new Set([0]) };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const sl = a => (a.length > 1 ? "slides " : "slide ") + a.join(", ");
+const LABEL = { send: "Send to team", ask: "Ask first", out: "Leave out" };
+const cards = () => [...document.querySelectorAll(".card")];
+const total = nF + 3;   // cover, findings, what works, note
+
+function note() {
+  const send = F.filter((_, i) => S.d[i] === "send"), ask = F.filter((_, i) => S.d[i] === "ask");
+  const keep = REVIEW.works.filter((_, i) => S.keep[i]);
+  const L = [`Main issue: ${REVIEW.main.title}`];
+  if (send.length) L.push("", "To fix:", ...send.map((f, i) => `${i + 1}. ${f.next} (${sl(f.slides)})`));
+  if (ask.length) L.push("", "Before you change anything:", ...ask.map(f => `- ${f.ask}`));
+  if (keep.length) L.push("", "Keep:", ...keep.map(w => `- ${w.title} (slide ${w.slide})`));
+  return L.join("\n");
+}
+
+function build() {
+  const cover = `<section class="card cover" aria-label="Main issue">
+    <div class="head"><span class="lab">Lead review · ${REVIEW.slides} slides</span><span class="lab">Main issue</span></div>
+    <h1>${esc(REVIEW.main.title)}</h1><p class="why">${esc(REVIEW.main.why)}</p>
+    <div class="chips"><span class="chip lab">${sl(REVIEW.main.slides)}</span><span class="chip lab">${nF} findings</span></div>
+    <p class="lab" style="text-transform:none;letter-spacing:0;font-size:12.5px">${esc(REVIEW.check)}</p>
+    <button class="go" type="button" data-to="1"><span>Go through the findings</span><span>→</span></button></section>`;
+  const finds = F.map((f, i) => `<section class="card" data-i="${i}" aria-label="Finding ${i + 1}">
+    <div class="head"><span class="lab">Finding ${pad(i + 1)} / ${pad(nF)}</span><span class="lab sev ${f.severity}">${f.severity}</span></div>
+    <div class="slides">${f.slides.map(n => "S" + n).join(" ")}<span>of ${REVIEW.slides}</span></div>
+    ${f.quotes.map(q => `<div class="quote">“${esc(q.text)}”<small>slide ${q.slide}</small></div>`).join("")}
+    <h2>${esc(f.title)}</h2><p class="why">${esc(f.why)}</p>
+    <p class="next"><span class="lab">Next step</span>${esc(f.next)}</p>
+    <p class="askline"><span class="lab">Ask the team</span>${esc(f.ask)}</p>
+    <div class="decide">${Object.entries(LABEL).map(([k, v]) => `<button type="button" class="${k}" data-k="${k}" data-i="${i}">${v}</button>`).join("")}</div></section>`).join("");
+  const works = `<section class="card" aria-label="What works">
+    <div class="head"><span class="lab">What works</span><span class="lab">tick what to praise</span></div>
+    <h2>Tell them what holds up</h2>
+    <ul class="works">${REVIEW.works.length ? REVIEW.works.map((w, i) => `<li><button type="button" class="tick" data-w="${i}" aria-label="Include in note">✓</button>
+      <b>${esc(w.title)}</b><q>${esc(w.quote)}</q><span class="lab" style="grid-column:2;color:var(--grey)">slide ${w.slide}</span></li>`).join("")
+      : `<li><span></span><span>No specific strengths established from the material.</span></li>`}</ul>
+    <div class="limits"><span class="lab">Couldn't judge</span>${esc(REVIEW.couldntJudge)}</div>
+    <button class="go" type="button" data-to="${nF + 2}" style="background:var(--ink)"><span>Write my note</span><span>→</span></button></section>`;
+  const last = `<section class="card note-card" aria-label="Note to the team">
+    <div class="head"><span class="lab">Your note to the team</span><span class="lab" id="undecided"></span></div>
+    <h2>Paste this to the team</h2><div class="tally lab" id="tally"></div>
+    <pre class="msg" id="msg"></pre><button class="copy" type="button" id="copy">Copy note</button>
+    <p class="small">AI review, no grade. You decide what to keep. 180dc-review-lead · ${esc(REVIEW.stamp)}</p></section>`;
+  document.getElementById("track").innerHTML = cover + finds + works + last;
+}
+
+function paint() {
+  cards().forEach((c, idx) => {
+    const i = c.dataset.i; if (i == null) return;
+    c.className = "card" + (S.d[i] ? " d-" + S.d[i] : "");
+    c.querySelectorAll(".decide button").forEach(b => b.classList.toggle("on", S.d[i] === b.dataset.k));
+  });
+  document.querySelectorAll(".tick").forEach(t => t.classList.toggle("on", !!S.keep[t.dataset.w]));
+  document.getElementById("bar").innerHTML = Array.from({ length: total }, (_, k) => {
+    const d = k >= 1 && k <= nF ? S.d[k - 1] : null;
+    return `<button type="button" data-to="${k}" class="${d || (S.seen.has(k) ? "seen" : "")} ${k === S.cur ? "cur" : ""}" aria-label="Card ${k + 1}"></button>`;
+  }).join("");
+  const done = Object.keys(S.d).length;
+  document.getElementById("meta").innerHTML = `<span>${S.cur === 0 ? "Main issue" : S.cur <= nF ? `Finding ${S.cur} of ${nF}` : S.cur === nF + 1 ? "What works" : "Your note"}</span><span>${done} of ${nF} decided</span>`;
+  const c = { send: 0, ask: 0, out: 0 }; Object.values(S.d).forEach(v => c[v]++);
+  document.getElementById("tally").innerHTML = `<span style="background:var(--green);color:var(--forest)">${c.send} to fix</span><span style="background:var(--sun);color:var(--ink)">${c.ask} to ask</span><span style="background:#3a4a30;color:var(--paper)">${c.out} left out</span>`;
+  document.getElementById("undecided").textContent = nF - done ? `${nF - done} not decided` : "";
+  document.getElementById("msg").textContent = note();
+}
+
+function go(k) { k = Math.max(0, Math.min(total - 1, k)); cards()[k].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }
+
+build(); paint();
+const track = document.getElementById("track");
+track.addEventListener("scroll", () => {
+  const mid = track.scrollLeft + track.clientWidth / 2;
+  const k = cards().reduce((b, c, i) => Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid) < Math.abs(cards()[b].offsetLeft + cards()[b].offsetWidth / 2 - mid) ? i : b, 0);
+  if (k !== S.cur) { S.cur = k; S.seen.add(k); paint(); }
+}, { passive: true });
+document.addEventListener("click", e => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.dataset.to != null) go(+t.dataset.to);
+  else if (t.dataset.k) { const i = t.dataset.i; S.d[i] = S.d[i] === t.dataset.k ? undefined : t.dataset.k; if (!S.d[i]) delete S.d[i]; paint(); if (S.d[i]) setTimeout(() => go(+i + 2), 260); }
+  else if (t.dataset.w != null) { S.keep[t.dataset.w] = !S.keep[t.dataset.w]; paint(); }
+  else if (t.id === "prev") go(S.cur - 1);
+  else if (t.id === "next") go(S.cur + 1);
+  else if (t.id === "copy") {
+    const done = () => { t.textContent = "Copied"; setTimeout(() => t.textContent = "Copy note", 1600); };
+    const pick = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById("msg")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "Selected. Copy it from here"; };
+    try { navigator.clipboard.writeText(note()).then(done, pick); } catch (err) { pick(); }
+  }
+});
+addEventListener("keydown", e => { if (e.key === "ArrowRight") go(S.cur + 1); if (e.key === "ArrowLeft") go(S.cur - 1); });
+</script>
+</body>
+</html>
