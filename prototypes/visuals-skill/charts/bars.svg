@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 760" font-family="'IBM Plex Sans', Inter, Arial, sans-serif" role="img" aria-label="Phone bookings share of bookings and of missed pickups, July to December">
+<text x="330" y="70" font-size="32" font-weight="600" fill="#1D2124">Phone</text>
+<rect x="300" y="50" width="20" height="20" fill="#3A3F45"/>
+<text x="480" y="70" font-size="32" font-weight="600" fill="#1D2124">Online</text>
+<rect x="450" y="50" width="20" height="20" fill="#78B038"/>
+<text x="1500" y="70" text-anchor="end" font-size="30" fill="#6B7075">Share of Jul–Dec total</text>
+<g id="bar-0">
+<text x="300" y="222" text-anchor="end" font-size="30" font-weight="600" fill="#1D2124">Bookings</text>
+<rect x="330" y="150" width="382.8" height="110" fill="#3A3F45"/>
+<rect x="714.8" y="150" width="785.2" height="110" fill="#78B038"/>
+<text x="354" y="220" font-size="40" font-weight="600" fill="#fff">32.8%</text>
+<text x="1476" y="220" text-anchor="end" font-size="34" fill="#1D2124">67.2%</text>
+</g>
+<g id="bar-1">
+<text x="300" y="452" text-anchor="end" font-size="30" font-weight="600" fill="#1D2124">Missed pickups</text>
+<rect x="330" y="380" width="660.0" height="110" fill="#3A3F45"/>
+<rect x="992.0" y="380" width="508.0" height="110" fill="#78B038"/>
+<text x="354" y="450" font-size="40" font-weight="600" fill="#fff">56.5%</text>
+<text x="1476" y="450" text-anchor="end" font-size="34" fill="#1D2124">43.5%</text>
+</g>
+<line x1="915.0" x2="915.0" y1="130" y2="630" stroke="#1D2124" stroke-width="1" stroke-dasharray="4 6"/>
+<text x="925.0" y="655" font-size="22" fill="#6B7075">50%</text>
+<text x="20" y="730" font-size="22" fill="#6B7075">Jul–Dec: 173 of 306 missed pickups were phone bookings. Source: pantry booking log, Jan–Dec, 3,657 online and 1,833 phone bookings. Invented data for a prototype.</text>
+</svg>

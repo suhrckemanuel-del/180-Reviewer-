@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visuals skill: HTML deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #1D2124; --muted: #6B7075; --rule: #D9DBD6; --paper: #FFFFFF; --green: #78B038; --green-text: #4A7322; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { background: #2A2E31; color: var(--ink); font-family: 'IBM Plex Sans', Arial, sans-serif; overflow: hidden; }
+  /* one fixed 1600x900 canvas, scaled to the window: the slide looks the same on a laptop and a projector */
+  #viewport { position: absolute; inset: 0 0 44px 0; display: grid; place-items: center; }
+  #canvas { width: 1600px; height: 900px; position: relative; transform-origin: center; }
+  .slide { position: absolute; inset: 0; background: var(--paper); padding: 64px 80px 40px; display: flex; flex-direction: column;
+           opacity: 0; visibility: hidden; pointer-events: none; }
+  .slide.on { opacity: 1; visibility: visible; pointer-events: auto; }
+  .tag { font: 500 18px 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: .05em; color: var(--green-text); }
+  h1 { font-weight: 600; font-size: 44px; line-height: 1.18; margin-top: 14px; max-width: 1380px; }
+  .body { flex: 1; min-height: 0; margin-top: 28px; }
+  .chart svg { width: 100%; height: 100%; display: block; }
+  .reasons { list-style: none; border-top: 2px solid var(--ink); }
+  .reasons li { display: grid; grid-template-columns: 64px 1fr; border-bottom: 1px solid var(--rule); padding: 26px 0; font-size: 32px; line-height: 1.3; }
+  .reasons li span { font: 500 24px 'IBM Plex Mono', monospace; color: var(--green-text); padding-top: 4px; }
+  .footnote { margin-top: 22px; font-size: 22px; color: var(--muted); }
+  .rows { border-collapse: collapse; width: 100%; border-top: 2px solid var(--ink); }
+  .rows th, .rows td { text-align: left; border-bottom: 1px solid var(--rule); padding: 20px 0; font-size: 30px; vertical-align: top; }
+  .rows th { width: 330px; font: 500 22px 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding-top: 26px; }
+  .foot { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--rule); padding-top: 14px; margin-top: 18px;
+          font: 16px 'IBM Plex Mono', monospace; color: var(--muted); }
+  .foot img { height: 30px; }
+  /* bar under the slide: counter, keys, notes */
+  #bar { position: absolute; left: 0; right: 0; bottom: 0; height: 44px; display: flex; align-items: center; gap: 4px; padding: 0 12px;
+         background: #1D2124; color: #C9CCC6; font: 13px 'IBM Plex Mono', monospace; }
+  #bar button { background: none; border: 1px solid #4A4F54; color: #E8EAE5; font: inherit; padding: 4px 10px; cursor: pointer; }
+  #bar button:hover { border-color: var(--green); }
+  #bar .grow { flex: 1; }
+  #notes { position: absolute; left: 0; right: 0; bottom: 44px; background: #1D2124; color: #E8EAE5; border-top: 2px solid var(--green);
+           padding: 14px 20px; font-size: 17px; line-height: 1.5; display: none; max-height: 30vh; overflow: auto; }
+  body.notes #notes { display: block; }
+  body.notes #viewport { bottom: calc(44px + 30vh); }
+  @media print {
+    @page { size: 1600px 900px; margin: 0; }
+    body { background: #fff; overflow: visible; }
+    #viewport { position: static; display: block; } #canvas { transform: none !important; width: auto; height: auto; }
+    .slide { position: relative; opacity: 1; visibility: visible; width: 1600px; height: 900px; break-after: page; }
+    #bar, #notes { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="viewport"><div id="canvas">
+{{SLIDES}}
+</div></div>
+<div id="notes" aria-live="polite"></div>
+<div id="bar">
+  <button id="prev" aria-label="Previous slide">←</button>
+  <button id="next" aria-label="Next slide">→</button>
+  <span id="count"></span>
+  <span class="grow"></span>
+  <button id="nbtn">Notes (N)</button>
+  <button id="fs">Full screen (F)</button>
+  <button onclick="print()">PDF</button>
+</div>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = 0;
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('on', k === i));
+    document.getElementById('count').textContent = `${i + 1} / ${slides.length}`;
+    document.getElementById('notes').textContent = slides[i].dataset.notes || '';
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+  }
+  function fit() {
+    const v = document.getElementById('viewport').getBoundingClientRect();
+    document.getElementById('canvas').style.transform = `scale(${Math.min(v.width / 1600, v.height / 900)})`;
+  }
+  document.getElementById('prev').onclick = () => show(i - 1);
+  document.getElementById('next').onclick = () => show(i + 1);
+  document.getElementById('nbtn').onclick = () => { document.body.classList.toggle('notes'); fit(); };
+  document.getElementById('fs').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    if (['ArrowLeft', 'PageUp'].includes(e.key)) show(i - 1);
+    if (e.key === 'n' || e.key === 'N') document.getElementById('nbtn').click();
+    if (e.key === 'f' || e.key === 'F') document.getElementById('fs').click();
+  });
+  addEventListener('resize', fit);
+  show((parseInt(location.hash.slice(1)) || 1) - 1);
+  fit();
+</script>
+</body>
+</html>
