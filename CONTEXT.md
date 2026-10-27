@@ -76,6 +76,7 @@ Evidence base behind everything: deliverable quality anatomy, student-consulting
 - **Blocking issue / readiness:** v2 verdict logic — a deliverable's readiness is set by its worst blocking finding, never an average.
 - **Noise budget:** hard cap on findings per run (v1: three) so signal stays trusted.
 - **Coaching arc:** reviewer UX that locks the suggested fix until the consultant submits their own attempt.
+- **Attempt gate:** the reviewer refuses to show any findings until the person has typed their own read of the work. The review skill comes in a **gated** and an **ungated** variant, and the board picks which ships (`VISION.md` commitment 1).
 - **Murder board:** Red-Team CEO output — 10 quote-anchored hostile questions, then answers graded holds/weak/exposed.
 - **Gold set:** eval cases with trusted human labels; the standard the reviewer is measured against.
 - **Sealed triage:** machine quality ratings of the real decks, hidden from human labelers to keep labels independent.

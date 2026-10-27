@@ -4,7 +4,7 @@
 # extract_deck.py. The deck file is optional: with it, each slide is rendered to a small JPEG and embedded.
 # Rendering tries PyMuPDF, then pdftoppm; a .pptx goes through LibreOffice to PDF first. When none of that is
 # available the page still works and shows each slide's text instead of its picture.
-import base64, glob, json, os, re, shutil, subprocess, sys, tempfile
+import base64, glob, html, json, os, re, shutil, subprocess, sys, tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE = os.path.join(HERE, '..', 'assets', 'deck-line.html')
@@ -57,31 +57,143 @@ def pptx_to_pdf(pptx, tmp):
     return (pdf, 'LibreOffice') if os.path.exists(pdf) else (None, 'LibreOffice wrote no PDF')
 
 
-def pictures(deck_file, n_slides, width):
-    """Slide pictures as data URLs keyed by slide number, plus a one-line note on what happened."""
+def passages(rects):
+    """One box per quoted passage: pieces on the same line merge, and lines that follow each other merge into one
+    block, so a two-line title reads as one annotation. Lines far apart (a different text box) stay separate."""
+    lines = []
+    for r in sorted(rects, key=lambda r: (r[1], r[0])):
+        for ln in lines:                                  # same line: vertical overlap of more than half a line
+            if min(ln[3], r[3]) - max(ln[1], r[1]) > 0.5 * min(ln[3] - ln[1], r[3] - r[1]):
+                ln[:] = [min(ln[0], r[0]), min(ln[1], r[1]), max(ln[2], r[2]), max(ln[3], r[3])]
+                break
+        else:
+            lines.append(list(r))
+    blocks = []
+    for ln in sorted(lines, key=lambda r: r[1]):
+        b = blocks[-1] if blocks else None
+        if b and ln[1] - b[3] < 0.6 * (ln[3] - ln[1]) and min(b[2], ln[2]) > max(b[0], ln[0]):
+            b[:] = [min(b[0], ln[0]), b[1], max(b[2], ln[2]), max(b[3], ln[3])]
+        else:
+            blocks.append(ln)
+    return blocks
+
+
+def find(page, s):
+    """Search the page for s as written, then with straight and curly quotes swapped: the quote check counts
+    them as the same character, so a quote that passed it may use the other kind than the slide."""
+    curly = re.sub(r'"([^"]*)"', '“\\1”', straight(s).replace("'", '’'))
+    for v in dict.fromkeys([s, curly, straight(s)]):
+        hits = page.search_for(v)
+        if hits:
+            return hits
+    return []
+
+
+def straight(s):
+    return s.translate(str.maketrans({'‘': "'", '’': "'", '“': '"', '”': '"'}))
+
+
+def fitz_pages(pdf):
+    """A search function per page, through PyMuPDF. Raises ImportError when PyMuPDF isn't installed."""
+    import fitz
+    doc = fitz.open(pdf)
+
+    def page(n):
+        p = doc[n - 1]
+        w, h = p.rect.width, p.rect.height
+        return lambda s: [(r.x0 / w, r.y0 / h, r.x1 / w, r.y1 / h) for r in find(p, s)[:8]]
+    return page
+
+
+def poppler_pages(pdf):
+    """The same through poppler's word boxes (pdftotext -bbox-layout), for sandboxes with poppler but no PyMuPDF.
+    Words are matched in poppler's reading order, with straight and curly quotes counted as the same."""
+    def page(n):
+        try:
+            xml = subprocess.run(['pdftotext', '-bbox-layout', '-f', str(n), '-l', str(n), pdf, '-'],
+                                 capture_output=True, check=True).stdout.decode('utf-8', 'replace')
+        except (OSError, subprocess.CalledProcessError):
+            return lambda s: []
+        size = re.search(r'<page width="([\d.]+)" height="([\d.]+)"', xml)
+        if not size:
+            return lambda s: []
+        w, h = float(size[1]), float(size[2])
+        words = [(straight(html.unescape(t)), (float(a) / w, float(b) / h, float(c) / w, float(d) / h)) for a, b, c, d, t in
+                 re.findall(r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</word>', xml)]
+
+        def at(i, toks):
+            # inner words match whole; the first and last may sit inside punctuation ("help" in "help.")
+            last = len(toks) - 1
+            return all(words[i + j][0] == t if 0 < j < last else
+                       (t in words[i + j][0] if last == 0 else
+                        words[i + j][0].endswith(t) if j == 0 else words[i + j][0].startswith(t))
+                       for j, t in enumerate(toks))
+
+        def search(s):
+            toks = straight(s).split()
+            for i in range(len(words) - len(toks) + 1):
+                if at(i, toks):
+                    return [words[i + j][1] for j in range(len(toks))]
+            return []
+        return search
+    return page
+
+
+def quote_boxes(pdf, wanted):
+    """Where each quote sits on its slide, as fractions of the page: {slide: {quote: [[x0, y0, x1, y1], ...]}},
+    and the slides where a quote was found only in part. Uses PyMuPDF, else poppler; with neither, the page shows
+    the slides without highlight boxes."""
+    try:
+        page = fitz_pages(pdf)
+    except ImportError:
+        if not shutil.which('pdftotext'):
+            return {}, []
+        page = poppler_pages(pdf)
+    out, partly = {}, []
+    for n, quotes in wanted.items():
+        search = page(n)
+        for q in quotes:
+            words = q.split()
+            # the whole quote first; a quote broken across lines or boxes is found by its two ends
+            hits = search(' '.join(words))
+            if not hits and len(words) > 6:
+                head, tail = search(' '.join(words[:5])), search(' '.join(words[-5:]))
+                hits = head + tail
+                if hits and not (head and tail):
+                    partly.append(n)              # one end only: the box covers part of the quote
+            if hits:
+                out.setdefault(n, {})[q] = [[round(v, 4) for v in b] for b in passages(hits)]
+    return out, partly
+
+
+def pictures(deck_file, n_slides, width, wanted):
+    """Slide pictures as data URLs keyed by slide number, where the quotes sit on them, and a one-line note."""
     kind = deck_file.lower().rsplit('.', 1)[-1]
     with tempfile.TemporaryDirectory() as tmp:
         pdf, via = deck_file, ''
         if kind == 'pptx':
             pdf, via = pptx_to_pdf(deck_file, tmp)
             if not pdf:
-                return {}, via
+                return {}, {}, via
             via += ' + '
         elif kind != 'pdf':
-            return {}, f'cannot render .{kind} files'
+            return {}, {}, f'cannot render .{kind} files'
         for quality in (70, 55, 40):               # step quality down until the pictures fit the budget
             jpgs, how = pdf_pictures(pdf, width, quality)
             if jpgs is None:
-                return {}, how
+                return {}, {}, how
             if len(jpgs) != n_slides:
                 # numbers would not line up with the review (hidden slides, a different file): text only
-                return {}, f'deck renders to {len(jpgs)} pages but deck.json has {n_slides} slides'
+                return {}, {}, f'deck renders to {len(jpgs)} pages but deck.json has {n_slides} slides'
             if sum(len(j) for j in jpgs) * 4 / 3 < BUDGET:
                 break
         else:
-            return {}, 'slide pictures too large even at low quality'
+            return {}, {}, 'slide pictures too large even at low quality'
+        boxes, partly = quote_boxes(pdf, wanted)
     urls = {i: 'data:image/jpeg;base64,' + base64.b64encode(j).decode('ascii') for i, j in enumerate(jpgs, 1)}
-    return urls, f'{len(urls)} pictures via {via}{how}, quality {quality}'
+    found = sum(len(v) for v in boxes.values()) - len(partly)
+    part = f', {len(partly)} only in part (slide {", ".join(map(str, sorted(set(partly))))})' if partly else ''
+    return urls, boxes, f'{len(urls)} pictures via {via}{how}, quality {quality}; {found} of {sum(len(v) for v in wanted.values())} quotes located on their slide{part}'
 
 
 def check(review, n):
@@ -91,6 +203,8 @@ def check(review, n):
         if key not in review:
             warn.append(f'review.json has no "{key}"')
     for i, f in enumerate(review.get('findings', []), 1):
+        if not f.get('slides') and not f.get('quotes'):
+            warn.append(f'finding {i} has no slide and no quote, so it has no place on the line')
         bad = [s for s in f.get('slides', []) + [q.get('slide') for q in f.get('quotes', [])] if not 1 <= int(s) <= n]
         if bad:
             warn.append(f'finding {i} cites slide {bad[0]}, but the deck has {n}')
@@ -126,14 +240,21 @@ def main():
         review['slides'] = n
 
     text = {s['n']: [l[:MAX_CHARS] for l in s['items'][:MAX_LINES]] for s in slides}
-    pics, how = ({}, 'pictures turned off') if not images or len(args) < 3 else pictures(args[2], n, width)
+    wanted = {}                                       # every quote the page shows, by the slide it sits on
+    for f in review.get('findings', []):
+        for q in f.get('quotes', []):
+            wanted.setdefault(int(q['slide']), set()).add(q['text'])
+    for w in review.get('works', []):
+        wanted.setdefault(int(w['slide']), set()).add(w['quote'])
+    wanted = {k: sorted(v) for k, v in wanted.items() if 1 <= k <= n}
+    pics, boxes, how = ({}, {}, 'pictures turned off') if not images or len(args) < 3 else pictures(args[2], n, width, wanted)
     if images and len(args) < 3:
         how = 'no deck file given, so no pictures'
 
     page = open(TEMPLATE, encoding='utf-8').read()
     if '__REVIEW_JSON__' not in page or '__DECK_JSON__' not in page:
         fail(f'template {TEMPLATE} has no placeholders')
-    page = page.replace('__REVIEW_JSON__', embed(review), 1).replace('__DECK_JSON__', embed({'text': text, 'images': pics}), 1)
+    page = page.replace('__REVIEW_JSON__', embed(review), 1).replace('__DECK_JSON__', embed({'text': text, 'images': pics, 'boxes': boxes}), 1)
     open(out, 'w', encoding='utf-8').write(page)
 
     for w in check(review, n):

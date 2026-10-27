@@ -44,17 +44,50 @@ level that builds them.
 
 ## The four commitments
 
-### 1. Attempt first
+### 1. Attempt first — open, and going to the board
 
-Nothing unlocks until the consultant has committed their own read of their own work. The reviewer
-**refuses** — and the refusal cannot be argued past; that was tested against a user pushing back.
+**Status, 2026-10-15: not decided.** This commitment used to say that nothing unlocks until the
+consultant has committed their own read of their own work. The release of 6 Oct dropped that
+gate, following the owner's instruction of 29 Sep not to "require an unaided read in routine use".
+The two documents disagreed until now.
 
-This is the generation effect and the "answer key" model: the junior attempts the work, the AI
-grades the attempt, and the difference is where the learning is. There is no difference to learn
-from if you never formed a view.
+The owner has not picked one on paper. **The review skill is built in two variants**, and the owner
+takes the choice to the board:
 
-It is also the only student-side instrument this system has. The gap between what the consultant
-saw and what the reviewer saw, closing over a term, is the thing actually worth measuring.
+- **Gated:** the reviewer refuses to show findings until the person has typed their own read, and
+  the refusal cannot be argued past.
+- **Ungated:** the full review appears immediately.
+
+**Version one is team-lead mode**, ready by 26 Oct for the team-lead session on 27 Oct, so the
+first pair of variants is a lead-mode pair. In that session the cold read happens in the room, by
+hand, before the reviewer runs, whichever variant ships.
+
+**Student mode follows shortly after**, for the consultant session on 3 Nov, and it is deliberately
+simpler: a check of the consultant's work against the chapter's principles, not the full review.
+The worry is consultants leaning on AI instead of learning to consult. The student tool should help
+them line their work up with the principles, not give them a reviewer to depend on. The same gated
+or ungated choice applies to student mode as well.
+
+The case for the gate is still the generation effect and the "answer key" model: the junior
+attempts the work, the AI grades the attempt, and the difference is where the learning is. There is
+no difference to learn from if you never formed a view. The gap between what the consultant saw and
+what the reviewer saw, closing over a term, is the only student-side measure this system has, and
+the ungated variant records no reads to measure it with.
+
+What is known, so the board argues from facts:
+
+- **The gate works mechanically.** In September, with the gate's text present, the model refused 16
+  of 16 times across two model families. It held 4 of 4 times against a user arguing back, but that
+  was one family and a prompt that no longer exists.
+- **The gate must never judge quality.** A word-count rule made the model refuse a real eight-word
+  read. Even without a rule, the model judged quality on its own, and the same junk answer was
+  refused once and accepted once.
+- **The outside evidence does not settle it.** Bastani et al. (PNAS 2025) found that practising with
+  an answer-giving AI lowered later exam scores by 17%, and that a hint-giving tutor removed that
+  harm. The tutor did not make students attempt first. The study supports commitment 2 (no
+  drafting), not the gate. It does add one point for the gate: students did not notice the learning
+  they lost, so an optional read is likely to be skipped.
+- **No real user has met either variant.**
 
 ### 2. No drafting
 
@@ -105,7 +138,9 @@ including with the system prompt entirely missing.
 
 Each commitment gives something up, and the tradeoffs are accepted rather than hidden:
 
-- **Attempt first** costs the consultant who is stuck at midnight and just wants help.
+- **Attempt first**, if the gated variant ships, costs the consultant who is stuck at midnight and
+  just wants help, and the lead reviewing under time pressure. If the ungated variant ships, it
+  costs the closing measure below its only data.
 - **No drafting** costs the weakest consultants most — they are the ones who most need to see what
   good looks like, and this refuses to show them.
 - **No grade** costs the lead who wants to know how much to trust a review at a glance.
@@ -127,4 +162,6 @@ the case frameworks — starting with the chapter's own, in [frameworks/](framew
 
 The measure of whether any of it worked is not a scorecard. It is whether a consultant's own read
 of their own work gets closer to the reviewer's, over a term, without the reviewer ever writing a
-word of their deck.
+word of their deck. That measure needs the consultant's read to be written down somewhere. The
+gated variant writes it down; the ungated one does not, so if the board picks ungated, the read has
+to be captured some other way or this measure has nothing to count.

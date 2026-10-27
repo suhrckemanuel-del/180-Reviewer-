@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck walk</title>
+<style>
+  :root { --ink:#1d2321; --muted:#66706b; --line:#dfe3dc; --bg:#f7f8f4; --card:#fff; --green:#78B038;
+          --high:#c0392b; --mod:#c27c0e; --min:#7a868c; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:16px; }
+  .check { font-size:13px; background:#eef6e6; color:#2e6b12; border-radius:6px; padding:4px 8px; display:inline-block; }
+  h1 { font-size:18px; margin:12px 0 4px; }
+  .main { border-left:4px solid var(--high); background:#fdf1ef; border-radius:6px; padding:10px 12px; margin:8px 0 16px; }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fill, minmax(30px, 1fr)); gap:3px; }
+  .tile { height:34px; border-radius:4px; border:1px solid #cfe3b8; background:#e8f2dc; font-size:11px;
+          display:flex; align-items:flex-end; justify-content:center; padding-bottom:2px; cursor:pointer; }
+  .tile.Minor { background:#eceff0; border-color:#c9d0d2; }
+  .tile.Moderate { background:#fbe7c6; border-color:#efc27a; }
+  .tile.High { background:#f6cdc7; border-color:#e08a7e; }
+  .tile.sel { outline:2px solid var(--ink); }
+  .legend { font-size:12px; color:var(--muted); margin:6px 0 14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin:8px 0; }
+  .card.dim { opacity:.35; }
+  .sev { font-weight:600; font-size:13px; }
+  .sev.High { color:var(--high); } .sev.Moderate { color:var(--mod); } .sev.Minor { color:var(--min); }
+  blockquote { margin:6px 0; padding-left:10px; border-left:3px solid var(--line); color:#3b4440; }
+  .small { font-size:13px; color:var(--muted); }
+  button.clear { font-size:12px; border:1px solid var(--line); background:#fff; border-radius:6px; padding:2px 8px; cursor:pointer; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+// The skill replaces only this object. Every string comes from the chat review, unchanged.
+const REVIEW = {
+  check: "Quotes checked by script: 0 of 0 found on the cited slide.",
+  slides: 0,                        // total slides or pages in the deliverable
+  main: { title: "", why: "", slides: [] },
+  findings: [
+    // { title: "", severity: "High|Moderate|Minor", slides: [n], next: "",
+    //   quotes: [{ text: "", slide: n }], why: "", ask: "" }
+  ],
+  works: [ /* { title: "", quote: "", slide: n } */ ],
+  couldntJudge: "",
+  stamp: ""
+};
+
+const rank = { High: 3, Moderate: 2, Minor: 1 };
+let sel = null;
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function worst(n) {
+  let best = null;
+  for (const f of REVIEW.findings) if (f.slides.includes(n) && (!best || rank[f.severity] > rank[best])) best = f.severity;
+  return best;
+}
+
+function render() {
+  const tiles = Array.from({ length: REVIEW.slides }, (_, i) => i + 1).map(n =>
+    `<div class="tile ${worst(n) || ""} ${sel === n ? "sel" : ""}" data-n="${n}" title="Slide ${n}">${n}</div>`).join("");
+  const cards = REVIEW.findings.map((f, i) => `
+    <details class="card ${sel && !f.slides.includes(sel) ? "dim" : ""}" ${sel && f.slides.includes(sel) ? "open" : ""}>
+      <summary><b>${i + 1}. ${esc(f.title)}</b> · <span class="sev ${f.severity}">${f.severity}</span> · slide ${f.slides.join(", ")}<br>
+        <span class="small">→ ${esc(f.next)}</span></summary>
+      ${f.quotes.map(q => `<blockquote>"${esc(q.text)}" (slide ${q.slide})</blockquote>`).join("")}
+      <p><b>Why it matters:</b> ${esc(f.why)}</p>
+      <p><b>Ask the team:</b> ${esc(f.ask)}</p>
+    </details>`).join("");
+  const works = REVIEW.works.length
+    ? REVIEW.works.map(w => `<li><b>${esc(w.title)}</b>: "${esc(w.quote)}" (slide ${w.slide})</li>`).join("")
+    : "<li>No specific strengths established from the material.</li>";
+  document.getElementById("app").innerHTML = `
+    <span class="check">${esc(REVIEW.check)}</span>
+    <h1>Main issue</h1>
+    <div class="main"><b>${esc(REVIEW.main.title)}</b> ${esc(REVIEW.main.why)} Slides ${REVIEW.main.slides.join(", ")}.</div>
+    <div class="tiles">${tiles}</div>
+    <div class="legend">Each tile is a slide, coloured by its most serious finding. Tap one to see its findings.
+      ${sel ? `<button class="clear" id="clear">Show all</button>` : ""}</div>
+    <h1>Findings</h1>${cards || `<p class="small">No findings.</p>`}
+    <h1>What works</h1><ul>${works}</ul>
+    <p><b>Couldn't judge:</b> ${esc(REVIEW.couldntJudge)}</p>
+    <p class="small"><i>AI review, no grade. You decide what to keep. 180dc-review-lead · ${esc(REVIEW.stamp)}</i></p>`;
+  document.querySelectorAll(".tile").forEach(t => t.onclick = () => { const n = +t.dataset.n; sel = sel === n ? null : n; render(); });
+  const c = document.getElementById("clear"); if (c) c.onclick = () => { sel = null; render(); };
+}
+render();
+</script>
+</body>
+</html>

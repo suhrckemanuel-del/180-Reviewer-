@@ -25,6 +25,7 @@ slide text from `deck.json` and, when it can render the deck, one JPEG per slide
 | PPTX | No LibreOffice here, so no pictures; page still builds with each slide's text (34 KB) |
 | No deck file | Text only, same as the PPTX run |
 | Finding cites slide 27 of 18 | Builds, prints `warning: finding 3 cites slide 27, but the deck has 18` |
+| Quote boxes (added later the same day) | 10 of 10 quotes located on their slide with PyMuPDF; fix mode draws numbered boxes over them. The PPTX build has no boxes (no pictures) and highlights the quote in the slide text instead |
 
 The fallback order is PyMuPDF, then `pdftoppm`; a .pptx goes through LibreOffice to PDF first. If the rendered
 page count doesn't match `deck.json` (hidden slides, a different file), the script drops the pictures rather
