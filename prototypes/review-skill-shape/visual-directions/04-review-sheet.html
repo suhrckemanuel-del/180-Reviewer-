@@ -1,0 +1,246 @@
+<!doctype html>
+<!-- PROTOTYPE for 180-Reviewer- issue 23. Third candidate for assets/deck-walk.html, between the paper draft
+(v2) and the hand-back draft (v3): one calm scrolling sheet, but each finding ends in the lead's decision and
+the sheet ends in the note to the team. Boxes follow Ramp/Browserbase/Attio: ruled cells that share 1px lines,
+square corners, no soft shadows, no tinted panels. Same REVIEW contract as the asset. Invented content. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review Sheet</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&family=Martian+Mono:wdth,wght@75..112.5,400;75..112.5,500&display=swap">
+<style>
+  /* A ruled review sheet: every box is a cell in one grid, lines are shared, green marks what the lead decides. */
+  :root {
+    --page: #f6f6f2; --paper: #ffffff; --ink: #121411; --grey: #646a60; --hair: #d6d9d0; --dot: #d3d6cc;
+    --green: #78B038; --forest: #183a0e; --pen: rgba(120,176,56,.5);
+    --sans: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Martian Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --hatch: repeating-linear-gradient(135deg, var(--ink) 0 1.5px, transparent 1.5px 5px);
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--page); }
+  body { margin: 0; color: var(--ink); font: 400 15.5px/1.5 var(--sans); }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)); }
+  .lab { font: 500 10px/1.35 var(--mono); font-stretch: 85%; letter-spacing: .04em; text-transform: uppercase; }
+  button { font: inherit; color: inherit; }
+  button:focus-visible { outline: 3px solid var(--green); outline-offset: -3px; }
+
+  /* the ruled-cell primitive: ink shows through 1px gaps, so neighbours share one line */
+  .cells { display: grid; gap: 1px; background: var(--ink); border: 1px solid var(--ink); }
+  .cells > * { background: var(--paper); min-width: 0; }
+
+  /* sticky progress */
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--page); z-index: 10; }
+  .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--page); padding: 10px 0 10px; }
+  .top .cells { grid-template-columns: 1fr auto; }
+  .top .cells > * { padding: 8px 10px; display: flex; align-items: center; gap: 10px; }
+  .segs { display: flex; gap: 3px; flex: 1; }
+  .segs i { flex: 1; height: 8px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--ink); }
+  .segs .send { background: var(--green); box-shadow: inset 0 0 0 1px var(--forest); }
+  .segs .ask { background: var(--ink); }
+  .segs .out { background: var(--hatch); }
+
+  /* spec plate */
+  .plate { grid-template-columns: 1.4fr 1fr 1fr; margin-top: 6px; }
+  .plate > div { padding: 8px 10px 9px; }
+  .plate .v { font: 700 20px/1.1 var(--sans); margin-top: 3px; font-variant-numeric: tabular-nums; }
+  .plate .full { grid-column: 1 / -1; color: var(--grey); }
+
+  /* main issue band: the one loud surface */
+  .band { background: var(--green); color: var(--forest); margin-top: 16px; border: 1px solid var(--forest); }
+  .band .head { display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--forest); }
+  .band h1 { font: 800 30px/1.05 var(--sans); letter-spacing: -.025em; margin: 0; padding: 16px 12px 10px; text-wrap: balance; }
+  .band p { margin: 0; padding: 0 12px 16px; font-size: 16.5px; line-height: 1.4; font-weight: 500; }
+
+  /* slide strip */
+  .strip { margin-top: 16px; grid-template-columns: repeat(var(--n), 1fr); }
+  .strip button { all: unset; cursor: pointer; background: var(--paper); height: 38px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 3px 0 4px; }
+  .strip button:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+  .strip b { font: 500 8.5px/1 var(--mono); font-stretch: 75%; color: var(--grey); }
+  .strip i { width: 9px; height: 14px; }
+  .strip .High i { background: var(--ink); } .strip .Moderate i { background: var(--hatch); box-shadow: inset 0 0 0 1px var(--ink); }
+  .strip .Minor i { box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .strip .on { background: var(--green); } .strip .on b { color: var(--forest); }
+  .key { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 0; color: var(--grey); }
+  .key i { display: inline-block; width: 8px; height: 11px; vertical-align: -2px; margin-right: 5px; }
+
+  /* a finding is one ruled block: tab row, slide desk, text, decision row */
+  .sec-h { display: flex; justify-content: space-between; align-items: baseline; margin: 36px 0 10px; }
+  .sec-h h2 { font: 800 13px/1 var(--sans); letter-spacing: .02em; text-transform: uppercase; margin: 0; }
+  .find { grid-template-columns: 1fr; margin-bottom: 18px; transition: opacity .2s; }
+  .find.dim { opacity: .3; }
+  .tabs { display: grid; grid-template-columns: auto auto 1fr; gap: 1px; background: var(--ink); }
+  .tabs > span { background: var(--paper); padding: 7px 10px; }
+  .tabs .no { font: 800 13px/1.2 var(--sans); }
+  .tabs em { font-style: normal; }
+  .tabs .High { background: var(--ink); color: var(--paper); }
+  .tabs .Moderate { background: var(--paper) var(--hatch); } .tabs .Moderate em { background: var(--paper); font-style: normal; padding: 0 3px; }
+  .desk { background-color: #f1f2ed !important; background-image: radial-gradient(var(--dot) 1px, transparent 1.2px); background-size: 14px 14px; padding: 14px 14px 16px; display: grid; }
+  .frame { background: var(--paper); border: 1px solid var(--ink); aspect-ratio: 16 / 9; width: 74%; max-width: 100%; padding: 7px 9px; display: flex; flex-direction: column; }
+  .frame + .frame { margin: -13% 0 0 26%; }
+  .frame .lab { color: var(--grey); display: flex; justify-content: space-between; }
+  .frame p { margin: 8px 0 0; font: 500 13.5px/1.35 var(--sans); }
+  .frame mark { background: linear-gradient(transparent 48%, var(--pen) 48%, var(--pen) 94%, transparent 94%); color: inherit; }
+  .body { padding: 14px 12px 4px; }
+  .body h3 { font: 800 21px/1.12 var(--sans); letter-spacing: -.015em; margin: 0 0 8px; text-wrap: balance; }
+  .body .why { color: var(--grey); margin: 0 0 12px; }
+  .spec { display: grid; grid-template-columns: 62px 1fr; border-top: 1px solid var(--ink); }
+  .spec > * { padding: 9px 0; border-bottom: 1px solid var(--hair); }
+  .spec > :nth-last-child(-n+2) { border-bottom: 0; }
+  .spec dt { color: var(--grey); padding-top: 12px; }
+  .spec dd { margin: 0; }
+  .spec .nx { font-weight: 700; }
+  .decide { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 1px; background: var(--ink); }
+  .decide button { all: unset; cursor: pointer; background: var(--paper); text-align: center; padding: 13px 4px; font: 700 14px/1.1 var(--sans); }
+  .decide button:hover { background: #f1f2ed; }
+  .decide button:focus-visible { outline: 3px solid var(--green); outline-offset: -3px; }
+  .decide .on.send { background: var(--green); color: var(--forest); }
+  .decide .on.ask { background: var(--ink); color: var(--paper); }
+  .decide .on.out { background: var(--paper) var(--hatch); } .decide .on.out span { background: var(--paper); padding: 2px 4px; }
+
+  /* what works + limits */
+  .works { grid-template-columns: 44px 1fr; }
+  .works .tick { all: unset; cursor: pointer; display: grid; place-items: center; font: 800 16px/1 var(--sans); color: var(--hair); }
+  .works .tick.on { background: var(--green); color: var(--forest); }
+  .works .w { padding: 10px 12px; }
+  .works .w b { display: block; font-weight: 700; }
+  .works q { color: var(--grey); quotes: "“" "”"; }
+  .limits { margin-top: 10px; grid-template-columns: 44px 1fr; }
+  .limits .h { background: var(--paper) var(--hatch) !important; }
+  .limits p { margin: 0; padding: 10px 12px; color: var(--grey); font-size: 14px; }
+  .limits p .lab { display: block; color: var(--ink); margin-bottom: 2px; }
+
+  /* the note */
+  .note { grid-template-columns: repeat(3, 1fr); margin-top: 6px; }
+  .note .h { grid-column: 1 / -1; background: var(--ink) !important; color: var(--green); padding: 9px 12px; display: flex; justify-content: space-between; }
+  .note .t { padding: 8px 10px; } .note .t .v { font: 800 22px/1 var(--sans); display: block; margin-top: 3px; }
+  .note .t.send { background: var(--green); color: var(--forest); }
+  .note pre { grid-column: 1 / -1; margin: 0; padding: 14px 12px; white-space: pre-wrap; overflow-wrap: anywhere; font: 400 15px/1.55 var(--sans); }
+  .note .copy { all: unset; cursor: pointer; grid-column: 1 / -1; background: var(--green); color: var(--forest); text-align: center; padding: 15px; font: 800 16px/1 var(--sans); }
+  .note .copy:focus-visible { outline: 3px solid var(--ink); outline-offset: -3px; }
+  .foot { margin-top: 26px; grid-template-columns: 1fr auto; }
+  .foot > span { padding: 8px 10px; }
+
+  @media (min-width: 720px) {
+    .band h1 { font-size: 40px; padding: 22px 16px 12px; } .band p { padding: 0 16px 20px; font-size: 18px; max-width: 60ch; }
+    .find { grid-template-columns: 1fr 1fr; }
+    .tabs, .decide { grid-column: 1 / -1; }
+    .desk { align-content: center; }
+  }
+  @media (prefers-reduced-motion: reduce) { .find { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+// The skill replaces only this object. Every string comes from the chat review, unchanged.
+const REVIEW = {
+  check: "Quotes checked by script: 11 of 11 found on the cited slide.",
+  slides: 18,
+  main: { title: "The deck recommends the booking app but never says what it costs or who sets it up.",
+          why: "The board is asked to approve a change it cannot price, and nobody is named to start it.", slides: [2, 14] },
+  findings: [
+    { title: "The recommendation has no cost, owner or first step", severity: "High", slides: [14, 15],
+      next: "Add who sets the app up, what it costs per year and the first step for next month.",
+      quotes: [{ text: "We recommend adopting a volunteer booking app.", slide: 14 }, { text: "Next steps: explore options with the board", slide: 15 }],
+      why: "The board approves budget lines. Without a yearly cost and a named owner it cannot say yes, so the decision slides to the next meeting.",
+      ask: "Did the client give the team a budget ceiling?" },
+    { title: "The summary promises a pilot that slide 15 never gives", severity: "Moderate", slides: [2, 15],
+      next: "Make slide 15 deliver the pilot the summary describes, or bring the summary down to what the deck supports.",
+      quotes: [{ text: "A three-month pilot will test the app with two shift teams.", slide: 2 }, { text: "Next steps: explore options with the board", slide: 15 }],
+      why: "A board member who reads only the summary expects a pilot ready to run. The closing slide asks them to keep exploring instead.",
+      ask: "Is the pilot agreed with the client, or the team's own idea?" },
+    { title: "Nobody can tell if 30% unfilled shifts is bad", severity: "Moderate", slides: [7],
+      next: "Name what the 30% should be compared with: last year, a similar food bank, or the client's own target.",
+      quotes: [{ text: "30% of shifts are unfilled at least once a month", slide: 7 }],
+      why: "The case for change rests on this number. Without last year's figure or a target, the board cannot tell a crisis from normal churn.",
+      ask: "Does the client track a target fill rate?" },
+    { title: "The adoption claim rests on 12 volunteers reached on WhatsApp", severity: "Minor", slides: [9, 17],
+      next: "Optional: say who the survey did not reach, next to the claim on slide 9.",
+      quotes: [{ text: "Most volunteers would use an app (9 of 12 surveyed)", slide: 9 }, { text: "Survey sent to the volunteer WhatsApp group", slide: 17 }],
+      why: "Volunteers already on WhatsApp are the ones most likely to use an app. The ones the change could lose were not asked.",
+      ask: "How many volunteers are in the WhatsApp group?" },
+    { title: "Analysis titles name topics, not conclusions", severity: "Minor", slides: [8, 10],
+      next: "Optional: rewrite each analysis title as the finding it proves.",
+      quotes: [{ text: "Volunteer demographics", slide: 8 }, { text: "Current tools", slide: 10 }],
+      why: "A board member flipping through slides 7 to 12 learns the topics but not what the team found, so the argument only lives in the speaker's head.",
+      ask: "Will the team present this, or will it be read without them?" }
+  ],
+  works: [
+    { title: "The interview synthesis is concrete", quote: "Coordinators spend about 4 hours a week chasing replies", slide: 6 },
+    { title: "The options are compared side by side", quote: "Option comparison: WhatsApp, shared spreadsheet, booking app", slide: 12 }
+  ],
+  couldntJudge: "whether a booking app suits these volunteers (needs domain knowledge); the values in the slide 11 chart (image only); prices of the named apps (not in the deck)",
+  stamp: "1017-PROTO01"
+};
+
+const F = REVIEW.findings, N = REVIEW.slides;
+const S = { d: {}, keep: Object.fromEntries(REVIEW.works.map((_, i) => [i, true])), sel: null };
+const rank = { High: 3, Moderate: 2, Minor: 1 };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const sl = a => (a.length > 1 ? "slides " : "slide ") + a.join(", ");
+const m = /(\d+) of (\d+)/.exec(REVIEW.check);
+const LABEL = { send: "Send to team", ask: "Ask first", out: "Leave out" };
+function worst(n) { let b = null; for (const f of F) if (f.slides.includes(n) && (!b || rank[f.severity] > rank[b])) b = f.severity; return b; }
+
+function note() {
+  const send = F.filter((_, i) => S.d[i] === "send"), ask = F.filter((_, i) => S.d[i] === "ask");
+  const keep = REVIEW.works.filter((_, i) => S.keep[i]);
+  const L = [`Main issue: ${REVIEW.main.title}`];
+  if (send.length) L.push("", "To fix:", ...send.map((f, i) => `${i + 1}. ${f.next} (${sl(f.slides)})`));
+  if (ask.length) L.push("", "Before you change anything:", ...ask.map(f => `- ${f.ask}`));
+  if (keep.length) L.push("", "Keep:", ...keep.map(w => `- ${w.title} (slide ${w.slide})`));
+  return L.join("\n");
+}
+
+function render() {
+  const done = Object.keys(S.d).length, c = { send: 0, ask: 0, out: 0 }; Object.values(S.d).forEach(v => c[v]++);
+  const all = Array.from({ length: N }, (_, i) => i + 1);
+  const top = `<div class="top"><div class="cells"><div><span class="lab">Decided</span><div class="segs">${F.map((_, i) => `<i class="${S.d[i] || ""}"></i>`).join("")}</div></div>
+      <div><span class="lab">${done}/${F.length}</span></div></div></div>`;
+  const plate = `<div class="cells plate"><div><div class="lab">180DC · lead review</div><div class="v">${pad(F.length)} findings</div></div>
+      <div><div class="lab">Slides</div><div class="v">${pad(N)}</div></div>
+      <div><div class="lab">Quotes found</div><div class="v">${m ? `${m[1]}/${m[2]}` : "—"}</div></div>
+      <div class="full lab">${esc(REVIEW.check)}</div></div>`;
+  const band = `<section class="band"><div class="head lab"><span>Main issue</span><span>${sl(REVIEW.main.slides)}</span></div>
+      <h1>${esc(REVIEW.main.title)}</h1><p>${esc(REVIEW.main.why)}</p></section>`;
+  const strip = `<div class="cells strip" style="--n:${N}">${all.map(n => `<button type="button" class="${worst(n) || ""} ${S.sel === n ? "on" : ""}" data-n="${n}" aria-label="Slide ${n}${worst(n) ? ", " + worst(n) : ""}"><b>${n}</b><i></i></button>`).join("")}</div>
+      <div class="key lab"><span><i style="background:var(--ink)"></i>High</span><span><i style="background:var(--hatch);box-shadow:inset 0 0 0 1px var(--ink)"></i>Moderate</span><span><i style="box-shadow:inset 0 0 0 1.5px var(--ink)"></i>Minor</span><span>${S.sel ? `Slide ${S.sel} · tap again for all` : "Tap a slide to filter"}</span></div>`;
+  const finds = F.map((f, i) => `<article class="cells find ${S.sel && !f.slides.includes(S.sel) ? "dim" : ""}" id="f${i}">
+      <div class="tabs"><span class="no">${pad(i + 1)}</span><span class="lab ${f.severity}"><em>${f.severity}</em></span><span class="lab">${sl(f.slides)}</span></div>
+      <div class="desk">${f.quotes.map(q => `<div class="frame"><div class="lab"><span>Slide ${q.slide}</span><span>${pad(q.slide)}/${pad(N)}</span></div><p><mark>${esc(q.text)}</mark></p></div>`).join("")}</div>
+      <div class="body"><h3>${esc(f.title)}</h3><p class="why">${esc(f.why)}</p>
+        <dl class="spec"><dt class="lab">Next</dt><dd class="nx">${esc(f.next)}</dd><dt class="lab">Ask the team</dt><dd>${esc(f.ask)}</dd></dl></div>
+      <div class="decide">${Object.entries(LABEL).map(([k, v]) => `<button type="button" class="${k} ${S.d[i] === k ? "on" : ""}" data-k="${k}" data-i="${i}" aria-pressed="${S.d[i] === k}"><span>${v}</span></button>`).join("")}</div>
+    </article>`).join("");
+  const works = `<div class="sec-h"><h2>What works</h2><span class="lab">Tick what to praise</span></div>
+    <div class="cells works">${REVIEW.works.length ? REVIEW.works.map((w, i) => `<button type="button" class="tick ${S.keep[i] ? "on" : ""}" data-w="${i}" aria-pressed="${!!S.keep[i]}" aria-label="Include in note">✓</button>
+      <div class="w"><b>${esc(w.title)}</b><q>${esc(w.quote)}</q> <span class="lab">slide ${w.slide}</span></div>`).join("")
+      : `<span></span><div class="w">No specific strengths established from the material.</div>`}</div>
+    <div class="cells limits"><span class="h"></span><p><span class="lab">Couldn't judge</span>${esc(REVIEW.couldntJudge)}</p></div>`;
+  const noteBox = `<div class="sec-h"><h2>Note to the team</h2><span class="lab">${F.length - done ? `${F.length - done} not decided` : "All decided"}</span></div>
+    <div class="cells note"><div class="h lab"><span>Paste this to the team</span><span>Built from your decisions</span></div>
+      <div class="t send"><span class="lab">To fix</span><span class="v">${c.send}</span></div><div class="t"><span class="lab">To ask</span><span class="v">${c.ask}</span></div><div class="t"><span class="lab">Left out</span><span class="v">${c.out}</span></div>
+      <pre id="msg">${esc(note())}</pre><button type="button" class="copy" id="copy">Copy note</button></div>`;
+  const foot = `<div class="cells foot"><span class="lab">AI review, no grade. You decide what to keep.</span><span class="lab">180dc-review-lead · ${esc(REVIEW.stamp)}</span></div>`;
+  document.getElementById("app").innerHTML = top + plate + band + strip + `<div class="sec-h"><h2>Findings</h2><span class="lab">Decide each one</span></div>` + finds + works + noteBox + foot;
+}
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.dataset.n) { const n = +t.dataset.n; S.sel = S.sel === n ? null : n; render();
+    const i = S.sel ? F.findIndex(f => f.slides.includes(S.sel)) : -1; if (i >= 0) document.getElementById("f" + i).scrollIntoView({ behavior: "smooth", block: "center" }); }
+  else if (t.dataset.k) { const i = t.dataset.i; if (S.d[i] === t.dataset.k) delete S.d[i]; else S.d[i] = t.dataset.k; render(); }
+  else if (t.dataset.w != null) { S.keep[t.dataset.w] = !S.keep[t.dataset.w]; render(); }
+  else if (t.id === "copy") {
+    const ok = () => { t.textContent = "Copied"; setTimeout(() => t.textContent = "Copy note", 1600); };
+    const pick = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById("msg")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "Selected. Copy it from here"; };
+    try { navigator.clipboard.writeText(note()).then(ok, pick); } catch (err) { pick(); }
+  }
+});
+render();
+</script>
+</body>
+</html>

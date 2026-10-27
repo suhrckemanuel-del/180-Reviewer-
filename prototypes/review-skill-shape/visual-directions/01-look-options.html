@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>Reviewer Look Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<!-- PROTOTYPE for 180-Reviewer- issue 23 ("The final visual style of the review output"). Three
+directions side by side, each filled from the one REVIEW object below: the chat reply (rendered and as
+raw markdown) and the deck-walk view. #a, #b, #c focus one direction. The deck and review are INVENTED.
+Throwaway: the winner gets rewritten into SKILL.md's template and assets/deck-walk.html. -->
+<style>
+/* Layout: a control strip, then three phone-width columns side by side (a swipe row on a phone). */
+:root {
+  --bg: #f3f4f1; --panel: #ffffff; --fg: #1c201b; --muted: #646b62; --line: #dcdfd8;
+  --chip: #e8ebe4; --brand: #78B038; --brand-ink: #3f6a14; --mark: rgba(120,176,56,.16);
+  --code-bg: #eef0eb; --code-fg: #6b2f1a;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #151714; --panel: #1e211d; --fg: #e8ebe4; --muted: #a0a79c; --line: #343932;
+  --chip: #2a2e28; --brand-ink: #a9d47a; --mark: rgba(120,176,56,.22);
+  --code-bg: #2a2e28; --code-fg: #f0b39b; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #151714; --panel: #1e211d; --fg: #e8ebe4; --muted: #a0a79c; --line: #343932;
+  --chip: #2a2e28; --brand-ink: #a9d47a; --mark: rgba(120,176,56,.22);
+  --code-bg: #2a2e28; --code-fg: #f0b39b; color-scheme: dark }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--sans); }
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+        padding-block: 20px 110px; max-width: 1280px; margin: 0 auto; }
+header h1 { font: 600 22px/1.2 var(--sans); margin: 0 0 4px; letter-spacing: -.01em; text-wrap: balance; }
+header p { margin: 0; color: var(--muted); max-width: 72ch; }
+.tag { font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 16px 0 18px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); }
+.seg button { font: 500 13px/1 var(--sans); padding: 8px 12px; border: 0; background: transparent; color: var(--fg); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--panel); }
+.seg button:focus-visible, .sw button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.ctl { display: flex; gap: 8px; align-items: center; }
+
+.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 390px)); gap: 20px; justify-content: center; }
+@media (max-width: 1260px) { .cols { grid-template-columns: repeat(3, 360px); justify-content: start; overflow-x: auto;
+  scroll-snap-type: x mandatory; padding-bottom: 8px; } .col { scroll-snap-align: start; } }
+@media (max-width: 760px) { .cols { grid-template-columns: repeat(3, calc(100vw - 72px)); gap: 12px; } }
+body.focus .cols { grid-template-columns: minmax(0, 760px); overflow: visible; }
+body.focus .col:not(.on) { display: none; }
+.col { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.col-head h2 { font: 600 17px/1.25 var(--sans); margin: 2px 0 2px; }
+.col-head .src { font-size: 13px; color: var(--muted); }
+.moves { font-size: 13px; color: var(--fg); margin: 6px 0 0; padding: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+.moves b { font: 500 10.5px/1.8 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); display: block; }
+.moves ul { margin: 0 0 6px; padding-left: 18px; } .moves li { margin: 2px 0; }
+.stat { font: 12px/1.4 var(--mono); color: var(--muted); }
+.stat .bad { color: #c0392b; }
+
+.frame { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); overflow: hidden; }
+.frame-bar { font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+             padding: 10px 14px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px; }
+.frame-body { padding: 16px; }
+
+/* ---------- Claude chat approximation: the SAME for every direction, because Claude styles chat, not us ---------- */
+.chat { font: 15.5px/1.62 var(--serif); color: var(--fg); overflow-wrap: anywhere; }
+.user { font: 14px/1.45 var(--sans); background: var(--chip); border-radius: 14px; padding: 10px 12px; margin: 0 0 16px 18%; }
+.chat h2 { font: 600 17px/1.3 var(--serif); margin: 20px 0 6px; }
+.chat h3 { font: 600 15.5px/1.35 var(--serif); margin: 16px 0 4px; }
+.chat h4 { font: 600 15px/1.35 var(--serif); margin: 12px 0 2px; }
+.chat p { margin: 0 0 10px; }
+.chat ol, .chat ul { margin: 0 0 10px; padding-left: 22px; } .chat li { margin: 0 0 8px; }
+.chat blockquote { margin: 4px 0 8px; padding: 0 0 0 12px; border-left: 3px solid var(--line); color: var(--muted); }
+.chat hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
+.chat code { font: 0.84em var(--mono); background: var(--code-bg); color: var(--code-fg); padding: 1px 5px; border-radius: 4px; }
+.raw { font: 12.5px/1.55 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; color: var(--fg); }
+
+/* lead-only marking */
+body.mark .lead-only { outline: 1.5px dashed var(--brand); outline-offset: 3px; position: relative; }
+body.mark .lead-only::before { content: "lead only"; position: absolute; top: -9px; right: 4px; font: 600 9.5px/1 var(--mono);
+  text-transform: uppercase; letter-spacing: .08em; background: var(--brand); color: #10200a; padding: 2px 5px; border-radius: 3px; z-index: 2; }
+.none { color: var(--muted); font-size: 14px; padding: 24px 8px; text-align: center; }
+
+/* switcher (prototype chrome, not part of any design) */
+.sw { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+      background: #111; color: #fff; border-radius: 999px; padding: 6px 8px; display: flex; gap: 6px; align-items: center;
+      box-shadow: 0 6px 24px rgba(0,0,0,.3); font-size: 13px; z-index: 20; max-width: calc(100vw - 24px); }
+.sw button { background: #2c2c2c; color: #fff; border: 0; border-radius: 999px; padding: 6px 11px; cursor: pointer; font: 500 13px/1 var(--sans); }
+.sw .lbl { padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ================= Direction A: Margin notes (from Steep) ================= */
+.dw-a { --ink: #1b1f1a; --soft: #5d655a; --rule: #e3e6df; --wash: #eef5e4; --wash-ink: #2f4d12;
+        background: #ffffff; color: var(--ink); font: 15px/1.55 var(--sans); padding: 20px 18px 16px; }
+.dw-a .chk { font-size: 12.5px; color: var(--soft); margin: 0 0 14px; }
+.dw-a .main { background: var(--wash); color: var(--wash-ink); border-radius: 20px; padding: 18px 18px 16px; margin-bottom: 22px; }
+.dw-a .eb { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 6px; opacity: .8; }
+.dw-a .main h2 { font: 400 23px/1.25 var(--serif); letter-spacing: -.01em; margin: 0 0 8px; text-wrap: balance; }
+.dw-a .main p { margin: 0; font-size: 14.5px; }
+.dw-a .ruler { display: grid; grid-template-columns: repeat(18, 1fr); align-items: end; height: 46px; gap: 2px; border-bottom: 1px solid var(--ink); }
+.dw-a .ruler button { all: unset; cursor: pointer; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.dw-a .ruler i { display: block; width: 100%; background: var(--ink); border-radius: 2px 2px 0 0; height: 2px; }
+.dw-a .ruler .Minor i { height: 12px; background: #9aa396; } .dw-a .ruler .Moderate i { height: 24px; background: #4c5449; }
+.dw-a .ruler .High i { height: 40px; } .dw-a .ruler .sel i { outline: 2px solid var(--brand); outline-offset: 1px; }
+.dw-a .nums { display: grid; grid-template-columns: repeat(18, 1fr); gap: 2px; font: 10px/1.6 var(--sans); color: var(--soft); text-align: center; font-variant-numeric: tabular-nums; }
+.dw-a .legend { font-size: 12.5px; color: var(--soft); margin: 6px 0 16px; }
+.dw-a .f { border-top: 1px solid var(--rule); padding: 12px 0; }
+.dw-a .f.dim { opacity: .3; }
+.dw-a summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 26px 1fr; gap: 4px; }
+.dw-a summary::-webkit-details-marker { display: none; }
+.dw-a .no { font: 400 20px/1.1 var(--serif); }
+.dw-a .t { font: 400 18px/1.3 var(--serif); display: block; }
+.dw-a .meta { font-size: 13px; color: var(--soft); font-style: italic; }
+.dw-a .nx { display: block; font-size: 14px; margin-top: 2px; }
+.dw-a .body { padding-left: 30px; font-size: 14px; }
+.dw-a blockquote { font: italic 15px/1.5 var(--serif); margin: 8px 0; padding-left: 12px; border-left: 2px solid var(--rule); }
+.dw-a .body p { margin: 6px 0; } .dw-a .lab { color: var(--soft); }
+.dw-a h3 { font: 400 18px/1.3 var(--serif); margin: 18px 0 6px; }
+.dw-a ul { padding-left: 18px; margin: 0 0 10px; font-size: 14px; }
+.dw-a .foot { border-top: 1px solid var(--rule); padding-top: 10px; font-size: 12.5px; color: var(--soft); }
+.dw-a .foot p { margin: 4px 0; }
+
+/* ================= Direction B: Ledger stamps (from Vercel) ================= */
+.dw-b { --ink: #171717; --body: #474747; --soft: #6b6b6b; --hair: #e6e6e6; --ok: #4f8a1c;
+        background: #fafafa; color: var(--ink); font: 14.5px/1.5 var(--sans); padding: 18px 16px 14px; }
+.dw-b .mono, .dw-b .lab, .dw-b .eb { font-family: var(--mono); }
+.dw-b .eb { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--soft); margin: 0 0 10px; }
+.dw-b .chk { font: 12px/1.5 var(--mono); background: #fff; box-shadow: 0 0 0 1px var(--hair); border-radius: 6px; padding: 8px 10px; margin: 0 0 14px; }
+.dw-b .chk .ok { color: var(--ok); font-weight: 700; }
+.dw-b .main { background: var(--ink); color: #fafafa; border-radius: 6px; padding: 14px 14px 12px; margin-bottom: 16px; }
+.dw-b .main .lab { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #a3a3a3; margin: 0 0 6px; }
+.dw-b .main h2 { font: 500 19px/1.3 var(--sans); letter-spacing: -.015em; margin: 0 0 6px; text-wrap: balance; }
+.dw-b .main p { margin: 0; color: #d4d4d4; font-size: 14px; }
+.dw-b .grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; }
+.dw-b .grid button { all: unset; cursor: pointer; aspect-ratio: 1; max-width: 100%; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--hair);
+                     background: #fff; font: 11px/1 var(--mono); color: var(--soft); display: flex; align-items: flex-end; justify-content: flex-start; padding: 4px; }
+.dw-b .grid .High { background: var(--ink); color: #fff; box-shadow: none; }
+.dw-b .grid .Moderate { background: repeating-linear-gradient(135deg, #171717 0 2px, #fff 2px 5px); color: var(--ink); }
+.dw-b .grid .Moderate span { background: #fff; padding: 0 2px; border-radius: 2px; }
+.dw-b .grid .Minor { box-shadow: inset 0 0 0 1.5px var(--ink); color: var(--ink); }
+.dw-b .grid .sel { outline: 2px solid var(--ok); outline-offset: 1px; }
+.dw-b .legend { font: 11px/1.6 var(--mono); color: var(--soft); margin: 8px 0 14px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.dw-b .k { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
+.dw-b .card { background: #fff; box-shadow: 0 0 0 1px var(--hair); border-radius: 6px; padding: 12px; margin: 0 0 8px; }
+.dw-b .card.dim { opacity: .3; }
+.dw-b summary { list-style: none; cursor: pointer; } .dw-b summary::-webkit-details-marker { display: none; }
+.dw-b .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 4px; }
+.dw-b .st { font: 600 10.5px/1 var(--mono); letter-spacing: .06em; padding: 4px 6px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--hair); color: var(--body); }
+.dw-b .st.High { background: var(--ink); color: #fff; box-shadow: none; }
+.dw-b .t { font-weight: 500; display: block; letter-spacing: -.005em; }
+.dw-b .nx { display: block; color: var(--body); font-size: 13.5px; margin-top: 2px; }
+.dw-b blockquote { font: 12.5px/1.55 var(--mono); color: var(--body); margin: 8px 0; padding: 8px 10px; background: #fafafa; border-radius: 4px; }
+.dw-b .card p { margin: 6px 0; font-size: 13.5px; color: var(--body); } .dw-b .card p .lab { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--soft); margin-right: 4px; }
+.dw-b h3 { font: 500 11px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--soft); margin: 18px 0 8px; }
+.dw-b ul { list-style: none; padding: 0; margin: 0 0 10px; font-size: 13.5px; }
+.dw-b ul li { padding-left: 18px; position: relative; margin: 0 0 6px; } .dw-b ul li::before { content: "✓"; position: absolute; left: 0; color: var(--ok); font-weight: 700; }
+.dw-b .foot { font: 11px/1.6 var(--mono); color: var(--soft); border-top: 1px solid var(--hair); padding-top: 10px; }
+.dw-b .foot p { margin: 4px 0; } .dw-b .foot .cj { font-family: var(--sans); font-size: 13px; color: var(--body); }
+
+/* ================= Direction C: One pass (from Ramp) ================= */
+.dw-c { --ink: #12140f; --soft: #62675e; --hair: #e2e5de; --canvas: #f2f4ef; --hl: rgba(120,176,56,.42);
+        background: var(--canvas); color: var(--ink); font: 400 15px/1.5 var(--sans); padding: 18px 16px 14px; }
+.dw-c * { font-weight: 400; }
+.dw-c .chk { font-size: 12.5px; color: var(--soft); margin: 0 0 12px; }
+.dw-c .main h2 { font-size: 25px; line-height: 1.16; letter-spacing: -.02em; margin: 0 0 8px; text-wrap: balance; }
+.dw-c .main mark { background: linear-gradient(transparent 52%, var(--hl) 52%, var(--hl) 92%, transparent 92%); color: inherit; padding: 0 2px; }
+.dw-c .main p { margin: 0 0 14px; color: var(--soft); font-size: 14.5px; }
+.dw-c .eb { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--soft); margin: 0 0 6px; }
+.dw-c svg { display: block; width: 100%; height: auto; max-width: 100%; }
+.dw-c .legend { font-size: 12.5px; color: var(--soft); margin: 2px 0 14px; }
+.dw-c .card { background: #fff; border: 1px solid var(--hair); border-radius: 16px; padding: 14px; margin: 0 0 10px; }
+.dw-c .card.dim { opacity: .3; }
+.dw-c .row { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-size: 12.5px; color: var(--soft); margin-bottom: 4px; }
+.dw-c .pill { font-size: 11.5px; padding: 2px 8px; border-radius: 6px; border: 1px solid var(--ink); color: var(--ink); }
+.dw-c .pill.High { background: var(--ink); color: #fff; }
+.dw-c .pill.Minor { border-color: transparent; padding-left: 0; color: var(--soft); }
+.dw-c .t { font-size: 17.5px; line-height: 1.3; letter-spacing: -.01em; margin: 0 0 6px; }
+.dw-c blockquote { margin: 6px 0; padding: 6px 10px; background: var(--canvas); border-radius: 8px; font-size: 14px; }
+.dw-c .card p { margin: 6px 0; font-size: 14px; } .dw-c .lab { color: var(--soft); }
+.dw-c .nx { border-top: 1px solid var(--hair); padding-top: 8px; margin-top: 8px !important; }
+.dw-c h3 { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--soft); margin: 16px 0 6px; }
+.dw-c ul { padding-left: 18px; margin: 0 0 10px; font-size: 14px; }
+.dw-c .foot { font-size: 12.5px; color: var(--soft); border-top: 1px solid var(--hair); padding-top: 10px; }
+.dw-c .foot p { margin: 4px 0; }
+@media (prefers-reduced-motion: no-preference) { .dw .f, .dw .card { transition: opacity .2s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="tag">Prototype · issue 23 · invented deck and review</div>
+    <h1>Reviewer look options</h1>
+    <p>Three directions for the same lead review. Every string in both surfaces comes from one REVIEW object, so only the look changes. The chat column uses Claude's own styling for all three, because markdown is all the skill controls there.</p>
+  </header>
+  <div class="controls">
+    <div class="ctl"><span class="tag">Surface</span><div class="seg" id="surface">
+      <button type="button" id="s-chat" data-v="chat">Chat reply</button><button type="button" id="s-walk" data-v="walk">Deck walk</button></div></div>
+    <div class="ctl"><span class="tag">Chat as</span><div class="seg" id="view">
+      <button type="button" id="v-rendered" data-v="rendered">Rendered</button><button type="button" id="v-md" data-v="md">Markdown</button></div></div>
+    <div class="ctl"><span class="tag">Skill</span><div class="seg" id="mode">
+      <button type="button" id="m-lead" data-v="lead">Lead</button><button type="button" id="m-student" data-v="student">Student (guess)</button></div></div>
+    <div class="ctl"><div class="seg" id="markseg"><button type="button" id="mark" data-v="mark">Outline lead-only parts</button></div></div>
+  </div>
+  <div class="cols" id="cols"></div>
+</div>
+<div class="sw" id="sw"></div>
+
+<script>
+// ---- The one review. Same shape as REVIEW in assets/deck-walk.html; every string appears in the chat. ----
+const REVIEW = {
+  check: "Quotes checked by script: 11 of 11 found on the cited slide.",
+  slides: 18,
+  main: { title: "The deck recommends the booking app but never says what it costs or who sets it up.",
+          why: "The board is asked to approve a change it cannot price, and nobody is named to start it.", slides: [2, 14] },
+  findings: [
+    { title: "The recommendation has no cost, owner or first step", severity: "High", slides: [14, 15],
+      next: "Add who sets the app up, what it costs per year and the first step for next month.",
+      quotes: [{ text: "We recommend adopting a volunteer booking app.", slide: 14 }, { text: "Next steps: explore options with the board", slide: 15 }],
+      why: "The board approves budget lines. Without a yearly cost and a named owner it cannot say yes, so the decision slides to the next meeting.",
+      ask: "Did the client give the team a budget ceiling?" },
+    { title: "The summary promises a pilot that slide 15 never gives", severity: "Moderate", slides: [2, 15], pair: [2, 15],
+      next: "Make slide 15 deliver the pilot the summary describes, or bring the summary down to what the deck supports.",
+      quotes: [{ text: "A three-month pilot will test the app with two shift teams.", slide: 2 }, { text: "Next steps: explore options with the board", slide: 15 }],
+      why: "A board member who reads only the summary expects a pilot ready to run. The closing slide asks them to keep exploring instead.",
+      ask: "Is the pilot agreed with the client, or the team's own idea?" },
+    { title: "Nobody can tell if 30% unfilled shifts is bad", severity: "Moderate", slides: [7],
+      next: "Name what the 30% should be compared with: last year, a similar food bank, or the client's own target.",
+      quotes: [{ text: "30% of shifts are unfilled at least once a month", slide: 7 }],
+      why: "The case for change rests on this number. Without last year's figure or a target, the board cannot tell a crisis from normal churn.",
+      ask: "Does the client track a target fill rate?" },
+    { title: "The adoption claim rests on 12 volunteers reached on WhatsApp", severity: "Minor", slides: [9, 17],
+      next: "Optional: say who the survey did not reach, next to the claim on slide 9.",
+      quotes: [{ text: "Most volunteers would use an app (9 of 12 surveyed)", slide: 9 }, { text: "Survey sent to the volunteer WhatsApp group", slide: 17 }],
+      why: "Volunteers already on WhatsApp are the ones most likely to use an app. The ones the change could lose were not asked.",
+      ask: "How many volunteers are in the WhatsApp group?" },
+    { title: "Analysis titles name topics, not conclusions", severity: "Minor", slides: [8, 10],
+      next: "Optional: rewrite each analysis title as the finding it proves.",
+      quotes: [{ text: "Volunteer demographics", slide: 8 }, { text: "Current tools", slide: 10 }],
+      why: "A board member flipping through slides 7 to 12 learns the topics but not what the team found, so the argument only lives in the speaker's head.",
+      ask: "Will the team present this, or will it be read without them?" }
+  ],
+  works: [
+    { title: "The interview synthesis is concrete", quote: "Coordinators spend about 4 hours a week chasing replies", slide: 6 },
+    { title: "The options are compared side by side", quote: "Option comparison: WhatsApp, shared spreadsheet, booking app", slide: 12 }
+  ],
+  couldntJudge: "whether a booking app suits these volunteers (needs domain knowledge); the values in the slide 11 chart (image only); prices of the named apps (not in the deck)",
+  stamp: "1017-PROTO01"
+};
+
+const P = { lead: "180dc-review-lead", student: "180dc-review-student" };
+const rank = { High: 3, Moderate: 2, Minor: 1 };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const sl = a => (a.length > 1 ? "slides " : "slide ") + a.join(", ");
+const S = { surface: "chat", view: "rendered", mode: "lead", mark: false, focus: null, sel: { a: null, b: null, c: null } };
+
+// the review as each skill would see it: the student guess keeps the shared base, max 3 findings, no lead parts
+function rv() { return S.mode === "lead" ? REVIEW : { ...REVIEW, findings: REVIEW.findings.slice(0, 3) }; }
+const lead = () => S.mode === "lead";
+const L = s => lead() ? `<!--lead-->\n${s}\n<!--/lead-->` : "";       // markdown: wraps lead-only lines
+const LH = (s, tag = "div") => lead() ? `<${tag} class="lead-only">${s}</${tag}>` : ""; // html: same
+function footer(R) {
+  const deck = lead() ? ` or say "deck walk" for the slide-by-slide view` : "";
+  return `AI review, no grade. You decide what to keep. Ask about any finding to go deeper${deck}. ${P[S.mode]} · ${R.stamp}`;
+}
+function worst(R, n) { let b = null; for (const f of R.findings) if (f.slides.includes(n) && (!b || rank[f.severity] > rank[b])) b = f.severity; return b; }
+
+// ================= chat templates (markdown the skill would emit) =================
+const MD = {
+  a: R => [
+    `*${R.check}*`, ``,
+    L(`**Main issue: ${R.main.title}** ${R.main.why} Slides ${R.main.slides.join(", ")}.`), ``,
+    ...R.findings.flatMap((f, i) => [`${i + 1}. **${f.title}**`, `   *${f.severity}* · ${sl(f.slides)} → ${f.next}`]), ``,
+    `---`, ``, `### Evidence`, ``,
+    ...R.findings.flatMap((f, i) => [`**${i + 1}. ${f.title}**`, ``, ...f.quotes.map(q => `> "${q.text}" (slide ${q.slide})`), ``,
+      `*Why it matters:* ${f.why}`, ``, L(`*Ask the team:* ${f.ask}`), ``]),
+    `### What works`, ``, ...R.works.map(w => `- **${w.title}**: "${w.quote}" (slide ${w.slide})`), ``,
+    `*Couldn't judge:* ${R.couldntJudge}.`, ``, `---`, ``, `*${footer(R)}*`
+  ],
+  b: R => [
+    `\`✓\` ${R.check}`, ``,
+    L(`### Main issue\n**${R.main.title}** ${R.main.why} \`${R.main.slides.map(n => "s" + n).join(" ")}\``), ``,
+    `### Findings`, ``,
+    ...R.findings.flatMap((f, i) => [`${i + 1}. \`${f.severity.toUpperCase()}\` **${f.title}** \`${f.slides.map(n => "s" + n).join(" ")}\``, `   → ${f.next}`]), ``,
+    ...R.findings.flatMap((f, i) => [`#### ${i + 1} · ${f.title}`, ...f.quotes.map(q => `> "${q.text}" \`s${q.slide}\``), ``,
+      `**Why it matters:** ${f.why}`, L(`**Ask the team:** ${f.ask}`), ``]),
+    `### What works`, ``, ...R.works.map(w => `- \`✓\` **${w.title}**: "${w.quote}" \`s${w.slide}\``), ``,
+    `**Couldn't judge:** ${R.couldntJudge}.`, ``, `\`${footer(R)}\``
+  ],
+  c: R => [
+    R.check, ``,
+    L(`## ${R.main.title}\n${R.main.why} Slides ${R.main.slides.join(", ")}.`), ``,
+    ...R.findings.flatMap((f, i) => [`---`, ``, `**${i + 1}. ${f.title}**`, `${f.severity === "High" ? "**High**" : f.severity} · ${sl(f.slides)}`, ``,
+      ...f.quotes.map(q => `> "${q.text}" (slide ${q.slide})`), ``, `${f.why}`, ``,
+      `**Next step:** ${f.next}`, L(`**Ask the team:** ${f.ask}`), ``]),
+    `---`, ``, `**What works:** ${R.works.map(w => `${w.title}: "${w.quote}" (slide ${w.slide})`).join("; ")}.`, ``,
+    `**Couldn't judge:** ${R.couldntJudge}.`, ``, `*${footer(R)}*`
+  ]
+};
+
+// tiny markdown renderer for what Claude chat shows: headings, lists with continuation, quotes, rules, inline marks
+function inline(s) {
+  return esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/\*([^*]+)\*/g, "<i>$1</i>");
+}
+function md2html(lines) {
+  const src = lines.join("\n").split("\n");
+  let out = "", list = null, para = [], quote = [];
+  const flushP = () => { if (para.length) out += `<p>${para.map(inline).join("<br>")}</p>`; para = []; };
+  const flushQ = () => { if (quote.length) out += `<blockquote>${quote.map(inline).join("<br>")}</blockquote>`; quote = []; };
+  const flushL = () => { if (list) out += `<${list.t}>${list.items.map(it => `<li>${it.map(inline).join("<br>")}</li>`).join("")}</${list.t}>`; list = null; };
+  const flush = () => { flushP(); flushQ(); flushL(); };
+  for (const ln of src) {
+    let m;
+    if (ln === "<!--lead-->") { flush(); out += `<div class="lead-only">`; continue; }
+    if (ln === "<!--/lead-->") { flush(); out += `</div>`; continue; }
+    if (!ln.trim()) { flushP(); flushQ(); if (list && list.t === "ul") flushL(); continue; }
+    if (list && /^ {3}\S/.test(ln)) { list.items[list.items.length - 1].push(ln.trim()); continue; }
+    if ((m = ln.match(/^(#{2,4}) (.*)$/))) { flush(); out += `<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`; continue; }
+    if (ln === "---") { flush(); out += "<hr>"; continue; }
+    if ((m = ln.match(/^> (.*)$/))) { flushP(); flushL(); quote.push(m[1]); continue; }
+    if ((m = ln.match(/^(\d+)\. (.*)$/))) { flushP(); flushQ(); if (!list || list.t !== "ol") { flushL(); list = { t: "ol", items: [] }; } list.items.push([m[2]]); continue; }
+    if ((m = ln.match(/^- (.*)$/))) { flushP(); flushQ(); if (!list || list.t !== "ul") { flushL(); list = { t: "ul", items: [] }; } list.items.push([m[1]]); continue; }
+    flushQ(); flushL(); para.push(ln);
+  }
+  flush();
+  return out;
+}
+const stripLead = lines => lines.join("\n").split("\n").filter(l => !/^<!--\/?lead-->$/.test(l)).join("\n");
+
+// ================= deck-walk views (the HTML artifact; only REVIEW changes per review) =================
+const quotesA = f => f.quotes.map(q => `<blockquote>"${esc(q.text)}" (slide ${q.slide})</blockquote>`).join("");
+const WALK = {
+  a: (R, sel) => {
+    const bars = Array.from({ length: R.slides }, (_, i) => i + 1).map(n =>
+      `<button type="button" class="${worst(R, n) || ""} ${sel === n ? "sel" : ""}" data-n="${n}" aria-label="Slide ${n}"><i></i></button>`).join("");
+    const nums = Array.from({ length: R.slides }, (_, i) => `<span>${i + 1}</span>`).join("");
+    return `<div class="dw dw-a">
+      <p class="chk">${esc(R.check)}</p>
+      ${LH(`<p class="eb">Main issue · Slides ${R.main.slides.join(", ")}</p><h2>${esc(R.main.title)}</h2><p>${esc(R.main.why)}</p>`, "section").replace('class="lead-only"', 'class="lead-only main"')}
+      <div class="lead-only"><div class="ruler">${bars}</div><div class="nums">${nums}</div>
+      <p class="legend">Bar height is the most serious finding on that slide. Tap a slide to see only its findings.</p></div>
+      ${R.findings.map((f, i) => `<details class="f ${sel && !f.slides.includes(sel) ? "dim" : ""}" ${sel && f.slides.includes(sel) ? "open" : ""}>
+        <summary><span class="no">${i + 1}</span><span><span class="t">${esc(f.title)}</span><span class="meta">${f.severity} · ${sl(f.slides)}</span>
+        <span class="nx">→ ${esc(f.next)}</span></span></summary>
+        <div class="body">${quotesA(f)}<p><span class="lab">Why it matters.</span> ${esc(f.why)}</p>${LH(`<p><span class="lab">Ask the team.</span> ${esc(f.ask)}</p>`)}</div></details>`).join("")}
+      <h3>What works</h3><ul>${R.works.map(w => `<li><b>${esc(w.title)}</b>: "${esc(w.quote)}" (slide ${w.slide})</li>`).join("")}</ul>
+      <div class="foot"><p><i>Couldn't judge:</i> ${esc(R.couldntJudge)}.</p><p><i>AI review, no grade. You decide what to keep. ${P[S.mode]} · ${esc(R.stamp)}</i></p></div></div>`;
+  },
+  b: (R, sel) => {
+    const cells = Array.from({ length: R.slides }, (_, i) => i + 1).map(n =>
+      `<button type="button" class="${worst(R, n) || ""} ${sel === n ? "sel" : ""}" data-n="${n}" aria-label="Slide ${n}"><span>${n}</span></button>`).join("");
+    return `<div class="dw dw-b">
+      <p class="eb">Lead review · ${R.slides} slides</p>
+      <p class="chk"><span class="ok">✓</span> ${esc(R.check)}</p>
+      ${LH(`<p class="lab">Main issue · ${R.main.slides.map(n => "s" + n).join(" ")}</p><h2>${esc(R.main.title)}</h2><p>${esc(R.main.why)}</p>`, "section").replace('class="lead-only"', 'class="lead-only main"')}
+      <div class="lead-only"><div class="grid">${cells}</div>
+      <div class="legend"><span><i class="k" style="background:#171717"></i>High</span><span><i class="k" style="background:repeating-linear-gradient(135deg,#171717 0 2px,#fff 2px 5px)"></i>Moderate</span>
+        <span><i class="k" style="box-shadow:inset 0 0 0 1.5px #171717"></i>Minor</span><span>tap = filter</span></div></div>
+      ${R.findings.map((f, i) => `<details class="card ${sel && !f.slides.includes(sel) ? "dim" : ""}" ${sel && f.slides.includes(sel) ? "open" : ""}>
+        <summary><div class="row"><span class="st ${f.severity}">${f.severity.toUpperCase()}</span><span class="mono" style="font-size:11px;color:#6b6b6b">${f.slides.map(n => "s" + n).join(" ")}</span></div>
+        <span class="t">${i + 1}. ${esc(f.title)}</span><span class="nx">→ ${esc(f.next)}</span></summary>
+        ${f.quotes.map(q => `<blockquote>"${esc(q.text)}" s${q.slide}</blockquote>`).join("")}
+        <p><span class="lab">Why it matters</span>${esc(f.why)}</p>${LH(`<p><span class="lab">Ask the team</span>${esc(f.ask)}</p>`)}</details>`).join("")}
+      <h3>What works</h3><ul>${R.works.map(w => `<li><b>${esc(w.title)}</b>: "${esc(w.quote)}" s${w.slide}</li>`).join("")}</ul>
+      <div class="foot"><p class="cj"><b>Couldn't judge:</b> ${esc(R.couldntJudge)}.</p><p>AI review, no grade. You decide what to keep. ${P[S.mode]} · ${esc(R.stamp)}</p></div></div>`;
+  },
+  c: (R, sel) => {
+    const W = 360, x = n => 12 + (n - 1) * ((W - 24) / (R.slides - 1)), base = 52;
+    const dot = n => { const s = worst(R, n);
+      if (s === "High") return `<circle cx="${x(n)}" cy="${base}" r="6.5" fill="#12140f"/>`;
+      if (s === "Moderate") return `<circle cx="${x(n)}" cy="${base}" r="5" fill="#fff" stroke="#12140f" stroke-width="2.2"/>`;
+      if (s === "Minor") return `<circle cx="${x(n)}" cy="${base}" r="3" fill="#62675e"/>`;
+      return `<line x1="${x(n)}" x2="${x(n)}" y1="${base - 3}" y2="${base + 3}" stroke="#b8bdb3" stroke-width="1"/>`; };
+    const arcs = R.findings.filter(f => f.pair).map(f => { const [a, b] = f.pair;
+      return `<path d="M ${x(a)} ${base - 8} C ${x(a)} 4, ${x(b)} 4, ${x(b)} ${base - 8}" fill="none" stroke="#78B038" stroke-width="2" stroke-dasharray="4 3"/>`; }).join("");
+    const nums = Array.from({ length: R.slides }, (_, i) => `<text x="${x(i + 1)}" y="${base + 20}" text-anchor="middle" font-size="9" fill="${sel === i + 1 ? "#12140f" : "#62675e"}" font-family="system-ui,sans-serif">${i + 1}</text>`).join("");
+    const hits = Array.from({ length: R.slides }, (_, i) => `<rect data-n="${i + 1}" x="${x(i + 1) - 9}" y="0" width="18" height="${base + 24}" fill="${sel === i + 1 ? "rgba(120,176,56,.18)" : "transparent"}" style="cursor:pointer"/>`).join("");
+    return `<div class="dw dw-c">
+      <p class="chk">${esc(R.check)}</p>
+      ${LH(`<p class="eb">Main issue · Slides ${R.main.slides.join(", ")}</p><h2><mark>${esc(R.main.title)}</mark></h2><p>${esc(R.main.why)}</p>`, "section").replace('class="lead-only"', 'class="lead-only main"')}
+      <div class="lead-only"><svg viewBox="0 0 ${W} ${base + 26}" role="img" aria-label="Slides 1 to ${R.slides} with findings marked">
+        <line x1="6" x2="${W - 6}" y1="${base}" y2="${base}" stroke="#b8bdb3" stroke-width="1"/>${hits}${arcs}${Array.from({ length: R.slides }, (_, i) => dot(i + 1)).join("")}${nums}</svg>
+      <p class="legend">● High · ○ Moderate · • Minor. Dashed arc: two slides that say different things. Tap a slide to filter.</p></div>
+      ${R.findings.map((f, i) => `<div class="card ${sel && !f.slides.includes(sel) ? "dim" : ""}">
+        <div class="row"><span class="pill ${f.severity}">${f.severity}</span><span>${sl(f.slides)}</span></div>
+        <p class="t">${i + 1}. ${esc(f.title)}</p>${quotesA(f)}<p>${esc(f.why)}</p>
+        <p class="nx"><span class="lab">Next step</span> ${esc(f.next)}</p>${LH(`<p><span class="lab">Ask the team</span> ${esc(f.ask)}</p>`)}</div>`).join("")}
+      <h3>What works</h3><ul>${R.works.map(w => `<li>${esc(w.title)}: "${esc(w.quote)}" (slide ${w.slide})</li>`).join("")}</ul>
+      <div class="foot"><p>Couldn't judge: ${esc(R.couldntJudge)}.</p><p>AI review, no grade. You decide what to keep. ${P[S.mode]} · ${esc(R.stamp)}</p></div></div>`;
+  }
+};
+
+const DIRS = {
+  a: { name: "Margin notes", src: "From Steep, “serif analytics on warm paper”",
+       shared: ["Severity is a word in italics, never a colour", "Bold sits on the problem only; labels are italic", "Main issue has no heading: it is the bold first line", "Footer and evidence sit behind a plain rule"],
+       leadAdds: ["Main issue on the one green card", "Slide ruler: bar height shows severity", "Serif titles over sans body"] },
+  b: { name: "Ledger stamps", src: "From Vercel, “typeset terminal on white paper”",
+       shared: ["Severity and slides as code stamps: HIGH, s14", "Monospace for metadata, plain text for reading", "Green appears only on ✓ marks"],
+       leadAdds: ["Main issue on an inverted black card", "Slide grid filled by severity: solid, hatched, outline", "Square 6px corners throughout"] },
+  c: { name: "One pass", src: "From Ramp, “editorial finance desk”",
+       shared: ["Each finding carries its own quote, why and next step", "No separate findings list or Details section", "Only High is marked; the rest is plain text"],
+       leadAdds: ["Main issue as a large headline with a green highlighter", "Slide timeline with a dashed arc between contradicting slides", "Needs one new REVIEW field (pair) for the arc"] }
+};
+
+function strings(R) {
+  const out = [R.check, R.couldntJudge, R.stamp];
+  if (lead()) out.push(R.main.title, R.main.why);
+  for (const f of R.findings) { out.push(f.title, f.next, f.why, ...f.quotes.map(q => q.text)); if (lead()) out.push(f.ask); }
+  for (const w of R.works) out.push(w.title, w.quote);
+  return out;
+}
+const norm = s => s.replace(/\s+/g, " ");
+function coverage(el, R) { const t = norm(el.textContent); const all = strings(R); const miss = all.filter(s => !t.includes(norm(s))); return [all.length - miss.length, all.length, miss]; }
+
+function render() {
+  const R = rv();
+  document.body.classList.toggle("mark", S.mark);
+  document.body.classList.toggle("focus", !!S.focus);
+  const html = Object.entries(DIRS).map(([k, d]) => {
+    let body, bar;
+    if (S.surface === "chat") {
+      const lines = MD[k](R);
+      bar = `<span>Claude chat</span><span>${S.view === "md" ? "raw markdown" : "rendered"}</span>`;
+      body = `<div class="user">📎 foodbank-volunteer-app.pptx<br>Can you review this before I send it back to the team?</div>` +
+        (S.view === "md" ? `<pre class="raw">${esc(stripLead(lines))}</pre>` : `<div class="chat">${md2html(lines)}</div>`);
+    } else {
+      bar = `<span>Artifact · deck walk</span><span>${R.slides} slides</span>`;
+      body = lead() ? WALK[k](R, S.sel[k]) : `<p class="none">The deck walk is lead-only (issue 21). Students get the chat reply.</p>`;
+    }
+    const pad = S.surface === "walk" && lead() ? "" : "frame-body";
+    return `<article class="col ${S.focus === k ? "on" : ""}" data-k="${k}">
+      <div class="col-head"><span class="tag">${k.toUpperCase()}</span><h2>${d.name}</h2><div class="src">${d.src}</div>
+        <div class="moves"><b>Shared base · both skills</b><ul>${d.shared.map(s => `<li>${s}</li>`).join("")}</ul>
+        <b>Lead adds</b><ul>${d.leadAdds.map(s => `<li>${s}</li>`).join("")}</ul></div></div>
+      <div class="frame"><div class="frame-bar">${bar}</div><div class="${pad}" data-surface>${body}</div></div>
+      <div class="stat" data-stat></div></article>`;
+  }).join("");
+  document.getElementById("cols").innerHTML = html;
+
+  // surface the state: words, and whether every REVIEW string made it into this surface word for word
+  document.querySelectorAll(".col").forEach(c => {
+    const el = c.querySelector("[data-surface]");
+    const words = (el.textContent.match(/\S+/g) || []).length - (S.surface === "chat" ? 13 : 0);
+    const st = c.querySelector("[data-stat]");
+    if (S.surface === "walk" && !lead()) { st.textContent = ""; return; }
+    const [got, all, miss] = coverage(el, R);
+    st.innerHTML = `${words} words · REVIEW strings present: <span class="${got < all ? "bad" : ""}">${got}/${all}</span>` +
+      (miss.length ? `<br><span class="bad">missing: ${esc(miss[0].slice(0, 60))}…</span>` : "");
+  });
+  document.querySelectorAll(".dw [data-n]").forEach(t => t.addEventListener("click", () => {
+    const k = t.closest(".col").dataset.k, n = +t.dataset.n; S.sel[k] = S.sel[k] === n ? null : n; render(); }));
+
+  for (const [id, key] of [["surface", "surface"], ["view", "view"], ["mode", "mode"]])
+    document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(S[key] === b.dataset.v)));
+  document.getElementById("mark").setAttribute("aria-pressed", String(S.mark));
+  document.getElementById("view").parentElement.hidden = S.surface !== "chat";
+
+  const keys = ["a", "b", "c"];
+  document.getElementById("sw").innerHTML = `<button type="button" id="prev" aria-label="Previous direction">←</button>
+    <span class="lbl">${S.focus ? `<b>${S.focus.toUpperCase()}</b> ${DIRS[S.focus].name}` : "All three side by side"}</span>
+    <button type="button" id="next" aria-label="Next direction">→</button>${S.focus ? `<button type="button" id="all">Compare</button>` : ""}`;
+  const go = d => { const i = S.focus ? keys.indexOf(S.focus) : (d > 0 ? -1 : 0); setFocus(keys[(i + d + 3) % 3]); };
+  document.getElementById("prev").onclick = () => go(-1);
+  document.getElementById("next").onclick = () => go(1);
+  const all = document.getElementById("all"); if (all) all.onclick = () => setFocus(null);
+}
+function setFocus(k) { S.focus = k; try { history.replaceState(null, "", k ? "#" + k : location.pathname); } catch (e) {} render(); window.scrollTo({ top: 0 }); }
+
+for (const [id, key] of [["surface", "surface"], ["view", "view"], ["mode", "mode"]])
+  document.querySelectorAll(`#${id} button`).forEach(b => b.addEventListener("click", () => { S[key] = b.dataset.v; render(); }));
+document.getElementById("mark").addEventListener("click", () => { S.mark = !S.mark; render(); });
+addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest("input,textarea,[contenteditable]")) return;
+  const keys = ["a", "b", "c"];
+  if (e.key === "ArrowRight") setFocus(keys[((S.focus ? keys.indexOf(S.focus) : -1) + 1) % 3]);
+  if (e.key === "ArrowLeft") setFocus(keys[((S.focus ? keys.indexOf(S.focus) : 0) + 2) % 3]);
+  if (e.key === "Escape") setFocus(null);
+});
+const h = location.hash.slice(1); if (["a", "b", "c"].includes(h)) S.focus = h;
+render();
+</script>
+</body>
+</html>

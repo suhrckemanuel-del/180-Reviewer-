@@ -1,0 +1,3 @@
+# build outputs and test runs: the zips are rebuilt from the skill folder, and decks never go in git
+*.zip
+free-run/

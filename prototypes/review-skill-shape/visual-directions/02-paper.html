@@ -1,0 +1,208 @@
+<!doctype html>
+<!-- PROTOTYPE for 180-Reviewer- issue 23. A candidate replacement for assets/deck-walk.html built from
+three borrowed moves: findings pinned to slide frames (Ramp's invoice + attached panel, Superhuman's
+in-text highlight), the main issue as a two-tone sentence (Sprig, Midday), and printed-label metadata
+(Ramp's top line, teenage engineering's port strip). Same REVIEW contract as the asset. Invented content. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Walk</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  /* Paper on a dotted desk: the deck is the object, the review is pen marks and pinned notes. */
+  :root {
+    --desk: #f1f2ee; --dot: #cdd1c8; --paper: #ffffff; --ink: #151713; --grey: #6e746a; --hair: #d8dbd3;
+    --pen: rgba(120,176,56,.48); --green: #78B038; --green-ink: #3d6b12;
+    --serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --hatch: repeating-linear-gradient(135deg, var(--ink) 0 1.5px, transparent 1.5px 4.5px);
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--desk); }
+  body { margin: 0; color: var(--ink); font: 15px/1.5 var(--sans); background: var(--desk);
+         background-image: radial-gradient(var(--dot) 1px, transparent 1.2px); background-size: 18px 18px; }
+  main { max-width: 760px; margin: 0 auto; padding: 18px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px)); }
+  .lab { font: 500 10.5px/1.3 var(--mono); letter-spacing: .09em; text-transform: uppercase; color: var(--grey); }
+
+  /* 1. printed label strip */
+  .plate { background: var(--paper); border: 1px solid var(--ink); display: grid; grid-template-columns: repeat(3, 1fr); }
+  .plate > div { padding: 7px 9px 8px; min-width: 0; }
+  .plate > div + div { border-left: 1px solid var(--ink); }
+  .plate .v { font: 500 17px/1.2 var(--mono); color: var(--ink); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .plate .ok { color: var(--green-ink); }
+  .plate .wide { grid-column: 1 / -1; border-left: 0 !important; border-top: 1px solid var(--ink); display: flex; justify-content: space-between; gap: 8px; }
+  .plate .wide .lab { color: var(--ink); }
+
+  /* 2. main issue as a sentence */
+  .mi { margin: 28px 0 26px; }
+  .mi p { font: 400 29px/1.16 var(--serif); letter-spacing: -.015em; margin: 8px 0 0; text-wrap: pretty; }
+  .mi .why { color: var(--grey); }
+
+  /* 3. port strip: one segment per slide */
+  .strip-head { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .strip { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 3px; }
+  .strip button { all: unset; cursor: pointer; height: 30px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--hair); position: relative; }
+  .strip button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  .strip .High { background: var(--ink); box-shadow: none; }
+  .strip .Moderate { background: var(--paper) var(--hatch); box-shadow: inset 0 0 0 1px var(--ink); }
+  .strip .Minor { box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .strip .on::after { content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 3px; background: var(--green); }
+  .nums { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 3px; margin-top: 9px; text-align: center; font: 9.5px/1 var(--mono); color: var(--grey); }
+  .key { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 0 0; }
+  .key i { display: inline-block; width: 12px; height: 9px; vertical-align: -1px; margin-right: 5px; }
+  .clear { all: unset; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+  /* 4. findings: slide frames with the quote highlighted, and a note pinned to them */
+  .finding { margin-top: 44px; transition: opacity .2s; }
+  .finding.dim { opacity: .25; }
+  .frames { display: grid; }
+  .frame { background: var(--paper); aspect-ratio: 16 / 9; max-width: 100%; width: 78%; border: 1px solid var(--hair);
+           box-shadow: 0 1px 2px rgba(20,24,18,.05), 0 10px 24px -14px rgba(20,24,18,.25); padding: 10px 12px; display: flex; flex-direction: column; }
+  .frame + .frame { margin: -15% 0 0 22%; }
+  .frame .lab { display: flex; justify-content: space-between; }
+  .frame .txt { margin: 12px 0 auto; font: 400 14.5px/1.35 var(--sans); padding-right: 6%; }
+  .frame mark { background: linear-gradient(transparent 50%, var(--pen) 50%, var(--pen) 92%, transparent 92%); color: inherit; padding: 0 1px; }
+  .frame .ghost { display: grid; gap: 5px; margin-bottom: 2px; }
+  .frame .ghost i { display: block; height: 4px; background: #eceee9; width: 70%; } .frame .ghost i + i { width: 45%; }
+
+  .note { position: relative; background: var(--paper); border: 1px solid var(--ink); padding: 14px 14px 12px; margin: -22px 0 0 6%; z-index: 1;
+          background-image: linear-gradient(var(--ink), var(--ink)), linear-gradient(var(--ink), var(--ink)), linear-gradient(var(--ink), var(--ink)), linear-gradient(var(--ink), var(--ink));
+          background-size: 5px 5px; background-repeat: no-repeat; background-position: -1px -1px, calc(100% + 1px) -1px, -1px calc(100% + 1px), calc(100% + 1px) calc(100% + 1px); }
+  .note .row { display: flex; gap: 8px; align-items: center; }
+  .sev { font: 500 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border: 1px solid var(--ink); }
+  .sev.High { background: var(--ink); color: var(--paper); }
+  .sev.Moderate { background: var(--paper) var(--hatch); } .sev.Moderate span { background: var(--paper); padding: 0 2px; }
+  .note h2 { font: 400 21px/1.22 var(--serif); letter-spacing: -.01em; margin: 10px 0 8px; text-wrap: pretty; }
+  .note .next { margin: 0; font-weight: 500; }
+  .note .next::before { content: "→ "; color: var(--green-ink); }
+  .note p { margin: 8px 0 0; }
+  .note .why { color: var(--grey); font-size: 14px; }
+  .note .ask { border-top: 1px solid var(--hair); padding-top: 8px; font-size: 14px; }
+  .note .ask .lab { margin-right: 6px; }
+
+  /* 5. what holds up, limits, footer plate */
+  .sec { margin-top: 48px; }
+  .works { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 8px; }
+  .works li { background: var(--paper); border: 1px solid var(--hair); padding: 10px 12px; display: grid; grid-template-columns: 18px 1fr; gap: 2px 6px; }
+  .works li::before { content: "✓"; color: var(--green-ink); font-weight: 600; }
+  .works q { grid-column: 2; font: 400 15px/1.35 var(--serif); quotes: "“" "”"; }
+  .works .lab { grid-column: 2; }
+  .limits { margin: 10px 0 0; padding: 10px 12px; border-left: 6px solid transparent; border-image: var(--hatch) 6; background: var(--paper); font-size: 14px; color: var(--grey); }
+  .foot { margin-top: 36px; border-top: 1px solid var(--ink); padding-top: 8px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; }
+  .foot .lab { color: var(--ink); }
+
+  @media (min-width: 700px) {
+    .mi p { font-size: 36px; }
+    .finding { display: grid; grid-template-columns: 1fr 300px; align-items: start; }
+    .frames { grid-column: 1; }
+    .note { grid-column: 2; margin: 46px 0 0 -40px; }
+    .frame { width: 100%; } .frame + .frame { margin: -40px 0 0 14%; width: 86%; }
+  }
+  @media (prefers-reduced-motion: reduce) { .finding { transition: none; } }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+// The skill replaces only this object. Every string comes from the chat review, unchanged.
+const REVIEW = {
+  check: "Quotes checked by script: 11 of 11 found on the cited slide.",
+  slides: 18,
+  main: { title: "The deck recommends the booking app but never says what it costs or who sets it up.",
+          why: "The board is asked to approve a change it cannot price, and nobody is named to start it.", slides: [2, 14] },
+  findings: [
+    { title: "The recommendation has no cost, owner or first step", severity: "High", slides: [14, 15],
+      next: "Add who sets the app up, what it costs per year and the first step for next month.",
+      quotes: [{ text: "We recommend adopting a volunteer booking app.", slide: 14 }, { text: "Next steps: explore options with the board", slide: 15 }],
+      why: "The board approves budget lines. Without a yearly cost and a named owner it cannot say yes, so the decision slides to the next meeting.",
+      ask: "Did the client give the team a budget ceiling?" },
+    { title: "The summary promises a pilot that slide 15 never gives", severity: "Moderate", slides: [2, 15],
+      next: "Make slide 15 deliver the pilot the summary describes, or bring the summary down to what the deck supports.",
+      quotes: [{ text: "A three-month pilot will test the app with two shift teams.", slide: 2 }, { text: "Next steps: explore options with the board", slide: 15 }],
+      why: "A board member who reads only the summary expects a pilot ready to run. The closing slide asks them to keep exploring instead.",
+      ask: "Is the pilot agreed with the client, or the team's own idea?" },
+    { title: "Nobody can tell if 30% unfilled shifts is bad", severity: "Moderate", slides: [7],
+      next: "Name what the 30% should be compared with: last year, a similar food bank, or the client's own target.",
+      quotes: [{ text: "30% of shifts are unfilled at least once a month", slide: 7 }],
+      why: "The case for change rests on this number. Without last year's figure or a target, the board cannot tell a crisis from normal churn.",
+      ask: "Does the client track a target fill rate?" },
+    { title: "The adoption claim rests on 12 volunteers reached on WhatsApp", severity: "Minor", slides: [9, 17],
+      next: "Optional: say who the survey did not reach, next to the claim on slide 9.",
+      quotes: [{ text: "Most volunteers would use an app (9 of 12 surveyed)", slide: 9 }, { text: "Survey sent to the volunteer WhatsApp group", slide: 17 }],
+      why: "Volunteers already on WhatsApp are the ones most likely to use an app. The ones the change could lose were not asked.",
+      ask: "How many volunteers are in the WhatsApp group?" },
+    { title: "Analysis titles name topics, not conclusions", severity: "Minor", slides: [8, 10],
+      next: "Optional: rewrite each analysis title as the finding it proves.",
+      quotes: [{ text: "Volunteer demographics", slide: 8 }, { text: "Current tools", slide: 10 }],
+      why: "A board member flipping through slides 7 to 12 learns the topics but not what the team found, so the argument only lives in the speaker's head.",
+      ask: "Will the team present this, or will it be read without them?" }
+  ],
+  works: [
+    { title: "The interview synthesis is concrete", quote: "Coordinators spend about 4 hours a week chasing replies", slide: 6 },
+    { title: "The options are compared side by side", quote: "Option comparison: WhatsApp, shared spreadsheet, booking app", slide: 12 }
+  ],
+  couldntJudge: "whether a booking app suits these volunteers (needs domain knowledge); the values in the slide 11 chart (image only); prices of the named apps (not in the deck)",
+  stamp: "1017-PROTO01"
+};
+
+const rank = { High: 3, Moderate: 2, Minor: 1 };
+let sel = null;
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const m = /(\d+) of (\d+)/.exec(REVIEW.check);   // the plate reads the counts off the check line, it adds no words
+
+function worst(n) {
+  let best = null;
+  for (const f of REVIEW.findings) if (f.slides.includes(n) && (!best || rank[f.severity] > rank[best])) best = f.severity;
+  return best;
+}
+
+function render() {
+  const N = REVIEW.slides, all = Array.from({ length: N }, (_, i) => i + 1);
+  const high = REVIEW.findings.filter(f => f.severity === "High").length;
+  const plate = `<section class="plate" aria-label="Review summary">
+      <div><div class="lab">Quotes found</div><div class="v ${m && m[1] === m[2] ? "ok" : ""}">${m ? `${m[1]}/${m[2]}` : "—"}</div></div>
+      <div><div class="lab">Slides</div><div class="v">${pad(N)}</div></div>
+      <div><div class="lab">Findings</div><div class="v">${pad(REVIEW.findings.length)}${high ? `<span class="lab" style="margin-left:6px">${high} high</span>` : ""}</div></div>
+      <div class="wide"><span class="lab">${esc(REVIEW.check)}</span></div></section>`;
+
+  const main = `<section class="mi"><div class="lab">Main issue · slides ${REVIEW.main.slides.join(", ")}</div>
+      <p>${esc(REVIEW.main.title)} <span class="why">${esc(REVIEW.main.why)}</span></p></section>`;
+
+  const strip = `<section aria-label="Slides by most serious finding">
+      <div class="strip-head"><span class="lab">Slide by slide</span><span class="lab">${sel ? `slide ${sel} · <button class="clear lab" id="clear">show all</button>` : "tap a slide"}</span></div>
+      <div class="strip" style="--n:${N}">${all.map(n => `<button type="button" class="${worst(n) || ""} ${sel === n ? "on" : ""}" data-n="${n}" aria-label="Slide ${n}${worst(n) ? ", " + worst(n) : ""}"></button>`).join("")}</div>
+      <div class="nums" style="--n:${N}">${all.map(n => `<span>${n}</span>`).join("")}</div>
+      <div class="key lab"><span><i style="background:var(--ink)"></i>High</span><span><i style="background:var(--hatch);box-shadow:inset 0 0 0 1px var(--ink)"></i>Moderate</span><span><i style="box-shadow:inset 0 0 0 1.5px var(--ink)"></i>Minor</span></div></section>`;
+
+  const findings = REVIEW.findings.map((f, i) => `
+    <article class="finding ${sel && !f.slides.includes(sel) ? "dim" : ""}" id="f${i + 1}">
+      <div class="frames">${f.quotes.map(q => `<div class="frame"><div class="lab"><span>Slide ${pad(q.slide)}</span><span>${pad(q.slide)}/${pad(N)}</span></div>
+        <div class="txt"><mark>${esc(q.text)}</mark></div><div class="ghost"><i></i><i></i></div></div>`).join("")}</div>
+      <div class="note"><div class="row"><span class="lab" style="color:var(--ink)">${pad(i + 1)}</span><span class="sev ${f.severity}"><span>${f.severity}</span></span>
+        <span class="lab">slide ${f.slides.join(", ")}</span></div>
+        <h2>${esc(f.title)}</h2><p class="next">${esc(f.next)}</p><p class="why">${esc(f.why)}</p>
+        <p class="ask"><span class="lab">Ask the team</span>${esc(f.ask)}</p></div>
+    </article>`).join("") || `<p class="sec">No findings.</p>`;
+
+  const works = `<section class="sec"><div class="lab">What works</div><ul class="works">${REVIEW.works.length
+      ? REVIEW.works.map(w => `<li><b>${esc(w.title)}</b><q>${esc(w.quote)}</q><span class="lab">slide ${w.slide}</span></li>`).join("")
+      : `<li><span>No specific strengths established from the material.</span></li>`}</ul>
+    <div class="lab" style="margin-top:22px">Couldn't judge</div><p class="limits">${esc(REVIEW.couldntJudge)}</p></section>`;
+
+  const foot = `<footer class="foot"><span class="lab">AI review, no grade. You decide what to keep.</span><span class="lab">180dc-review-lead · ${esc(REVIEW.stamp)}</span></footer>`;
+
+  document.getElementById("app").innerHTML = plate + main + strip + findings + works + foot;
+  document.querySelectorAll(".strip button").forEach(b => b.onclick = () => {
+    const n = +b.dataset.n; sel = sel === n ? null : n; render();
+    const first = sel && REVIEW.findings.findIndex(f => f.slides.includes(sel));
+    if (sel && first >= 0) document.getElementById("f" + (first + 1)).scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  const c = document.getElementById("clear"); if (c) c.onclick = () => { sel = null; render(); };
+}
+render();
+</script>
+</body>
+</html>

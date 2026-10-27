@@ -1,0 +1,505 @@
+<!doctype html>
+<!-- TEMPLATE for scripts/build_deck_walk.py (issue 23, from prototype visual-directions/05-route.html). The deck as a transit line.
+The team fixes a deck in slide order, so findings are laid out as stops from slide 1 to the last slide, quotes sit
+at the slide they come from, one finding across several slides is a numbered red loop, and empty stretches collapse.
+A sticky slide bar and a slide viewer let you step through the deck itself. Two data objects: REVIEW is what Claude
+writes (same contract as the asset); DECK is what a build script would fill from deck.json at no token cost
+(invented here). No boxed content: the line and the type carry it. Invented content. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Line</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;500;600;800;900&family=Overpass+Mono:wght@400;600&display=swap">
+<style>
+  /* A transit line down the deck: stops are slides, red loops tie one problem across slides, the note is the ticket. */
+  :root {
+    --page: #fbfbf8; --ink: #141613; --grey: #60675b; --soft: #e8ebe2; --green: #78B038; --deep: #2a5512;
+    --loop: #d92d3a; --pen: rgba(120,176,56,.42);
+    --sans: "Overpass", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Overpass Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --x: 34px;  /* the line's position inside the route gutter */
+    --gut: 70px;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--page); }
+  body { margin: 0; color: var(--ink); font: 400 16px/1.5 var(--sans); }
+  body.locked { overflow: hidden; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 120px max(16px, env(safe-area-inset-left, 0px)); }
+  .lab { font: 600 11px/1.3 var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+  button { font: inherit; color: inherit; }
+  button:focus-visible { outline: 3px solid var(--loop); outline-offset: 2px; }
+
+  /* sticky slide bar: one tick per slide, tap to open that slide */
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--page); z-index: 10; }
+  .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; background: var(--page); padding: 10px 0 8px; border-bottom: 1px solid var(--soft); }
+  .bar .row { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; }
+  .bar button { all: unset; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0 2px; border-radius: 999px; }
+  .bar button:focus-visible { outline: 2px solid var(--loop); }
+  .bar button b { font: 700 11px/1 var(--mono); color: var(--grey); }
+  .bar button i { width: 7px; height: 7px; border-radius: 50%; background: var(--soft); }
+  .bar .t-find i { background: var(--ink); } .bar .t-echo i { background: var(--loop); } .bar .t-keep i { background: var(--green); }
+  .bar .t-find b, .bar .t-echo b, .bar .t-keep b { color: var(--ink); }
+  .bar .cur { background: var(--ink); } .bar .cur b { color: var(--page); }
+  .bar .hint { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; color: var(--grey); white-space: nowrap; }
+  @media (max-width: 480px) { .bar .hint .key { display: none; } }
+
+  /* top of the page */
+  .sign { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .bullet { width: 30px; height: 30px; border-radius: 50%; background: var(--green); color: var(--ink); display: grid; place-items: center; font: 900 13px/1 var(--sans); }
+  .sign .lab { color: var(--grey); }
+  h1 { font: 900 34px/1.02 var(--sans); letter-spacing: -.02em; margin: 16px 0 8px; text-wrap: balance; }
+  .lede { font-size: 18px; line-height: 1.4; color: var(--grey); margin: 0 0 14px; max-width: 58ch; }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { border-radius: 999px; padding: 5px 11px 4px; border: 1.5px solid var(--ink); }
+  .pill.solid { background: var(--ink); color: var(--page); }
+  .pill.green { background: var(--green); border-color: var(--green); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 22px 0 6px; color: var(--grey); align-items: center; }
+  .legend i { display: inline-block; vertical-align: -3px; margin-right: 6px; border-radius: 50%; }
+
+  /* the route */
+  .route { position: relative; padding-left: var(--gut); margin-top: 18px; }
+  .route svg { position: absolute; left: 0; top: 0; width: var(--gut); height: 100%; overflow: visible; }
+  .route svg .loop { cursor: pointer; transition: opacity .2s; }
+  .stop { position: relative; padding: 4px 0 30px; scroll-margin-top: 90px; }
+  .dot { position: absolute; left: calc(var(--x) - var(--gut)); top: 4px; transform: translate(-50%, 0); width: 24px; height: 24px; border-radius: 50%; background: var(--page); z-index: 1; }
+  .High .dot { background: var(--ink); box-shadow: 0 0 0 4px var(--page); }
+  .Moderate .dot { border: 5px solid var(--ink); box-shadow: 0 0 0 4px var(--page); }
+  .tag .dot { border: 5px solid var(--ink); box-shadow: 0 0 0 4px var(--page); }
+  .sev.tag { text-transform: none; letter-spacing: 0; }
+  .dothis, .checkit, .fwwhy { margin: 0 0 8px; }
+  .dothis .lab, .checkit .lab, .fwwhy .lab { color: var(--grey); margin-right: 8px; }
+  .Minor .dot { width: 18px; height: 18px; top: 7px; border: 3px solid var(--ink); box-shadow: 0 0 0 4px var(--page); }
+  .echo .dot { width: 14px; height: 14px; top: 9px; border: 3px solid var(--loop); box-shadow: 0 0 0 4px var(--page); }
+  .keep .dot { background: var(--green); box-shadow: 0 0 0 4px var(--page); display: grid; place-items: center; font: 900 13px/1 var(--sans); }
+  .gap .dot, .limits .dot { width: 10px; height: 10px; top: 7px; background: var(--page); border: 2px solid #9aa194; box-shadow: 0 0 0 3px var(--page); }
+  .end .dot { width: 30px; height: 12px; top: 6px; border-radius: 6px; background: var(--ink); }
+  .where { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 4px; }
+  .slide { all: unset; cursor: pointer; font: 900 15px/1 var(--sans); letter-spacing: .01em; border-bottom: 2px solid var(--soft); padding-bottom: 2px; }
+  .slide:hover { border-bottom-color: var(--ink); }
+  .slide:focus-visible { outline: 3px solid var(--loop); outline-offset: 2px; }
+  .slide::after { content: " ▸"; color: var(--grey); font-size: 11px; }
+  .sev { border-radius: 999px; padding: 3px 9px 2px; border: 1.5px solid var(--ink); }
+  .sev.High { background: var(--ink); color: var(--page); }
+  .sev.Minor { border-color: transparent; color: var(--grey); padding-left: 0; }
+  .main-tag { color: var(--deep); }
+  .stop h2 { font: 800 22px/1.15 var(--sans); letter-spacing: -.012em; margin: 4px 0 8px; text-wrap: balance; }
+  .q { margin: 8px 0; font: 500 16px/1.4 var(--sans); }
+  .q mark { background: linear-gradient(transparent 46%, var(--pen) 46%, var(--pen) 94%, transparent 94%); color: inherit; }
+  .q small { font: 600 10.5px/1 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--grey); margin-left: 6px; white-space: nowrap; }
+  .why { color: var(--grey); margin: 6px 0 10px; }
+  .next { font-weight: 700; margin: 0 0 6px; padding-left: 22px; text-indent: -22px; }
+  .next::before { content: "→"; display: inline-block; width: 22px; text-indent: 0; color: var(--deep); }
+  .askq { margin: 0 0 12px; padding-left: 22px; text-indent: -22px; }
+  .askq::before { content: "?"; display: inline-block; width: 22px; text-indent: 0; font-weight: 900; color: var(--grey); }
+  .decide { display: flex; flex-wrap: wrap; gap: 6px; }
+  .decide button { cursor: pointer; border-radius: 999px; border: 1.5px solid var(--ink); background: transparent; padding: 8px 14px 7px; font-weight: 700; font-size: 14px; }
+  .decide .on.send { background: var(--green); border-color: var(--green); }
+  .decide .on.ask { background: var(--ink); color: var(--page); }
+  .decide .on.out { background: var(--soft); border-color: var(--soft); color: var(--grey); text-decoration: line-through; }
+  .stop.d-out > :not(.dot):not(.decide) { opacity: .4; }
+  .ref { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; color: var(--loop); font: 600 11px/1 var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+  .ref .n { background: var(--loop); color: #fff; border-radius: 999px; padding: 3px 6px 2px; }
+  .ref:focus-visible { outline: 2px solid var(--loop); outline-offset: 2px; }
+  .loopno { display: inline-flex; align-items: center; gap: 5px; color: var(--loop); }
+  .loopno .n { background: var(--loop); color: #fff; border-radius: 999px; padding: 3px 6px 2px; }
+  .gap { padding-bottom: 26px; color: var(--grey); }
+  .gap .slide, .echo .slide { font-size: 14px; }
+  .keep h2 { font-size: 19px; }
+  .limits p { margin: 2px 0 0; color: var(--grey); font-size: 15px; }
+  .limits .t, .end .t { font: 900 15px/1 var(--sans); }
+  .end { padding-bottom: 8px; }
+  .stop.flash h2, .stop.flash .q { animation: flash 1.2s ease-out; }
+  @keyframes flash { 0% { background: rgba(217,45,58,.14); } 100% { background: transparent; } }
+
+  /* the ticket */
+  .ticket { position: relative; margin-top: 34px; background: var(--ink); color: var(--page); border-radius: 18px; }
+  .ticket .stub { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; padding: 18px 20px 16px; flex-wrap: wrap; }
+  .ticket .stub b { display: block; font: 900 26px/1 var(--sans); letter-spacing: -.01em; }
+  .ticket .counts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ticket .counts span { border-radius: 999px; padding: 4px 10px 3px; border: 1.5px solid var(--page); }
+  .ticket .counts .f { background: var(--green); border-color: var(--green); color: var(--ink); }
+  .perf { position: relative; border-top: 2px dashed #4a5045; margin: 0 18px; }
+  .perf::before, .perf::after { content: ""; position: absolute; top: -13px; width: 24px; height: 24px; border-radius: 50%; background: var(--page); }
+  .perf::before { left: -31px; } .perf::after { right: -31px; }
+  .ticket pre { margin: 0; padding: 18px 20px 6px; white-space: pre-wrap; overflow-wrap: anywhere; font: 400 15.5px/1.55 var(--sans); }
+  .ticket .foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 20px 18px; }
+  .ticket .foot .lab { color: #a8b19f; }
+  .copy { cursor: pointer; border: 0; border-radius: 999px; background: var(--green); color: var(--ink); padding: 12px 20px 11px; font-weight: 800; font-size: 16px; }
+
+  /* floating progress capsule */
+  .float { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 5;
+           display: flex; align-items: center; gap: 10px; background: var(--ink); color: var(--page); border-radius: 999px; padding: 6px 6px 6px 16px; box-shadow: 0 8px 24px -10px rgba(0,0,0,.5); max-width: calc(100vw - 24px); }
+  .float .ticks { display: flex; gap: 4px; }
+  .float .ticks i { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #8d9488; }
+  .float .ticks .send { background: var(--green); border-color: var(--green); } .float .ticks .ask { background: var(--page); border-color: var(--page); }
+  .float .ticks .out { background: #555b52; border-color: #555b52; }
+  .float button { cursor: pointer; border: 0; border-radius: 999px; background: var(--page); color: var(--ink); padding: 8px 14px 7px; font-weight: 800; font-size: 14px; white-space: nowrap; }
+  body.locked .float { display: none; }
+
+  /* slide viewer: a sheet from the bottom on phones, a panel on the right on wide screens */
+  .scrim { position: fixed; inset: 0; background: rgba(20,22,19,.45); z-index: 20; }
+  .viewer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--page); border-radius: 22px 22px 0 0; max-height: 88vh; overflow: auto;
+            padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); box-shadow: 0 -10px 40px -16px rgba(0,0,0,.4); }
+  .viewer .grab { width: 44px; height: 5px; border-radius: 999px; background: #cfd3c8; margin: 0 auto 10px; }
+  .viewer .vh { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .viewer .vh b { font: 900 20px/1 var(--sans); }
+  .x { cursor: pointer; border: 0; background: var(--soft); border-radius: 999px; width: 36px; height: 36px; font-size: 16px; font-weight: 800; }
+  .slidepic { aspect-ratio: 16 / 9; max-width: 100%; background: #fff; border: 1px solid #d6d9d0; border-radius: 6px; padding: 5% 6%; overflow: hidden;
+              display: flex; flex-direction: column; gap: .5em; font-size: clamp(9px, 2.6vw, 13px); touch-action: pan-y; user-select: none; }
+  img.slidepic { padding: 0; display: block; width: 100%; height: auto; object-fit: contain; }
+  .slidepic .st { font: 800 1.55em/1.15 var(--sans); }
+  .slidepic .it { font: 400 1em/1.35 var(--sans); color: #333; }
+  .slidepic .it mark { background: var(--pen); color: inherit; }
+  .slidepic .img { flex: 1; min-height: 30%; border-radius: 4px; background: repeating-linear-gradient(135deg, #eef0ea 0 6px, #e2e5dc 6px 12px); display: grid; place-items: center; color: var(--grey); font: 600 .85em/1 var(--mono); text-transform: uppercase; }
+  .stand-in { margin: 6px 0 0; color: var(--grey); }
+  .steps { display: flex; justify-content: space-between; gap: 8px; margin: 12px 0 14px; }
+  .steps button { cursor: pointer; border: 1.5px solid var(--ink); background: transparent; border-radius: 999px; padding: 9px 16px 8px; font-weight: 800; font-size: 14px; }
+  .steps button:disabled { opacity: .3; cursor: default; }
+  .onslide h3 { margin: 0 0 8px; }
+  .onslide .it2 { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--soft); }
+  .onslide .it2 b { font: 800 16px/1.25 var(--sans); }
+  .onslide .go { all: unset; cursor: pointer; grid-column: 2; color: var(--deep); font: 700 14px/1.2 var(--sans); }
+  .onslide .go:focus-visible { outline: 2px solid var(--loop); }
+  .onslide .none { color: var(--grey); padding: 10px 0; border-top: 1px solid var(--soft); }
+
+  /* highlight boxes: where each quote sits on the slide, found by the build script */
+  .picwrap { position: relative; display: block; max-width: 100%; line-height: 0; }
+  .hl { position: absolute; margin: -5px; padding: 4px; box-sizing: content-box; border: 2.5px solid var(--loop); border-radius: 5px;
+        background: rgba(217,45,58,.07); box-shadow: 0 0 0 2px rgba(255,255,255,.85); pointer-events: none; }
+  .hl.keep { border-color: var(--green); background: rgba(120,176,56,.12); }
+  .hl.cited { border: 2px dashed var(--ink); background: rgba(20,22,19,.05); }
+  .hl.cited i { background: var(--ink); }
+  .gapchip { position: absolute; left: 3%; display: inline-flex; align-items: center; gap: 7px; background: var(--loop); color: #fff; border-radius: 999px;
+             padding: 4px 12px 4px 4px; font: 800 12px/1.2 var(--sans); box-shadow: 0 0 0 2px #fff; pointer-events: none; }
+  .gapchip i { background: #fff; color: var(--loop); border-radius: 999px; padding: 3px 6px 2px; font-style: normal; }
+  .marklegend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 0 0; color: var(--grey); line-height: 1.6; }
+  .marklegend i { display: inline-block; width: 16px; height: 10px; margin-right: 6px; vertical-align: -1px; border-radius: 2px; }
+  .more { margin-top: 6px; } .more summary { cursor: pointer; color: var(--deep); font-weight: 700; font-size: 14px; }
+  .more summary:focus-visible { outline: 2px solid var(--loop); outline-offset: 2px; }
+  .more div { margin-top: 4px; color: var(--grey); }
+  .fw { color: var(--deep); }
+  .located { margin: 8px 0 0; color: var(--grey); text-transform: none; letter-spacing: 0; font-size: 12px; }
+  .fx-note { margin: 8px 0 0; color: var(--grey); text-transform: none; letter-spacing: 0; font-size: 12px; }
+  .hl i { position: absolute; top: -13px; left: -13px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 999px; background: var(--loop); color: #fff;
+          font: 800 11px/22px var(--sans); font-style: normal; text-align: center; box-shadow: 0 0 0 2px #fff; }
+  .hl.keep i { background: var(--green); color: var(--ink); }
+
+  /* fix mode: the reviewer on one screen, the deck open on the other */
+  .fixbtn { cursor: pointer; background: var(--green); border-color: var(--green); color: var(--ink); font: inherit; }
+  .fix { position: fixed; inset: 0; z-index: 30; background: var(--page); display: flex; flex-direction: column;
+         padding: env(safe-area-inset-top, 0px) max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px)); }
+  .fx-top { display: flex; align-items: center; gap: 12px 18px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--soft); }
+  .fx-x, .fx-nav button, .fx-done { cursor: pointer; border: 1.5px solid var(--ink); background: transparent; border-radius: 999px; padding: 9px 16px 8px; font-weight: 800; font-size: 14px; }
+  .fx-x { border-color: var(--soft); background: var(--soft); }
+  .fx-where { display: flex; align-items: baseline; gap: 8px; margin-right: auto; }
+  .fx-where b { font: 900 32px/1 var(--sans); letter-spacing: -.01em; }
+  .fx-where .lab { color: var(--grey); }
+  .fx-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .fx-nav .lab { color: var(--grey); margin-right: 4px; }
+  .fx-nav button:last-child { background: var(--ink); color: var(--page); }
+  .fx-nav button:disabled { opacity: .3; cursor: default; }
+  .fx-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr); gap: 28px; padding: 18px 0 0; }
+  .fx-slide { min-width: 0; overflow: auto; padding: 14px 14px 24px; }
+  .fx-slide .picwrap { display: inline-block; }
+  .fx-slide img.slidepic { width: auto; max-width: 100%; max-height: calc(100vh - 150px); }
+  .fx-side { min-width: 0; overflow: auto; padding: 6px 6px 32px 0; }
+  .fx-main { margin: 0 0 18px; font: 800 17px/1.3 var(--sans); }
+  .fx-main .pill { margin-right: 6px; vertical-align: 2px; }
+  .fx-f { padding: 0 0 18px; margin: 0 0 18px; border-bottom: 1px solid var(--soft); }
+  .fx-f h3 { font: 800 22px/1.15 var(--sans); letter-spacing: -.01em; margin: 8px 0 14px; text-wrap: balance; }
+  .chain { list-style: none; margin: 0 0 14px; padding: 0; counter-reset: c; }
+  .chain li { position: relative; padding: 0 0 14px 36px; counter-increment: c; }
+  .chain li::before { content: counter(c); position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--page);
+                      font: 800 12px/24px var(--sans); text-align: center; }
+  .chain li:not(:last-child)::after { content: ""; position: absolute; left: 11px; top: 26px; bottom: 2px; width: 2px; background: var(--green); }
+  .chain .lab { display: block; color: var(--grey); margin-bottom: 2px; }
+  .chain mark { background: var(--pen); color: inherit; }
+  .fx-do { color: var(--grey); }
+  .fx-f.done h3 { text-decoration: line-through; text-decoration-color: var(--green); text-decoration-thickness: 3px; }
+  .fx-f.done .fx-done { background: var(--green); border-color: var(--green); }
+  .fx-keep { margin: 0 0 18px; } .fx-keep b { display: block; margin: 8px 0 4px; font-weight: 800; } .fx-keep p { margin: 0; }
+  .fx-keep mark { background: var(--pen); color: inherit; }
+  @media (max-width: 860px) {
+    .fix { overflow: auto; } .fx-body { display: block; } .fx-slide { padding: 16px 0 14px 12px; } .fx-side { overflow: visible; }
+    .fx-where b { font-size: 24px; } .fx-slide img.slidepic { max-height: none; width: 100%; } .fx-slide .picwrap { display: block; }
+  }
+
+  @media (min-width: 900px) {
+    .viewer { left: auto; top: 0; width: 460px; max-height: none; border-radius: 22px 0 0 22px; padding-top: 18px; }
+    .viewer .grab { display: none; }
+    .slidepic { font-size: 12.5px; }
+  }
+  @media (min-width: 720px) { h1 { font-size: 44px; } :root { --x: 42px; --gut: 88px; } }
+  @media (prefers-reduced-motion: reduce) { .stop.flash h2, .stop.flash .q { animation: none; } }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="float" id="float"></div>
+<div id="sheet"></div>
+<div id="fixv"></div>
+<script>
+// Filled by scripts/build_deck_walk.py from review.json. Every string comes from the chat review, unchanged.
+const REVIEW = __REVIEW_JSON__;
+
+// Filled by scripts/build_deck_walk.py from deck.json and the rendered deck, never written by Claude.
+// text: {slide: [lines]}, images: {slide: "data:image/jpeg;base64,..."} (empty when the deck could not be rendered).
+const DECK = __DECK_JSON__;
+
+const F = REVIEW.findings, N = REVIEW.slides;
+// a slide a finding quotes is one of its slides, even when the review line left it out
+F.forEach(f => { f.quotes = f.quotes || []; f.slides = [...new Set((f.slides || []).concat(f.quotes.map(q => q.slide)))]; });
+// a finding with no slide numbers sits at the slides its quotes come from
+F.forEach(f => { if (!f.slides || !f.slides.length) f.slides = [...new Set((f.quotes || []).map(q => q.slide))]; });
+const S = { d: {}, view: null, focus: null, fix: null, done: {} };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const sl = a => (a.length > 1 ? "slides " : "slide ") + a.join(", ");
+const first = f => Math.min(...f.slides);
+// The student skill uses the same page: a principle tag instead of a severity, "Do this" and "Check it" lines,
+// and the student decides what to fix rather than what to send.
+const STUDENT = /student/.test(REVIEW.skill || "");
+const sevClass = s => ["High", "Moderate", "Minor"].includes(s) ? s : "tag";
+const WORDS = STUDENT
+  ? { kind: "Student review", main: "Fix first", limits: "Not checked", noteLab: "Your plan", noteHead: "Fix list" }
+  : { kind: "Lead review", main: "Main issue", limits: "Couldn't judge", noteLab: "Note to the team", noteHead: "Your hand-back" };
+const LABEL = STUDENT ? { send: "I'll fix it", ask: "Ask my lead", out: "Not now" } : { send: "Fix it", ask: "Ask first", out: "Leave out" };
+const m = /(\d+) of (\d+)/.exec(REVIEW.check);
+const multi = F.map((f, i) => i).filter(i => F[i].slides.length > 1);     // findings that get a loop
+const lane = Object.fromEntries(multi.map((i, k) => [i, k]));              // each loop keeps its own lane
+
+function note() {
+  const send = F.filter((_, i) => S.d[i] === "send"), ask = F.filter((_, i) => S.d[i] === "ask");
+  const L = [`${WORDS.main}: ${REVIEW.main.title}`];
+  if (send.length) L.push("", STUDENT ? "My fixes, in slide order:" : "To fix, in slide order:", ...send.sort((a, b) => first(a) - first(b)).map((f, i) => `${i + 1}. ${f.next} (${sl(f.slides)})`));
+  if (ask.length) L.push("", STUDENT ? "To ask my lead about:" : "Before you change anything:", ...ask.map(f => `- ${STUDENT ? f.title : f.ask}`));
+  if (REVIEW.works.length) L.push("", "Keep:", ...REVIEW.works.map(w => `- ${w.title} (slide ${w.slide})`));
+  return L.join("\n");
+}
+
+function kindOf(n) {
+  if (F.some(f => first(f) === n)) return "find";
+  if (F.some(f => f.slides.includes(n))) return "echo";
+  if (REVIEW.works.some(w => w.slide === n)) return "keep";
+  return "";
+}
+
+// one entry per slide that has something on it; empty runs collapse into a single "nothing flagged" stop
+function stops() {
+  const out = []; let gap = [];
+  const flush = () => { if (gap.length) out.push({ kind: "gap", from: gap[0], to: gap[gap.length - 1] }); gap = []; };
+  for (let n = 1; n <= N; n++) {
+    const here = [];
+    F.forEach((f, i) => { if (first(f) === n) here.push({ kind: "find", n, i }); });
+    const echoes = F.map((f, i) => i).filter(i => first(F[i]) !== n && F[i].slides.includes(n));
+    if (echoes.length) here.push({ kind: "echo", n, is: echoes });
+    REVIEW.works.forEach((w, i) => { if (w.slide === n) here.push({ kind: "keep", n, i }); });
+    if (here.length) { flush(); out.push(...here); } else gap.push(n);
+  }
+  flush();
+  return out;
+}
+
+const more = f => f.nextDetail && f.nextDetail !== f.next ? `<details class="more"><summary>More on this step</summary><div>${esc(f.nextDetail)}</div></details>` : "";
+const fwParts = f => { const s = f.framework || "", i = s.indexOf(": "); return i < 0 ? [s, ""] : [s.slice(0, i), s.slice(i + 2)]; };
+const fwTag = f => f.framework ? `<span class="lab fw">Framework · ${esc(fwParts(f)[0])}</span>` : "";
+const fwWhy = f => fwParts(f)[1] ? `<p class="fwwhy"><span class="lab">${esc(fwParts(f)[0])}</span>${esc(fwParts(f)[1])}</p>` : "";
+const slideBtn = (n, label) => `<button type="button" class="slide" data-view="${n}" aria-label="Show slide ${n}">${label || "Slide " + n}</button>`;
+const qhtml = (qs, n) => [...new Set(qs.map(q => q.text))].map(t => `<p class="q"><mark>${esc(t)}</mark><small>slide ${n}</small></p>`).join("");
+
+function stopHTML(s) {
+  const isMain = s.n && REVIEW.main.slides.includes(s.n);
+  if (s.kind === "gap") return `<div class="stop gap" id="s${s.from}"><span class="dot"></span><div class="where">${slideBtn(s.from, s.from === s.to ? `Slide ${s.from}` : `Slides ${s.from}–${s.to}`)}<span class="lab">nothing flagged</span></div></div>`;
+  if (s.kind === "keep") { const w = REVIEW.works[s.i];
+    return `<div class="stop keep" id="s${s.n}"><span class="dot">✓</span><div class="where">${slideBtn(s.n)}<span class="lab pill green">Keep</span></div>
+      <h2>${esc(w.title)}</h2><p class="q"><mark>${esc(w.quote)}</mark></p></div>`; }
+  if (s.kind === "echo") return `<div class="stop echo" id="s${s.n}" data-loops="${s.is.join(" ")}"><span class="dot"></span>
+      <div class="where">${slideBtn(s.n)}${s.is.map(i => `<button type="button" class="ref" data-jump="${i}"><span class="n">${pad(i + 1)}</span>back to ${sl([first(F[i])])}</button>`).join("")}${isMain ? `<span class="lab main-tag">· ${WORDS.main.toLowerCase()}</span>` : ""}</div>
+      ${qhtml(s.is.flatMap(i => F[i].quotes.filter(q => q.slide === s.n)), s.n)}</div>`;
+  const f = F[s.i], later = f.slides.filter(n => n !== s.n);
+  return `<div class="stop ${sevClass(f.severity)} ${S.d[s.i] ? "d-" + S.d[s.i] : ""}" id="f${s.i}" data-loop="${s.i}"><span class="dot"></span>
+      <div class="where">${slideBtn(s.n)}<span class="lab sev ${sevClass(f.severity)}">${esc(f.severity)}</span>${fwTag(f)}
+        ${later.length ? `<span class="lab loopno"><span class="n">${pad(s.i + 1)}</span>also ${sl(later)}</span>` : `<span class="lab">${pad(s.i + 1)}</span>`}
+        ${isMain ? `<span class="lab main-tag">· ${WORDS.main.toLowerCase()}</span>` : ""}</div>
+      <h2>${esc(f.title)}</h2>${qhtml(f.quotes.filter(q => q.slide === s.n), s.n)}<p class="why">${esc(f.why)}</p>${fwWhy(f)}
+      <p class="next">${esc(f.next)}</p>${more(f)}${f.do ? `<p class="dothis"><span class="lab">Do this</span>${esc(f.do)}</p>` : ""}
+      ${f.ask ? `<p class="askq">${esc(f.ask)}</p>` : ""}${f.checkIt ? `<p class="checkit"><span class="lab">Check it</span>${esc(f.checkIt)}</p>` : ""}
+      <div class="decide">${Object.entries(LABEL).map(([k, v]) => `<button type="button" class="${k} ${S.d[s.i] === k ? "on" : ""}" data-k="${k}" data-i="${s.i}" aria-pressed="${S.d[s.i] === k}">${v}</button>`).join("")}</div></div>`;
+}
+
+function render() {
+  const c = { send: 0, ask: 0, out: 0 }; Object.values(S.d).forEach(v => c[v]++);
+  const done = Object.keys(S.d).length;
+  const bar = `<div class="bar"><div class="row" style="--n:${N}">${Array.from({ length: N }, (_, k) => k + 1).map(n =>
+      `<button type="button" class="t-${kindOf(n)} ${S.view === n ? "cur" : ""}" data-view="${n}" aria-label="Show slide ${n}"><b>${n}</b><i></i></button>`).join("")}</div>
+      <div class="hint lab"><span>Tap a slide to open it</span><span class="key">● problem <span style="color:var(--loop)">●</span> later slide <span style="color:var(--green)">●</span> keep</span></div></div>`;
+  document.getElementById("app").innerHTML = bar + `
+    <div class="sign"><span class="bullet">180</span><span class="lab">${WORDS.kind} · ${N} slides${m ? ` · ${m[1]}/${m[2]} quotes located` : ""}</span></div>
+    <h1>${esc(REVIEW.main.title)}</h1><p class="lede">${esc(REVIEW.main.why)}</p>
+    <div class="pills lab"><span class="pill solid">${WORDS.main} · ${sl(REVIEW.main.slides)}</span><span class="pill">${F.length} findings</span><button type="button" class="pill fixbtn" data-fix="0">Fix mode · slide by slide →</button>${REVIEW.check ? `<span class="pill">${esc(REVIEW.check)}</span>` : ""}</div>
+    ${m ? `<p class="located lab">Located means the quoted words are on that slide. It doesn't confirm the finding.</p>` : ""}
+    <div class="legend lab">${STUDENT ? `<span><i style="width:14px;height:14px;border:4px solid var(--ink)"></i>Problem</span>` : `<span><i style="width:14px;height:14px;background:var(--ink)"></i>High</span><span><i style="width:14px;height:14px;border:4px solid var(--ink)"></i>Moderate</span>
+      <span><i style="width:11px;height:11px;border:2.5px solid var(--ink)"></i>Minor</span>`}<span><i style="width:18px;height:0;border-radius:0;border-top:3px solid var(--loop)"></i>Same problem, later slide</span>
+      <span><i style="width:14px;height:14px;background:var(--green)"></i>Keep</span></div>
+    <div class="route" id="route"><svg id="lines" aria-hidden="true"></svg>
+      ${stops().map(stopHTML).join("")}
+      <div class="stop limits"><span class="dot"></span><div class="where"><span class="t">${WORDS.limits}</span></div><p>${esc(REVIEW.couldntJudge)}</p></div>
+      <div class="stop end"><span class="dot"></span><div class="where"><span class="t">End of deck</span><span class="lab">slide ${N}</span></div></div></div>
+    <section class="ticket" id="ticket" aria-label="Note to the team">
+      <div class="stub"><div><span class="lab" style="color:#a8b19f">${WORDS.noteLab}</span><b>${WORDS.noteHead}</b></div>
+        <div class="counts lab"><span class="f">${c.send} to fix</span><span>${c.ask} to ask</span><span>${c.out} left out</span></div></div>
+      <div class="perf"></div><pre id="msg">${esc(note())}</pre>
+      <div class="foot"><span class="lab">${esc(REVIEW.footer || "AI review, no grade. You decide what to keep.")}<br>${esc(REVIEW.skill || "180dc-review-lead")} · ${esc(REVIEW.stamp)}</span><button type="button" class="copy" id="copy">Copy note</button></div></section>`;
+  document.getElementById("float").innerHTML = `<span class="lab">${done}/${F.length} decided</span><span class="ticks">${F.map((_, i) => `<i class="${S.d[i] || ""}"></i>`).join("")}</span><button type="button" id="jump">Note ↓</button>`;
+  sheet();
+  requestAnimationFrame(draw);
+}
+
+// the line and the numbered loops are drawn after layout, from the dots' real positions
+function draw() {
+  const route = document.getElementById("route"), svg = document.getElementById("lines"); if (!route) return;
+  const r0 = route.getBoundingClientRect(), x = parseFloat(getComputedStyle(route).getPropertyValue("--x"));
+  const y = el => { const b = el.querySelector(".dot").getBoundingClientRect(); return b.top - r0.top + b.height / 2; };
+  const all = [...route.querySelectorAll(".stop")];
+  let paths = `<line x1="${x}" x2="${x}" y1="${y(all[0])}" y2="${y(all[all.length - 1])}" stroke="#78B038" stroke-width="7" stroke-linecap="round"/>`;
+  const starts = {}; route.querySelectorAll(".stop[data-loop]").forEach(s => starts[s.dataset.loop] = y(s));
+  route.querySelectorAll(".stop[data-loops]").forEach(s => s.dataset.loops.split(" ").forEach(i => {
+    const a = starts[i], b = y(s), bx = x - 13 - lane[i] * 7.5, mid = (a + b) / 2;
+    const dim = S.focus != null && +i !== S.focus ? 0.15 : 1, w = S.focus === +i ? 3.6 : 2.6;
+    paths += `<g class="loop" data-focus="${i}" opacity="${dim}">
+      <path d="M ${x - 8} ${a} C ${bx} ${a}, ${bx} ${a + 14}, ${bx} ${a + 24} L ${bx} ${b - 24} C ${bx} ${b - 14}, ${bx} ${b}, ${x - 8} ${b}" fill="none" stroke="#d92d3a" stroke-width="${w}" stroke-linecap="round"/>
+      <path d="M ${bx} ${a + 24} L ${bx} ${b - 24}" stroke="transparent" stroke-width="16"/>
+      <circle cx="${bx}" cy="${mid}" r="9" fill="#d92d3a"/><text x="${bx}" y="${mid + 3.5}" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff" font-family="Overpass, system-ui, sans-serif">${pad(+i + 1)}</text></g>`;
+  }));
+  svg.setAttribute("viewBox", `0 0 ${svg.clientWidth} ${route.clientHeight}`);
+  svg.innerHTML = paths;
+}
+
+// numbered boxes where each quote sits on the slide (positions come from the build script; none without PyMuPDF)
+// Quoted words are evidence (dashed) unless the review marks them as the words to change (solid red);
+// a finding about something missing gets a label on the slide where it has to be added.
+function marks(n) {
+  const boxes = Object.entries((DECK.boxes || {})[n] || {}).map(([text, rects]) => {
+    const refs = F.flatMap((f, i) => f.quotes.filter(q => q.slide === n && q.text === text).map(q => ({ i, fix: q.mark === "fix" })));
+    const who = [...new Set(refs.map(x => x.i))];
+    const cls = !who.length ? "keep" : refs.some(x => x.fix) ? "fixit" : "cited";
+    const label = who.length ? who.map(i => pad(i + 1)).join(" · ") : "✓";
+    return rects.map((r, k) => `<span class="hl ${cls}" style="left:${r[0] * 100}%;top:${r[1] * 100}%;width:${(r[2] - r[0]) * 100}%;height:${(r[3] - r[1]) * 100}%">${k ? "" : `<i>${label}</i>`}</span>`).join("");
+  }).join("");
+  const gaps = F.map((f, i) => i).filter(i => F[i].gap && (F[i].gapSlide || F[i].slides[0]) === n)
+    .map((i, k) => `<span class="gapchip" style="bottom:${4 + k * 9}%"><i>${pad(i + 1)}</i>Add supporting analysis here</span>`).join("");
+  return boxes + gaps;
+}
+function legend(n) {
+  const m = DECK.images[n] ? marks(n) : "", keys = [
+    [m.includes("hl cited"), `<i style="border:2px dashed var(--ink)"></i>Quoted as evidence`],
+    [m.includes("hl fixit"), `<i style="border:2.5px solid var(--loop)"></i>Change these words`],
+    [m.includes("gapchip"), `<i style="background:var(--loop)"></i>Add something here`]].filter(k => k[0]);
+  return keys.length ? `<p class="marklegend lab">${keys.map(k => `<span>${k[1]}</span>`).join("")}</p>` : "";
+}
+
+// the slide viewer: the slide itself (its text when there is no picture), arrows to step, and what the review says about it
+function slidePic(n) {
+  if (DECK.images[n]) return `<div class="picwrap" id="pic"><img class="slidepic" src="${DECK.images[n]}" alt="Slide ${n}">${marks(n)}</div>`;
+  const t = DECK.text[n] || [], quotes = F.flatMap(f => f.quotes).concat(REVIEW.works.map(w => ({ text: w.quote, slide: w.slide }))).filter(q => q.slide === n).map(q => q.text);
+  const hl = s => quotes.some(q => s.includes(q) || q.includes(s)) ? `<mark>${esc(s)}</mark>` : esc(s);
+  return `<div class="slidepic" id="pic">${t.length ? `<div class="st">${hl(t[0])}</div>` + t.slice(1).map(s => s === "[image]" ? `<div class="img">chart · image only</div>` : `<div class="it">${hl(s)}</div>`).join("") : `<div class="it">Slide ${n}</div>`}</div>`;
+}
+function sheet() {
+  const el = document.getElementById("sheet"), n = S.view;
+  document.body.classList.toggle("locked", !!n || S.fix != null);
+  if (!n) { el.innerHTML = ""; return; }
+  const here = F.map((f, i) => i).filter(i => F[i].slides.includes(n)), keep = REVIEW.works.filter(w => w.slide === n);
+  el.innerHTML = `<div class="scrim" data-close="1"></div><div class="viewer" role="dialog" aria-label="Slide ${n}">
+    <div class="grab"></div><div class="vh"><b>Slide ${n} <span class="lab" style="color:var(--grey)">of ${N}</span></b><button type="button" class="x" data-close="1" aria-label="Close">✕</button></div>
+    ${slidePic(n)}${legend(n)}${DECK.images[n]
+      ? [...new Set(F.flatMap(f => f.quotes).concat(REVIEW.works.map(w => ({ text: w.quote, slide: w.slide }))).filter(q => q.slide === n).map(q => q.text))].map(t => `<p class="q"><mark>${esc(t)}</mark></p>`).join("")
+      : `<p class="stand-in lab">No picture of this slide in this build · its text</p>`}
+    <div class="steps"><button type="button" data-view="${n - 1}" ${n <= 1 ? "disabled" : ""}>← ${n > 1 ? n - 1 : ""}</button><button type="button" class="fixbtn" data-fixat="${n}">Fix mode</button><button type="button" data-view="${n + 1}" ${n >= N ? "disabled" : ""}>${n < N ? n + 1 : ""} →</button></div>
+    <div class="onslide"><h3 class="lab">On this slide</h3>
+      ${here.map(i => `<div class="it2"><span class="lab sev ${sevClass(F[i].severity)}">${pad(i + 1)}</span><b>${esc(F[i].title)}</b>
+        <button type="button" class="go" data-jump="${i}">Go to finding ${pad(i + 1)} →</button></div>`).join("")}
+      ${keep.map(w => `<div class="it2"><span class="lab pill green">Keep</span><b>${esc(w.title)}</b></div>`).join("")}
+      ${here.length || keep.length ? "" : `<p class="none">Nothing flagged on this slide.</p>`}</div></div>`;
+  const pic = document.getElementById("pic");
+  if (pic) { let x0 = null;
+    pic.addEventListener("touchstart", e => x0 = e.touches[0].clientX, { passive: true });
+    pic.addEventListener("touchend", e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) view(n + (dx < 0 ? 1 : -1)); x0 = null; }); }
+}
+// fix mode: one slide at a time, in deck order, problems boxed on the slide and the reasoning in steps
+const STOPS = [...new Set(F.flatMap(f => f.slides).concat(REVIEW.works.map(w => w.slide)))].sort((a, b) => a - b);
+const fixAt = n => Math.max(0, STOPS.findIndex(s => s >= n));
+function fixView() {
+  const el = document.getElementById("fixv"), k = S.fix;
+  document.body.classList.toggle("locked", k != null || !!S.view);
+  if (k == null) { el.innerHTML = ""; return; }
+  const n = STOPS[k], prev = STOPS[k - 1], next = STOPS[k + 1];
+  const here = F.map((f, i) => i).filter(i => F[i].slides.includes(n)), keep = REVIEW.works.filter(w => w.slide === n);
+  const step = (lab, body) => `<li><span class="lab">${lab}</span><div>${body}</div></li>`;
+  el.innerHTML = `<div class="fix" role="dialog" aria-label="Fix mode, slide ${n}">
+    <div class="fx-top"><button type="button" class="fx-x" data-fixclose="1">✕ Back to the review</button>
+      <div class="fx-where"><span class="lab">Open in your deck</span><b>Slide ${n}</b><span class="lab">of ${N}</span></div>
+      <div class="fx-nav"><span class="lab">${Object.keys(S.done).length} of ${F.length} marked as changed</span>
+        <button type="button" data-fix="${k - 1}" ${prev ? "" : "disabled"}>← ${prev ? "Slide " + prev : ""}</button>
+        <button type="button" data-fix="${k + 1}">${next ? "Slide " + next + " →" : "Done"}</button></div></div>
+    <div class="fx-body"><div class="fx-slide">${slidePic(n)}${legend(n)}${DECK.images[n] ? "" : `<p class="stand-in lab">No picture of this slide in this build · its text</p>`}</div>
+      <div class="fx-side">
+        ${REVIEW.main.slides.includes(n) ? `<p class="fx-main"><span class="pill solid lab">${WORDS.main}</span>${esc(REVIEW.main.title)}</p>` : ""}
+        ${here.map(i => { const f = F[i], qs = f.quotes.filter(q => q.slide === n), others = f.slides.filter(s => s !== n);
+          return `<section class="fx-f ${S.done[i] ? "done" : ""}">
+            <div class="where"><span class="loopno"><span class="n">${pad(i + 1)}</span></span><span class="lab sev ${sevClass(f.severity)}">${esc(f.severity)}</span>${fwTag(f)}
+              ${others.map(s => `<button type="button" class="ref" data-fixslide="${s}">also slide ${s} →</button>`).join("")}</div>
+            <h3>${esc(f.title)}</h3>
+            <ol class="chain">
+              ${step("On the slide", qs.length ? qs.map(q => `<mark>${esc(q.text)}</mark>`).join("<br>") : `Quoted on ${sl(others)}`)}
+              ${step("Why it matters", esc(f.why))}
+              ${fwParts(f)[1] ? step("Framework · " + esc(fwParts(f)[0]), esc(fwParts(f)[1])) : ""}
+              ${step(STUDENT ? "Do this" : "Next step", esc(f.next) + (f.do ? `<br><span class="fx-do">${esc(f.do)}</span>` : "") + more(f))}
+              ${f.checkIt ? step("Check it", esc(f.checkIt)) : f.ask ? step("Ask the team", esc(f.ask)) : ""}
+            </ol>
+            <button type="button" class="fx-done" data-fixdone="${i}" aria-pressed="${!!S.done[i]}">${S.done[i] ? "✓ Marked as changed" : "I've changed this"}</button>
+            <p class="fx-note lab">Your own tick. It doesn't re-check the slide.</p></section>`; }).join("")}
+        ${keep.map(w => `<section class="fx-keep"><span class="lab pill green">Keep</span><b>${esc(w.title)}</b><p><mark>${esc(w.quote)}</mark></p></section>`).join("")}
+      </div></div></div>`;
+}
+function openFix(k) { if (k < 0) return; if (k >= STOPS.length) return closeFix(); S.view = null; sheet(); S.fix = k; fixView(); }
+function closeFix() { S.fix = null; fixView(); }
+function view(n) { if (n < 1 || n > N) return; S.view = n; sheet(); document.querySelectorAll(".bar button").forEach(b => b.classList.toggle("cur", +b.dataset.view === n)); }
+function closeView() { S.view = null; sheet(); document.querySelectorAll(".bar .cur").forEach(b => b.classList.remove("cur")); }
+function jump(i) {
+  closeView(); S.focus = i; draw();
+  const el = document.getElementById("f" + i); el.scrollIntoView({ behavior: "smooth", block: "start" });
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+}
+
+document.addEventListener("click", e => {
+  const g = e.target.closest(".loop"); if (g) { S.focus = S.focus === +g.dataset.focus ? null : +g.dataset.focus; draw(); return; }
+  const t = e.target.closest("button, .scrim"); if (!t) return;
+  if (t.dataset.fix != null) return openFix(+t.dataset.fix);
+  if (t.dataset.fixat) return openFix(fixAt(+t.dataset.fixat));
+  if (t.dataset.fixslide) return openFix(STOPS.indexOf(+t.dataset.fixslide));
+  if (t.dataset.fixclose) return closeFix();
+  if (t.dataset.fixdone != null) { const i = t.dataset.fixdone; if (S.done[i]) delete S.done[i]; else S.done[i] = true; return fixView(); }
+  if (t.dataset.close) closeView();
+  else if (t.dataset.view) view(+t.dataset.view);
+  else if (t.dataset.jump != null) jump(+t.dataset.jump);
+  else if (t.dataset.k) { const i = t.dataset.i; if (S.d[i] === t.dataset.k) delete S.d[i]; else S.d[i] = t.dataset.k; S.focus = +i in lane ? +i : S.focus; render(); }
+  else if (t.id === "jump") document.getElementById("ticket").scrollIntoView({ behavior: "smooth", block: "start" });
+  else if (t.id === "copy") {
+    const ok = () => { t.textContent = "Copied"; setTimeout(() => t.textContent = "Copy note", 1600); };
+    const pick = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById("msg")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "Selected. Copy it from here"; };
+    try { navigator.clipboard.writeText(note()).then(ok, pick); } catch (err) { pick(); }
+  }
+});
+addEventListener("keydown", e => {
+  if (S.fix != null) { if (e.key === "ArrowRight") openFix(S.fix + 1); else if (e.key === "ArrowLeft") openFix(S.fix - 1); else if (e.key === "Escape") closeFix(); return; }
+  if (!S.view) return;
+  if (e.key === "ArrowRight") view(S.view + 1); else if (e.key === "ArrowLeft") view(S.view - 1); else if (e.key === "Escape") closeView();
+});
+addEventListener("resize", () => requestAnimationFrame(draw));
+if (document.fonts) document.fonts.ready.then(() => requestAnimationFrame(draw));
+render();
+</script>
+</body>
+</html>

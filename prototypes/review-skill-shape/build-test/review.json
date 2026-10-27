@@ -1,0 +1,128 @@
+{
+ "check": "Quotes checked by script: 11 of 11 found on the cited slide.",
+ "slides": 18,
+ "main": {
+  "title": "The deck recommends the booking app but never says what it costs or who sets it up.",
+  "why": "The board is asked to approve a change it cannot price, and nobody is named to start it.",
+  "slides": [
+   2,
+   14
+  ]
+ },
+ "findings": [
+  {
+   "title": "The recommendation has no cost, owner or first step",
+   "severity": "High",
+   "slides": [
+    14,
+    15
+   ],
+   "next": "Add who sets the app up, what it costs per year and the first step for next month.",
+   "quotes": [
+    {
+     "text": "We recommend adopting a volunteer booking app.",
+     "slide": 14
+    },
+    {
+     "text": "Next steps: explore options with the board",
+     "slide": 15
+    }
+   ],
+   "why": "The board approves budget lines. Without a yearly cost and a named owner it cannot say yes, so the decision slides to the next meeting.",
+   "ask": "Did the client give the team a budget ceiling?"
+  },
+  {
+   "title": "The summary promises a pilot that slide 15 never gives",
+   "severity": "Moderate",
+   "slides": [
+    2,
+    15
+   ],
+   "next": "Make slide 15 deliver the pilot the summary describes, or bring the summary down to what the deck supports.",
+   "quotes": [
+    {
+     "text": "A three-month pilot will test the app with two shift teams.",
+     "slide": 2
+    },
+    {
+     "text": "Next steps: explore options with the board",
+     "slide": 15
+    }
+   ],
+   "why": "A board member who reads only the summary expects a pilot ready to run. The closing slide asks them to keep exploring instead.",
+   "ask": "Is the pilot agreed with the client, or the team's own idea?"
+  },
+  {
+   "title": "Nobody can tell if 30% unfilled shifts is bad",
+   "severity": "Moderate",
+   "slides": [
+    7
+   ],
+   "next": "Name what the 30% should be compared with: last year, a similar food bank, or the client's own target.",
+   "quotes": [
+    {
+     "text": "30% of shifts are unfilled at least once a month",
+     "slide": 7
+    }
+   ],
+   "why": "The case for change rests on this number. Without last year's figure or a target, the board cannot tell a crisis from normal churn.",
+   "ask": "Does the client track a target fill rate?"
+  },
+  {
+   "title": "The adoption claim rests on 12 volunteers reached on WhatsApp",
+   "severity": "Minor",
+   "slides": [
+    9,
+    17
+   ],
+   "next": "Optional: say who the survey did not reach, next to the claim on slide 9.",
+   "quotes": [
+    {
+     "text": "Most volunteers would use an app (9 of 12 surveyed)",
+     "slide": 9
+    },
+    {
+     "text": "Survey sent to the volunteer WhatsApp group",
+     "slide": 17
+    }
+   ],
+   "why": "Volunteers already on WhatsApp are the ones most likely to use an app. The ones the change could lose were not asked.",
+   "ask": "How many volunteers are in the WhatsApp group?"
+  },
+  {
+   "title": "Analysis titles name topics, not conclusions",
+   "severity": "Minor",
+   "slides": [
+    8,
+    10
+   ],
+   "next": "Optional: rewrite each analysis title as the finding it proves.",
+   "quotes": [
+    {
+     "text": "Volunteer demographics",
+     "slide": 8
+    },
+    {
+     "text": "Current tools",
+     "slide": 10
+    }
+   ],
+   "why": "A board member flipping through slides 7 to 12 learns the topics but not what the team found, so the argument only lives in the speaker's head.",
+   "ask": "Will the team present this, or will it be read without them?"
+  }
+ ],
+ "works": [
+  {
+   "title": "The interview synthesis is concrete",
+   "quote": "Coordinators spend about 4 hours a week chasing replies",
+   "slide": 6
+  },
+  {
+   "title": "The options are compared side by side",
+   "quote": "Option comparison: WhatsApp, shared spreadsheet, booking app",
+   "slide": 12
+  }
+ ],
+ "couldntJudge": "whether a booking app suits these volunteers (needs domain knowledge); the values in the slide 11 chart (image only); prices of the named apps (not in the deck)",
+ "stamp": "1017-PROTO01"
+}
